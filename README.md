@@ -2,7 +2,7 @@
 
 Reinforcement-learning environments for scientific reasoning — physics-grounded inverse problems with uncertainty-calibrated rewards.
 
-> **Status (2026-04-25):** Day 3 of an 11-day sprint. Two environments shipped: `sparse-fourier-recovery` (1D compressed sensing) and `super-resolution-div2k-x4` (2D 4x SR with bicubic baseline). 62 tests green, full suite under 0.5 s.
+> **Status (2026-04-26):** Day 4 of an 11-day sprint. All three planned environments shipped: `sparse-fourier-recovery` (1D compressed sensing), `super-resolution-div2k-x4` (2D 4x SR with bicubic baseline), and `lodopab-ct-simplified` (2D parallel-beam CT with FBP baseline). 79 tests green, full suite under 1 s.
 
 ## What this is
 
@@ -18,7 +18,7 @@ Frontier reasoning models are trained with verifiable rewards (RLVR). Today's RL
 |---|---|---|
 | 1 | `sparse-fourier-recovery` | ✅ shipped (Day 2) |
 | 2 | `super-resolution-div2k-x4` | ✅ shipped (Day 3) |
-| 3 | `lodopab-ct-simplified` | ⏳ planned (Day 4) |
+| 3 | `lodopab-ct-simplified` | ✅ shipped (Day 4) |
 
 ## Install (once Day 1 is done)
 

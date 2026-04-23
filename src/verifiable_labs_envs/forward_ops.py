@@ -97,10 +97,61 @@ def blur_upsample_adjoint(
     return gaussian_filter(upsampled, sigma=blur_sigma, mode="reflect")
 
 
+def radon_forward(x: np.ndarray, angles_deg: np.ndarray) -> np.ndarray:
+    """``A(x)`` — 2D parallel-beam Radon transform at ``angles_deg`` (degrees).
+
+    Returns a sinogram of shape ``(n_side, n_angles)`` where ``n_side`` equals
+    the input side length (with ``circle=True`` the useful signal is contained
+    in a disc inscribed in the square image).
+    """
+    from skimage.transform import radon  # lazy import
+
+    if x.ndim != 2 or x.shape[0] != x.shape[1]:
+        raise ValueError(f"x must be square 2D; got shape {x.shape}")
+    return radon(x, theta=angles_deg, circle=True)
+
+
+def radon_adjoint(
+    sinogram: np.ndarray, angles_deg: np.ndarray, output_size: int
+) -> np.ndarray:
+    """``A^T(y)`` — unfiltered back-projection (the adjoint of Radon).
+
+    Computed as ``iradon(..., filter_name=None)`` which is the sum of
+    projections back along each ray, without the Ram-Lak sharpening filter.
+    """
+    from skimage.transform import iradon  # lazy import
+
+    return iradon(
+        sinogram,
+        theta=angles_deg,
+        output_size=output_size,
+        filter_name=None,
+        circle=True,
+    )
+
+
+def radon_fbp(
+    sinogram: np.ndarray, angles_deg: np.ndarray, output_size: int
+) -> np.ndarray:
+    """Filtered back-projection with the Ram-Lak filter — the reference CT baseline."""
+    from skimage.transform import iradon  # lazy import
+
+    return iradon(
+        sinogram,
+        theta=angles_deg,
+        output_size=output_size,
+        filter_name="ramp",
+        circle=True,
+    )
+
+
 __all__ = [
     "sparse_fourier_forward",
     "sparse_fourier_adjoint",
     "sparse_fourier_sample_mask",
     "blur_downsample",
     "blur_upsample_adjoint",
+    "radon_forward",
+    "radon_adjoint",
+    "radon_fbp",
 ]
