@@ -139,3 +139,89 @@ def test_openrouter_solver_requires_key(monkeypatch: pytest.MonkeyPatch) -> None
 
     with pytest.raises(RuntimeError, match="OPENROUTER_API_KEY"):
         OpenRouterSolver(model="anthropic/claude-haiku-4.5")
+
+
+# ---------- Multi-turn (complete_turns) ----------
+
+
+def test_complete_turns_string_response_echoes() -> None:
+    solver = FakeLLMSolver("echoed response")
+    result = solver.complete_turns([
+        {"role": "system", "content": "S"},
+        {"role": "user", "content": "U"},
+    ])
+    assert result.text == "echoed response"
+    assert result.completion_tokens == 2  # "echoed response"
+    assert result.prompt_tokens == 2  # S + U
+
+
+def test_complete_turns_list_queue_drains_per_call() -> None:
+    solver = FakeLLMSolver(["first", "second"])
+    a = solver.complete_turns([{"role": "user", "content": "x"}])
+    b = solver.complete_turns([{"role": "user", "content": "y"}])
+    assert a.text == "first"
+    assert b.text == "second"
+    with pytest.raises(LLMSolverError, match="empty"):
+        solver.complete_turns([{"role": "user", "content": "z"}])
+
+
+def test_complete_turns_records_full_messages_history() -> None:
+    solver = FakeLLMSolver(["turn1", "turn2"])
+    solver.complete_turns([
+        {"role": "system", "content": "You are X"},
+        {"role": "user", "content": "q1"},
+    ])
+    solver.complete_turns([
+        {"role": "system", "content": "You are X"},
+        {"role": "user", "content": "q1"},
+        {"role": "assistant", "content": "turn1"},
+        {"role": "user", "content": "q2"},
+    ])
+    history = solver.turn_calls
+    assert len(history) == 2
+    assert len(history[0]) == 2
+    assert len(history[1]) == 4
+    assert history[1][2]["role"] == "assistant"
+    assert history[1][2]["content"] == "turn1"
+
+
+def test_complete_and_complete_turns_track_separate_buffers() -> None:
+    solver = FakeLLMSolver(["a", "b"])
+    solver.complete(system="S", user="U")
+    solver.complete_turns([{"role": "user", "content": "q"}])
+    assert len(solver.calls) == 1
+    assert len(solver.turn_calls) == 1
+
+
+def test_envadapter_build_followup_turn_raises_by_default() -> None:
+    class _SingleTurnAdapter(EnvAdapter):
+        env_name = "toy"
+        system_prompt = ""
+
+        def build_user_prompt(self, instance):  # type: ignore[no-untyped-def]
+            return ""
+
+        def parse_response(self, text, instance):  # type: ignore[no-untyped-def]
+            return None
+
+    adapter = _SingleTurnAdapter()
+    with pytest.raises(NotImplementedError, match="multi-turn"):
+        adapter.build_followup_turn(history=[], last_prediction=None, instance=None)
+
+
+def test_envadapter_subclass_can_override_build_followup_turn() -> None:
+    class _MultiTurnAdapter(EnvAdapter):
+        env_name = "toy-mt"
+        system_prompt = ""
+
+        def build_user_prompt(self, instance):  # type: ignore[no-untyped-def]
+            return "turn0"
+
+        def parse_response(self, text, instance):  # type: ignore[no-untyped-def]
+            return None
+
+        def build_followup_turn(self, history, last_prediction, instance):  # type: ignore[no-untyped-def]
+            return f"followup #{len(history)}"
+
+    adapter = _MultiTurnAdapter()
+    assert adapter.build_followup_turn([{"a": 1}, {"b": 2}], None, None) == "followup #2"

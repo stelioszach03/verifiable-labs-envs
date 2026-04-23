@@ -55,7 +55,8 @@ class CompletionResult:
 
 
 class LLMSolver(ABC):
-    """Transport-only abstraction. Subclasses implement ``.complete()``."""
+    """Transport-only abstraction. Subclasses implement ``.complete()`` and
+    ``.complete_turns()`` for single-turn and multi-turn chat respectively."""
 
     model: str
     temperature: float
@@ -66,6 +67,18 @@ class LLMSolver(ABC):
     @abstractmethod
     def complete(self, system: str, user: str) -> CompletionResult:
         """Single chat-completion call. Must raise ``LLMSolverError`` on unrecoverable failure."""
+
+    @abstractmethod
+    def complete_turns(self, messages: list[dict[str, str]]) -> CompletionResult:
+        """Multi-turn chat-completion call. ``messages`` is an OpenAI-format
+        list of ``{'role': 'system'|'user'|'assistant', 'content': str}`` dicts.
+
+        Used by multi-turn environments (e.g. `sparse-fourier-multiturn`) that
+        iterate solver responses with intermediate environment feedback.
+
+        Single-turn envs continue to use ``.complete()``; both should produce
+        the same cost and latency semantics.
+        """
 
     def solve(self, env_name: str, instance: Any) -> Any:
         """Build the prompt via the registered adapter, call the model, parse the response."""
@@ -140,15 +153,13 @@ class OpenRouterSolver(LLMSolver):
             timeout=self.timeout_s,
         )
 
-    def complete(self, system: str, user: str) -> CompletionResult:
+    def _invoke(self, messages: list[dict[str, str]]) -> CompletionResult:
+        """Shared transport: send ``messages``, return ``CompletionResult``."""
         start = time.perf_counter()
         try:
             response = self._client.chat.completions.create(
                 model=self.model,
-                messages=[
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user},
-                ],
+                messages=messages,
                 temperature=self.temperature,
                 max_tokens=self.max_tokens,
                 extra_body={"usage": {"include": True}},  # OpenRouter cost reporting
@@ -165,7 +176,6 @@ class OpenRouterSolver(LLMSolver):
         completion_tokens = int(getattr(usage, "completion_tokens", 0) or 0)
 
         # OpenRouter populates usage.cost when ``extra_body={"usage": {"include": True}}``.
-        # Fall back to None if not present.
         usd_cost: float | None = None
         raw_cost = getattr(usage, "cost", None)
         if raw_cost is not None:
@@ -182,6 +192,15 @@ class OpenRouterSolver(LLMSolver):
             model=getattr(response, "model", self.model),
             usd_cost=usd_cost,
         )
+
+    def complete(self, system: str, user: str) -> CompletionResult:
+        return self._invoke([
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ])
+
+    def complete_turns(self, messages: list[dict[str, str]]) -> CompletionResult:
+        return self._invoke(messages)
 
 
 # ──────────────────────────────────────────
@@ -213,10 +232,28 @@ class FakeLLMSolver(LLMSolver):
         self._response = response
         self._usd_cost = usd_cost
         self._calls: list[tuple[str, str]] = []
+        self._turn_calls: list[list[dict[str, str]]] = []
 
     @property
     def calls(self) -> list[tuple[str, str]]:
         return list(self._calls)
+
+    @property
+    def turn_calls(self) -> list[list[dict[str, str]]]:
+        """The ``messages`` list of every `complete_turns` call, in order."""
+        return [list(m) for m in self._turn_calls]
+
+    def _next_text(self, context_tokens: int) -> tuple[str, int]:
+        """Pop the next canned response. Returns (text, prompt_tokens)."""
+        if callable(self._response):
+            text = self._response(context_tokens, None)  # signature kept loose
+        elif isinstance(self._response, list):
+            if not self._response:
+                raise LLMSolverError("FakeLLMSolver response queue is empty")
+            text = self._response.pop(0)
+        else:
+            text = str(self._response)
+        return text, context_tokens
 
     def complete(self, system: str, user: str) -> CompletionResult:
         self._calls.append((system, user))
@@ -232,6 +269,27 @@ class FakeLLMSolver(LLMSolver):
         return CompletionResult(
             text=text,
             prompt_tokens=len(system.split()) + len(user.split()),
+            completion_tokens=len(text.split()),
+            latency_s=0.0,
+            model=self.label,
+            usd_cost=self._usd_cost,
+        )
+
+    def complete_turns(self, messages: list[dict[str, str]]) -> CompletionResult:
+        self._turn_calls.append([dict(m) for m in messages])
+        text: str
+        if callable(self._response):
+            text = self._response(messages, None)
+        elif isinstance(self._response, list):
+            if not self._response:
+                raise LLMSolverError("FakeLLMSolver response queue is empty")
+            text = self._response.pop(0)
+        else:
+            text = str(self._response)
+        prompt_tokens = sum(len((m.get("content") or "").split()) for m in messages)
+        return CompletionResult(
+            text=text,
+            prompt_tokens=prompt_tokens,
             completion_tokens=len(text.split()),
             latency_s=0.0,
             model=self.label,
@@ -264,6 +322,24 @@ class EnvAdapter(ABC):
 
         Raises ``LLMSolverError`` on invalid JSON or missing fields.
         """
+
+    def build_followup_turn(
+        self,
+        history: list[dict[str, str]],
+        last_prediction: Any,
+        instance: Any,
+    ) -> str:
+        """Build the user-message content for a follow-up turn in a multi-turn env.
+
+        Default: raises ``NotImplementedError``. Multi-turn adapters override
+        to return a fresh user turn conditioned on the solver's last
+        prediction (e.g. an encoded residual image, a validation error
+        message, a partial-credit hint). Single-turn adapters leave this
+        untouched and continue to use the ``solve()`` path.
+        """
+        raise NotImplementedError(
+            f"{type(self).__name__} does not support multi-turn rollouts"
+        )
 
 
 _ADAPTERS: dict[str, EnvAdapter] = {}
