@@ -1,0 +1,2 @@
+timestamp,model,env,mode,seed,reward,psnr,ssim,conformal,usd_cost,slice
+2026-04-23T19:36:16.961170+00:00,anthropic/claude-haiku-4.5,lodopab-ct-simplified,real,1,0.6941,0.4726,0.7431,0.9404,0.012651,lodopab_val_1

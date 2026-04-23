@@ -18,7 +18,7 @@ Frontier reasoning models are trained with verifiable rewards (RLVR). Today's RL
 |---|---|---|---|---|
 | 1 | `sparse-fourier-recovery` | ✅ | subsampled orthonormal 1D DFT | OMP with LS-covariance σ̂ |
 | 2 | `super-resolution-div2k-x4` | ✅ | Gaussian blur + 4× decimation | bicubic with edge-weighted σ̂ |
-| 3 | `lodopab-ct-simplified` | ✅ | 2D parallel-beam Radon (60-angle) | FBP with edge-weighted σ̂ |
+| 3 | `lodopab-ct-simplified` | ✅ | 2D parallel-beam Radon (60-angle) | FBP with edge-weighted σ̂ (phantom default; real-patient LoDoPaB-CT slices via `use_real_data=True`) |
 
 ## Classical-baseline benchmark (5 seeds each, default hyperparameters)
 
@@ -29,6 +29,26 @@ Frontier reasoning models are trained with verifiable rewards (RLVR). Today's RL
 | `super-resolution-div2k-x4` | 0.629 | 0.425 | +0.203 | 2.167 |
 
 Reproduce with `python benchmarks/run_all.py --seeds 5`.
+
+## Real-data CT (LoDoPaB-CT validation, opt-in via `use_real_data=True`)
+
+Phase 2 adds a real-patient-geometry path on `lodopab-ct-simplified`: 3552 validation slices from the LoDoPaB-CT dataset (Leuschner et al. 2021, Nature Scientific Data) drawn from the LIDC-IDRI clinical chest-CT cohort. CI defaults stay on the phantom rotation so no download is required. One-shot activation:
+
+```bash
+bash scripts/download_lodopab_validation.sh      # ~1.5 GB zip, 28 HDF5 chunks
+python -c "from verifiable_labs_envs.envs import lodopab_ct as ct; print(ct.load_environment(use_real_data=True).run_baseline(seed=0))"
+```
+
+Spot-check numbers (this repo, Apr 2026):
+
+| Solver | Mode | Mean reward | Notes |
+|---|---|---:|---|
+| Classical FBP | phantom (5 seeds) | 0.712 | Sprint 0 baseline |
+| Classical FBP | **real (10 seeds)** | **0.731** | mean PSNR 0.62, SSIM 0.64 — real CT is structurally cleaner than the synthetic phantoms |
+| Claude Haiku 4.5 | phantom (5 seeds) | 0.615 | Sprint 0 0/5 parse-fail |
+| Claude Haiku 4.5 | **real (3 seeds)** | 0.694 on 1/3 success | 2/3 parse-fails — "expected 32 entries, got 31" on seeds 0 and 2. Real CT grids are harder for the model to transcribe without losing count than the phantom pattern. |
+
+Raw data: [`results/ct_real_spotcheck.csv`](results/ct_real_spotcheck.csv).
 
 ## LLM benchmark (OpenRouter, 5 seeds each, total spend $1.89)
 

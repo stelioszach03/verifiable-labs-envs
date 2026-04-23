@@ -147,3 +147,81 @@ def test_env_run_baseline_returns_full_dict() -> None:
     out = env.run_baseline(seed=0, phantom_name="shepp_logan")
     assert set(out) == {"reward", "components", "meta"}
     assert set(out["components"]) == {"psnr", "ssim", "conformal"}
+
+
+# ---------- Real-data mode ----------
+# Infrastructure tests always run; data-touching tests skip if the LoDoPaB
+# validation HDF5 has not been downloaded.
+
+
+def test_has_real_data_returns_bool() -> None:
+    assert isinstance(ct.has_real_data(), bool)
+
+
+def test_real_data_mode_raises_file_not_found_when_missing() -> None:
+    # This test must pass whether or not the data is on disk: if not on disk
+    # we get FileNotFoundError; if on disk, the call succeeds and we skip.
+    if ct.has_real_data():
+        pytest.skip("real data present; this test exercises the missing-data path")
+    with pytest.raises(FileNotFoundError, match="LoDoPaB"):
+        ct.generate_instance(seed=0, use_real_data=True)
+
+
+def test_real_data_rejects_phantom_name_combination() -> None:
+    with pytest.raises(ValueError, match="phantom_name"):
+        ct.generate_instance(seed=0, phantom_name="shepp_logan", use_real_data=True)
+
+
+_real_data_marker = pytest.mark.skipif(
+    not ct.has_real_data(),
+    reason="LoDoPaB-CT validation HDF5 not downloaded; "
+    "run `bash scripts/download_lodopab_validation.sh`",
+)
+
+
+@_real_data_marker
+def test_real_data_generates_expected_shape() -> None:
+    inst = ct.generate_instance(seed=0, use_real_data=True)
+    assert inst.x_true.shape == inst.shape
+    assert inst.x_true.min() >= 0.0
+    assert inst.x_true.max() <= 1.0 + 1e-6
+    assert inst.phantom_name.startswith("lodopab_val_")
+
+
+@_real_data_marker
+def test_real_data_seed_determinism() -> None:
+    a = ct.generate_instance(seed=7, use_real_data=True)
+    b = ct.generate_instance(seed=7, use_real_data=True)
+    np.testing.assert_array_equal(a.x_true, b.x_true)
+    np.testing.assert_array_equal(a.y, b.y)
+
+
+@_real_data_marker
+def test_real_data_different_seeds_pick_different_slices() -> None:
+    a = ct.generate_instance(seed=0, use_real_data=True)
+    b = ct.generate_instance(seed=1, use_real_data=True)
+    assert a.phantom_name != b.phantom_name
+    # Most real slices will differ pixel-wise; allow identical only in the
+    # vanishingly small chance the validation set has duplicate slices.
+    assert not np.array_equal(a.x_true, b.x_true)
+
+
+@_real_data_marker
+def test_fbp_on_real_data_beats_zero_baseline() -> None:
+    env = ct.load_environment(calibration_quantile=0.241, use_real_data=True)
+    inst = env.generate_instance(seed=0)
+    fbp_pred = ct.fbp_baseline(**inst.as_inputs())
+    zero_pred = ct.zero_baseline(**inst.as_inputs())
+    s_fbp = env.score(fbp_pred, inst)
+    s_zero = env.score(zero_pred, inst)
+    assert s_fbp["components"]["psnr"] > s_zero["components"]["psnr"]
+    assert s_fbp["components"]["ssim"] > s_zero["components"]["ssim"]
+    assert s_fbp["reward"] > s_zero["reward"]
+
+
+@_real_data_marker
+def test_env_run_baseline_real_data_mode() -> None:
+    env = ct.load_environment(calibration_quantile=0.241, use_real_data=True)
+    out = env.run_baseline(seed=0)
+    assert set(out) == {"reward", "components", "meta"}
+    assert out["meta"]["phantom_name"].startswith("lodopab_val_")

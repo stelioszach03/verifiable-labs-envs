@@ -43,6 +43,14 @@ dev = [
 baselines = [
     "torch>=2.3",
 ]
+ct-real = [
+    # dival 0.6.2 requires the pre-1.0 odl API (odl.phantom.*). A companion
+    # setuptools pin is needed for odl 0.8.x which still uses pkg_resources.
+    "dival>=0.6.2",
+    "odl>=0.7,<1.0",
+    "setuptools<70",
+    "h5py>=3.10",
+]
 
 [project.urls]
 Homepage = "https://github.com/verifiable-labs/envs"
