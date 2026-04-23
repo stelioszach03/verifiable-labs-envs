@@ -1,0 +1,83 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual envs
+.venv/
+venv/
+env/
+ENV/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+
+# Type checkers
+.mypy_cache/
+.pyre/
+.pytype/
+
+# Tool caches
+.ruff_cache/
+.ipynb_checkpoints/
+
+# JAX / cached compilations
+.jax_cache/
+
+# Data — never commit large data, always download on demand
+data/
+datasets/
+*.h5
+*.npz
+*.npy
+*.mat
+*.tar
+*.tar.gz
+*.zip
+
+# Results artifacts larger than a few KB — commit CSV summaries, not raw runs
+results/**/checkpoints/
+results/**/*.pth
+results/**/*.pt
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Secrets
+.env
+.env.local
+*.key
