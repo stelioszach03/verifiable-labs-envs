@@ -1,0 +1,4 @@
+timestamp,model,env,n_seeds,det_seed,det_reward_a,det_reward_b,det_abs_diff,det_ok,var_seeds_start,var_rewards_mean,var_rewards_std,var_rewards_min,var_rewards_max,var_flagged,total_calls,total_usd_cost,total_failures
+2026-04-23T19:07:51.708718+00:00,anthropic/claude-haiku-4.5,sparse-fourier-recovery,10,42,0.3178,0.3178,0.0,True,0,0.347,0.0245,0.3169,0.3809,False,12,0.016332,0
+2026-04-23T19:08:13.113680+00:00,openai/gpt-5.4-mini,sparse-fourier-recovery,10,42,0.3836,0.2741,0.1096,False,0,0.3356,0.0277,0.3009,0.3821,False,12,0.011434,0
+2026-04-23T19:08:30.653609+00:00,openai/gpt-5.4-nano,sparse-fourier-recovery,10,42,0.3073,0.3171,0.0098,True,0,0.3429,0.0255,0.3198,0.3817,False,12,0.002993,0

@@ -83,9 +83,18 @@ Walkthrough across all three environments:
 python examples/quickstart.py
 ```
 
+## Contamination resistance
+
+Every environment in this repo is structurally resistant to the three attacks that have hollowed out static text benchmarks: train-set leakage, answer-string matching, and distribution creep. Full analysis in [`docs/CONTAMINATION.md`](docs/CONTAMINATION.md). Headline numbers:
+
+- `sparse-fourier-recovery` — the per-instance state space is continuous (10 real-valued amplitudes + 128 real-valued complex-noise coordinates), on top of `C(256, 10) × C(256, 64) ≈ 10⁷³` combinatorial arrangements of support and mask.
+- `super-resolution-div2k-x4` and `lodopab-ct-simplified` — the discrete image / phantom set is small (6 and 5 respectively, a known v0.0.1 weakness flagged in the doc), but measurement noise is regenerated per call so memorizing the HR image doesn't reproduce the measurement.
+- An empirical memorization probe at [`scripts/memorization_probe.py`](scripts/memorization_probe.py) confirms: across Haiku 4.5, GPT-5.4 mini, and GPT-5.4 nano on `sparse-fourier-recovery`, all three models show cross-seed reward std ≥ 0.02 (no constant-output signatures). Raw data: [`results/memorization_probe.csv`](results/memorization_probe.csv).
+
 ## Documentation
 
 - [`docs/conformal.md`](docs/conformal.md) — the conformal-coverage reward term: why it's there, how it's calibrated, what it rewards.
+- [`docs/CONTAMINATION.md`](docs/CONTAMINATION.md) — contamination resistance analysis, per-env effective instance count, empirical probe methodology.
 - [`docs/env1_sparse_fourier_design.md`](docs/env1_sparse_fourier_design.md) — Env 1 architecture and reward specification.
 
 ## Author
