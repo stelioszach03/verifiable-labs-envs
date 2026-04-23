@@ -12,13 +12,23 @@ Frontier reasoning models are trained with verifiable rewards (RLVR). Today's RL
 2. The **reward** is a weighted sum of reconstruction quality (PSNR, SSIM, or task-appropriate metric) and **conformal-prediction coverage** — models are rewarded for honest posterior width, not overconfident point estimates.
 3. Measurements are **procedurally regenerated per evaluation call**, so fixed-string memorization is structurally impossible.
 
-## Planned environments (v0.0.1 sprint)
+## Environments (v0.0.1)
 
-| # | Environment | Status |
-|---|---|---|
-| 1 | `sparse-fourier-recovery` | ✅ shipped (Day 2) |
-| 2 | `super-resolution-div2k-x4` | ✅ shipped (Day 3) |
-| 3 | `lodopab-ct-simplified` | ✅ shipped (Day 4) |
+| # | Environment | Status | Forward operator | Baseline |
+|---|---|---|---|---|
+| 1 | `sparse-fourier-recovery` | ✅ | subsampled orthonormal 1D DFT | OMP with LS-covariance σ̂ |
+| 2 | `super-resolution-div2k-x4` | ✅ | Gaussian blur + 4× decimation | bicubic with edge-weighted σ̂ |
+| 3 | `lodopab-ct-simplified` | ✅ | 2D parallel-beam Radon (60-angle) | FBP with edge-weighted σ̂ |
+
+## Benchmark (5 seeds each, default hyperparameters)
+
+| environment | reference reward | zero reward | gap | conformal q |
+|---|---:|---:|---:|---:|
+| `lodopab-ct-simplified` | 0.712 | 0.151 | +0.561 | 0.241 |
+| `sparse-fourier-recovery` | 0.869 | 0.336 | +0.533 | 1.587 |
+| `super-resolution-div2k-x4` | 0.629 | 0.425 | +0.203 | 2.167 |
+
+Reproduce with `python benchmarks/run_all.py --seeds 5`.
 
 ## Install (once Day 1 is done)
 
@@ -42,8 +52,19 @@ print(result["components"])        # {"nmse": 0.977, "support": 0.900, "conforma
 print(result["meta"]["coverage"])  # 0.80 — fraction of support entries inside the conformal interval
 ```
 
-Any custom solver can be scored by returning a `Prediction(x_hat, sigma_hat, support_hat)`
+Any custom solver can be scored by returning a `Prediction(x_hat, sigma_hat, support_hat=...)`
 and passing it to `env.score(prediction, instance)`.
+
+Walkthrough across all three environments:
+
+```bash
+python examples/quickstart.py
+```
+
+## Documentation
+
+- [`docs/conformal.md`](docs/conformal.md) — the conformal-coverage reward term: why it's there, how it's calibrated, what it rewards.
+- [`docs/env1_sparse_fourier_design.md`](docs/env1_sparse_fourier_design.md) — Env 1 architecture and reward specification.
 
 ## Author
 
