@@ -30,6 +30,7 @@ dependencies = [
     "tqdm>=4.66",
     "openai>=1.50",
     "python-dotenv>=1.0",
+    "matplotlib>=3.9",
 ]
 
 [project.optional-dependencies]

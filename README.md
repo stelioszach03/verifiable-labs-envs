@@ -49,6 +49,9 @@ Clean discrimination across model tiers and clean rank-ordering against the expe
 - **Sparse-Fourier is a weak LLM discriminator** (all models 0.30–0.36, barely above zero baseline 0.336) — compressed sensing is not yet a text-completion task.
 - **Super-resolution and CT produce a useful ranking** (Haiku / Sonnet / Opus / GPT-5.4 cluster at ~0.60, small models drop off).
 - **JSON-count parse-failure rate scales inversely with model size**: `gpt-5.4-nano` fails 33% of grid outputs, `gpt-5.4-mini` 11%, everything Haiku-and-above 0% — a legitimate discrimination axis on its own.
+- **Cross-env correlation matrix** (Spearman, n=6 models): SuperRes ↔ CT = +0.66 (same structural task); SparseF ↔ image envs = −0.26 to −0.37 (different capabilities). The three envs measure different things. Full methodology in [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md); heatmap in [`results/env_correlation_heatmap.png`](results/env_correlation_heatmap.png).
+
+![Cross-env Spearman correlation heatmap](results/env_correlation_heatmap.png)
 
 Reproduce with `python benchmarks/run_llm_benchmark.py --preset paid-full`. See [`results/llm_benchmark.md`](results/llm_benchmark.md) for the full analysis and [`results/llm_benchmark.csv`](results/llm_benchmark.csv) for per-call raw data.
 
@@ -95,6 +98,7 @@ Every environment in this repo is structurally resistant to the three attacks th
 
 - [`docs/conformal.md`](docs/conformal.md) — the conformal-coverage reward term: why it's there, how it's calibrated, what it rewards.
 - [`docs/CONTAMINATION.md`](docs/CONTAMINATION.md) — contamination resistance analysis, per-env effective instance count, empirical probe methodology.
+- [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) — benchmark aggregation, cross-env correlation interpretation, failure taxonomy.
 - [`docs/env1_sparse_fourier_design.md`](docs/env1_sparse_fourier_design.md) — Env 1 architecture and reward specification.
 
 ## Author

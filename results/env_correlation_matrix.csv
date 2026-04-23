@@ -1,0 +1,4 @@
+env_a,env_b,spearman_rho,n_models
+sparse-fourier-recovery,super-resolution-div2k-x4,-0.37142857142857144,6
+sparse-fourier-recovery,lodopab-ct-simplified,-0.2571428571428571,6
+super-resolution-div2k-x4,lodopab-ct-simplified,0.6571428571428571,6
