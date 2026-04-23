@@ -10,6 +10,7 @@ pattern-match on text answers.
 from __future__ import annotations
 
 import numpy as np
+from scipy.ndimage import gaussian_filter
 
 
 def sparse_fourier_forward(x: np.ndarray, mask: np.ndarray) -> np.ndarray:
@@ -50,8 +51,56 @@ def sparse_fourier_sample_mask(
     return np.sort(rng.choice(n, size=m, replace=False))
 
 
+def blur_downsample(
+    x: np.ndarray, blur_sigma: float, factor: int
+) -> np.ndarray:
+    """``A(x) = S . G(x)`` — 2D Gaussian blur followed by stride-``factor`` decimation.
+
+    Mirror-padded convolution (``mode='reflect'``) makes the boundary adjoint
+    clean. ``x`` must be 2D with each side divisible by ``factor``; returns an
+    array of shape ``(H // factor, W // factor)``.
+    """
+    if x.ndim != 2:
+        raise ValueError(f"x must be 2D; got shape {x.shape}")
+    if factor < 1:
+        raise ValueError(f"factor must be >= 1; got {factor}")
+    if x.shape[0] % factor != 0 or x.shape[1] % factor != 0:
+        raise ValueError(
+            f"each side of x ({x.shape}) must be divisible by factor={factor}"
+        )
+    blurred = gaussian_filter(x, sigma=blur_sigma, mode="reflect")
+    return blurred[::factor, ::factor]
+
+
+def blur_upsample_adjoint(
+    y: np.ndarray, blur_sigma: float, factor: int, target_shape: tuple[int, int]
+) -> np.ndarray:
+    """``A^T(y) = G . S^T(y)`` — zero-fill insertion at stride ``factor`` then blur.
+
+    Adjoint of :func:`blur_downsample`. Since the Gaussian kernel is symmetric
+    the blur is self-adjoint up to the boundary mode; with ``mode='reflect'``
+    the operator is its own transpose in the interior.
+    """
+    if y.ndim != 2:
+        raise ValueError(f"y must be 2D; got shape {y.shape}")
+    h, w = target_shape
+    if h % factor != 0 or w % factor != 0:
+        raise ValueError(
+            f"target_shape {target_shape} must be divisible by factor={factor}"
+        )
+    if y.shape != (h // factor, w // factor):
+        raise ValueError(
+            f"y shape {y.shape} incompatible with target_shape {target_shape} at factor {factor}"
+        )
+    upsampled = np.zeros((h, w), dtype=y.dtype)
+    upsampled[::factor, ::factor] = y
+    return gaussian_filter(upsampled, sigma=blur_sigma, mode="reflect")
+
+
 __all__ = [
     "sparse_fourier_forward",
     "sparse_fourier_adjoint",
     "sparse_fourier_sample_mask",
+    "blur_downsample",
+    "blur_upsample_adjoint",
 ]

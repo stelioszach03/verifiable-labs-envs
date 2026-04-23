@@ -77,3 +77,47 @@ def test_sparse_fourier_sample_mask_rejects_m_gt_n() -> None:
         forward_ops.sparse_fourier_sample_mask(
             n=4, m=10, rng=np.random.default_rng(0)
         )
+
+
+# ---------- Blur + downsample ----------
+
+
+def test_blur_downsample_shape() -> None:
+    x = np.random.default_rng(0).standard_normal((64, 64))
+    y = forward_ops.blur_downsample(x, blur_sigma=1.0, factor=4)
+    assert y.shape == (16, 16)
+
+
+def test_blur_downsample_rejects_bad_shape() -> None:
+    x = np.zeros((30, 30))
+    with pytest.raises(ValueError, match="divisible"):
+        forward_ops.blur_downsample(x, blur_sigma=1.0, factor=4)
+
+
+def test_blur_downsample_rejects_1d() -> None:
+    x = np.zeros(64)
+    with pytest.raises(ValueError, match="2D"):
+        forward_ops.blur_downsample(x, blur_sigma=1.0, factor=4)
+
+
+def test_blur_upsample_adjoint_shape() -> None:
+    y = np.random.default_rng(0).standard_normal((16, 16))
+    z = forward_ops.blur_upsample_adjoint(
+        y, blur_sigma=1.0, factor=4, target_shape=(64, 64)
+    )
+    assert z.shape == (64, 64)
+
+
+def test_blur_downsample_adjoint_relation() -> None:
+    """``<A x, y> == <x, A^T y>`` up to boundary reflection."""
+    rng = np.random.default_rng(3)
+    x = rng.standard_normal((64, 64))
+    y = rng.standard_normal((16, 16))
+    ax = forward_ops.blur_downsample(x, blur_sigma=1.0, factor=4)
+    aty = forward_ops.blur_upsample_adjoint(
+        y, blur_sigma=1.0, factor=4, target_shape=(64, 64)
+    )
+    lhs = float(np.sum(ax * y))
+    rhs = float(np.sum(x * aty))
+    # Symmetric Gaussian + reflect boundary is self-adjoint up to numeric noise.
+    assert abs(lhs - rhs) / (abs(lhs) + 1e-12) < 0.05
