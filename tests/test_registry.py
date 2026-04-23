@@ -9,11 +9,12 @@ def test_version() -> None:
     assert vle.__version__ == "0.0.1"
 
 
-def test_registry_lists_three_envs() -> None:
+def test_registry_lists_expected_envs() -> None:
     envs = vle.list_environments()
     assert envs == [
         "lodopab-ct-simplified",
         "sparse-fourier-recovery",
+        "sparse-fourier-recovery-multiturn",
         "super-resolution-div2k-x4",
     ]
 
