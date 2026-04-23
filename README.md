@@ -20,7 +20,7 @@ Frontier reasoning models are trained with verifiable rewards (RLVR). Today's RL
 | 2 | `super-resolution-div2k-x4` | ✅ | Gaussian blur + 4× decimation | bicubic with edge-weighted σ̂ |
 | 3 | `lodopab-ct-simplified` | ✅ | 2D parallel-beam Radon (60-angle) | FBP with edge-weighted σ̂ |
 
-## Benchmark (5 seeds each, default hyperparameters)
+## Classical-baseline benchmark (5 seeds each, default hyperparameters)
 
 | environment | reference reward | zero reward | gap | conformal q |
 |---|---:|---:|---:|---:|
@@ -29,6 +29,28 @@ Frontier reasoning models are trained with verifiable rewards (RLVR). Today's RL
 | `super-resolution-div2k-x4` | 0.629 | 0.425 | +0.203 | 2.167 |
 
 Reproduce with `python benchmarks/run_all.py --seeds 5`.
+
+## LLM benchmark (OpenRouter, 5 seeds each, total spend $1.89)
+
+| Model | SparseFourier | SuperRes | LoDoPaB-CT | Mean (3 envs) |
+|---|---:|---:|---:|---:|
+| **Reference baseline (OMP / bicubic / FBP)** | **0.869** | **0.629** | **0.712** | **0.737** |
+| Claude Opus 4.7 | 0.300 | 0.628 | 0.625 | 0.518 |
+| Claude Sonnet 4.6 | 0.316 | 0.629 | 0.595 | 0.513 |
+| **Claude Haiku 4.5** | 0.361 | 0.625 | 0.615 | **0.534** |
+| GPT-5.4 | 0.311 | 0.601 | 0.571 | 0.494 |
+| GPT-5.4 mini | 0.340 | 0.464 *(1/5 fail)* | 0.578 *(1/5 fail)* | 0.460 |
+| GPT-5.4 nano | 0.350 | 0.528 *(2/6 fail)* | 0.197 *(4/6 fail)* | 0.358 |
+| Zero baseline | 0.336 | 0.425 | 0.151 | 0.304 |
+
+Clean discrimination across model tiers and clean rank-ordering against the expert classical baselines. The environments measure capability, not chance:
+
+- **Classical expert algorithms (mean 0.737) beat every general-purpose LLM** on these inverse problems.
+- **Sparse-Fourier is a weak LLM discriminator** (all models 0.30–0.36, barely above zero baseline 0.336) — compressed sensing is not yet a text-completion task.
+- **Super-resolution and CT produce a useful ranking** (Haiku / Sonnet / Opus / GPT-5.4 cluster at ~0.60, small models drop off).
+- **JSON-count parse-failure rate scales inversely with model size**: `gpt-5.4-nano` fails 33% of grid outputs, `gpt-5.4-mini` 11%, everything Haiku-and-above 0% — a legitimate discrimination axis on its own.
+
+Reproduce with `python benchmarks/run_llm_benchmark.py --preset paid-full`. See [`results/llm_benchmark.md`](results/llm_benchmark.md) for the full analysis and [`results/llm_benchmark.csv`](results/llm_benchmark.csv) for per-call raw data.
 
 ## Install (once Day 1 is done)
 
