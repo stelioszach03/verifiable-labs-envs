@@ -2,7 +2,7 @@
 
 Reinforcement-learning environments for scientific reasoning — physics-grounded inverse problems with uncertainty-calibrated rewards.
 
-> **Status (2026-04-23):** Day 1 of an 11-day sprint. Scaffolding only. First working environment ships by 2026-04-24.
+> **Status (2026-04-24):** Day 2 of an 11-day sprint. First environment (`sparse-fourier-recovery`) shipped with OMP baseline, LS-covariance uncertainty, and split-conformal coverage rewards. 39 tests green.
 
 ## What this is
 
@@ -16,7 +16,7 @@ Frontier reasoning models are trained with verifiable rewards (RLVR). Today's RL
 
 | # | Environment | Status |
 |---|---|---|
-| 1 | `sparse-fourier-recovery` | 🚧 in progress (Day 2) |
+| 1 | `sparse-fourier-recovery` | ✅ shipped (Day 2) |
 | 2 | `super-resolution-div2k-x4` | ⏳ planned (Day 3) |
 | 3 | `lodopab-ct-simplified` | ⏳ planned (Day 4) |
 
@@ -30,15 +30,20 @@ pip install -e ".[dev]"
 pytest
 ```
 
-## Quickstart (target API — not implemented yet)
+## Quickstart
 
 ```python
 from verifiable_labs_envs import load_environment
 
 env = load_environment("sparse-fourier-recovery")
-result = env.run_baseline()
-print(result.reward)
+result = env.run_baseline(seed=0)
+print(result["reward"])            # e.g. 0.931
+print(result["components"])        # {"nmse": 0.977, "support": 0.900, "conformal": 0.900}
+print(result["meta"]["coverage"])  # 0.80 — fraction of support entries inside the conformal interval
 ```
+
+Any custom solver can be scored by returning a `Prediction(x_hat, sigma_hat, support_hat)`
+and passing it to `env.score(prediction, instance)`.
 
 ## Author
 
