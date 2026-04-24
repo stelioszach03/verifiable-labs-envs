@@ -71,7 +71,9 @@ Deploys with `cd leaderboard && python app.py` locally (verified via import smok
 
 1. **Classical baselines beat every tested LLM** (~0.74 classical mean vs 0.49 best LLM mean). The environments are not saturated.
 2. **Multi-turn helps frontier models on CT, hurts small models on CT** (Sonnet / GPT-5.4 +0.06, Haiku / GPT-5.4-mini −0.11 and −0.13 respectively).
-3. **Sparse-Fourier stays flat across single / multi / tool-use rollout formats** — compressed sensing is not yet a text-completion task, full stop.
+3. **Sparse-Fourier stays flat across single / multi / tool-use rollout formats** (all ~0.33; v2 tools/single ratio = 1.03). Compressed sensing is not yet a text-completion task, full stop.
+
+   > The earlier Task-4.1 number ("tool-use converges at 0.858, 2.4× single-turn") was a **scoring bug** — three different models produced byte-identical rewards because the benchmark was scoring the OMP baseline instead of the LLM's emitted answer. Full reconciliation: [`results/sparse_fourier_reconciliation.md`](../results/sparse_fourier_reconciliation.md). Any external material (YC app, README) must use the v2 numbers.
 4. **SuperRes saturates for the frontier cluster** at ~0.72–0.73; GPT-5.4-mini trails at 0.53 (budget models can't match the big cluster on image denoising).
 5. **Parse-failure rate scales inversely with model size** on long-JSON grid outputs — holds from Sprint 0 through v2.
 6. **Real CT is genuinely harder than phantom CT** for LLM transcription — the 2/3 parse-fail rate spike on Haiku is the evidence.

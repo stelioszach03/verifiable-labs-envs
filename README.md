@@ -65,7 +65,9 @@ Async benchmark (3 models × 3 instances, 54 LLM-calls max, **$0.175 total, 18.0
 | Claude Sonnet 4.6 | **0.858** | 9 | $0.12 |
 | GPT-5.4 mini | **0.858** | 9 | $0.01 |
 
-**Headline finding**: all three tiers converge to the **same mean reward** (0.858) — 2.4× the single-turn sparse-F score. Every model calls `ista_tool` first, gets the OMP answer, then verifies with `check_residual_tool`. The tool-use env shows the envs are a clean substrate for tool-RL training: frontier and budget models alike discover the same good strategy when given the right tools, with cost differing **~10×** (Sonnet/Haiku/mini).
+**Headline finding** (revised post-Phase-6 reconciliation): all three tiers converge to the **same mean reward** (0.858) — but this is not a reasoning gain. The oracle tool `ista_tool()` exposes the classical OMP solver; every model learns to call it within 3 tool calls and emits its output verbatim as the final answer. The identical cross-model rewards (byte-identical reward / NMSE / support-F1 / conformal components across 3 models × 3 seeds) are the fingerprint of oracle-delegation.
+
+What this env therefore measures is **tool-use adoption on a scientific task** — does the model correctly delegate to the provided classical solver? — not compressed-sensing reasoning. That is still a useful RLVR training signal: it discriminates "model uses the provided tool" from "model tries to solve from scratch" (the latter scores ≈0.33 as in Phase 6 v2 when tool dispatch is disabled). Full reconciliation: [`results/sparse_fourier_reconciliation.md`](results/sparse_fourier_reconciliation.md).
 
 Raw data: [`results/tools_sparse_fourier_recovery_tools.csv`](results/tools_sparse_fourier_recovery_tools.csv). Reproduce:
 
