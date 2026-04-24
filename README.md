@@ -143,14 +143,40 @@ Clean discrimination across model tiers and clean rank-ordering against the expe
 
 Reproduce with `python benchmarks/run_llm_benchmark.py --preset paid-full`. See [`results/llm_benchmark.md`](results/llm_benchmark.md) for the full analysis and [`results/llm_benchmark.csv`](results/llm_benchmark.csv) for per-call raw data.
 
-## Install (once Day 1 is done)
+## Install
+
+### Full monorepo (developers + research use)
 
 ```bash
-git clone https://github.com/verifiable-labs/envs
-cd envs
+git clone https://github.com/stelioszach03/verifiable-labs-envs
+cd verifiable-labs-envs
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-pytest
+pytest                                  # 176+ tests green
+```
+
+### Single environment (downstream consumers)
+
+Each of the six environments is also shipped as a thin verifiers-compatible package under `packages/`. Install just the one you need:
+
+```bash
+pip install "git+https://github.com/stelioszach03/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-sparse-fourier"
+# or: verifiable-labs-sparse-fourier-multiturn, -tools, super-resolution,
+#     lodopab-ct, lodopab-ct-multiturn, envs-core
+```
+
+Then:
+
+```python
+from verifiable_labs_sparse_fourier import load_environment
+env = load_environment()
+out = env.run_baseline(seed=0)
+```
+
+Prime Intellect Hub listing is pending `prime login` (see [`docs/PRIME_INTELLECT.md`](docs/PRIME_INTELLECT.md)). Once live:
+
+```bash
+prime env install verifiable-labs/sparse-fourier-recovery
 ```
 
 ## Quickstart
