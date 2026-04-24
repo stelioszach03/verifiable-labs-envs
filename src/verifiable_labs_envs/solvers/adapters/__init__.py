@@ -3,6 +3,12 @@ from verifiable_labs_envs.solvers.adapters.lodopab_ct import LodopabCtLLMAdapter
 from verifiable_labs_envs.solvers.adapters.lodopab_ct_multiturn import (
     LodopabCtMultiturnAdapter,
 )
+from verifiable_labs_envs.solvers.adapters.phase_retrieval import (
+    PhaseRetrievalLLMAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.phase_retrieval_multiturn import (
+    PhaseRetrievalMultiturnAdapter,
+)
 from verifiable_labs_envs.solvers.adapters.sparse_fourier import SparseFourierLLMAdapter
 from verifiable_labs_envs.solvers.adapters.sparse_fourier_multiturn import (
     SparseFourierMultiturnAdapter,
@@ -19,6 +25,8 @@ register_adapter(SparseFourierToolsAdapter())
 register_adapter(SuperResolutionLLMAdapter())
 register_adapter(LodopabCtLLMAdapter())
 register_adapter(LodopabCtMultiturnAdapter())
+register_adapter(PhaseRetrievalLLMAdapter())
+register_adapter(PhaseRetrievalMultiturnAdapter())
 
 __all__ = [
     "SparseFourierLLMAdapter",
@@ -27,4 +35,6 @@ __all__ = [
     "SuperResolutionLLMAdapter",
     "LodopabCtLLMAdapter",
     "LodopabCtMultiturnAdapter",
+    "PhaseRetrievalLLMAdapter",
+    "PhaseRetrievalMultiturnAdapter",
 ]

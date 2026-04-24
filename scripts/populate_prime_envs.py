@@ -46,6 +46,13 @@ SPECS = [
     ("lodopab-ct-simplified-multiturn", "lodopab_ct_simplified_multiturn",
      "lodopab_ct_multiturn",
      "3-turn CT reconstruction with FBP-domain residual feedback.", "0.2.0"),
+    ("phase-retrieval", "phase_retrieval", "phase_retrieval",
+     "Phase retrieval from magnitude-only Fourier measurements with Gerchberg-"
+     "Saxton baseline and conformal σ̂.", "1.0.0"),
+    ("phase-retrieval-multiturn", "phase_retrieval_multiturn",
+     "phase_retrieval_multiturn",
+     "3-turn phase retrieval with magnitude-residual feedback between turns.",
+     "1.0.0"),
 ]
 
 

@@ -9,6 +9,8 @@ _REGISTRY: dict[str, str] = {
     "super-resolution-div2k-x4": "verifiable_labs_envs.envs.super_resolution",
     "lodopab-ct-simplified": "verifiable_labs_envs.envs.lodopab_ct",
     "lodopab-ct-simplified-multiturn": "verifiable_labs_envs.envs.lodopab_ct_multiturn",
+    "phase-retrieval": "verifiable_labs_envs.envs.phase_retrieval",
+    "phase-retrieval-multiturn": "verifiable_labs_envs.envs.phase_retrieval_multiturn",
 }
 
 

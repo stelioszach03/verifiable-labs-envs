@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this environment, please cite:"
+title: "verifiable-labs-phase-retrieval: a verifiable RL environment for phase retrieval from magnitude-only Fourier measurements"
+authors:
+  - family-names: "Zacharioudakis"
+    given-names: "Stelios"
+version: "1.0.0"
+date-released: "2026-04-24"
+url: "https://github.com/stelioszach03/verifiable-labs-envs"
+repository-code: "https://github.com/stelioszach03/verifiable-labs-envs"
+license: Apache-2.0
+keywords:
+  - reinforcement-learning
+  - inverse-problems
+  - phase-retrieval
+  - gerchberg-saxton
+  - compressed-sensing
+  - scientific-ml
+  - rlvr

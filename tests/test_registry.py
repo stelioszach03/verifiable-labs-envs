@@ -14,6 +14,8 @@ def test_registry_lists_expected_envs() -> None:
     assert envs == [
         "lodopab-ct-simplified",
         "lodopab-ct-simplified-multiturn",
+        "phase-retrieval",
+        "phase-retrieval-multiturn",
         "sparse-fourier-recovery",
         "sparse-fourier-recovery-multiturn",
         "sparse-fourier-recovery-tools",

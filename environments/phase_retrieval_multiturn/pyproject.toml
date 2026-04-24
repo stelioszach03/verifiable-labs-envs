@@ -1,0 +1,32 @@
+[project]
+name = "phase-retrieval-multiturn"
+description = "3-turn phase retrieval with magnitude-residual feedback between turns."
+tags = ["scientific-reasoning", "inverse-problems", "rlvr", "conformal", "eval"]
+version = "1.0.0"
+requires-python = ">=3.11"
+dependencies = [
+    # verifiers>=0.1.12 (not >=0.1.13): the 0.1.13 line is dev-only at
+    # publish time, and PEP 440 treats 0.1.13.devN as < 0.1.13, so
+    # `>=0.1.13` would reject dev releases even with pip --pre. The
+    # widened pin lets Hub consumers install from stable releases. See
+    # docs/PRIME_INTELLECT_VERIFICATION.md for the reproducer.
+    "verifiers>=0.1.12",
+    "verifiable-labs-envs @ git+https://github.com/stelioszach03/verifiable-labs-envs.git@main",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+# The monorepo isn't on PyPI yet, so the verifiable-labs-envs dep is a
+# Git URL. Hatchling refuses direct references by default; this flag
+# whitelists them so the wheel can build.
+allow-direct-references = true
+
+[tool.hatch.build]
+include = ["phase_retrieval_multiturn.py", "pyproject.toml"]
+
+[tool.verifiers.eval]
+num_examples = 5
+rollouts_per_example = 3
