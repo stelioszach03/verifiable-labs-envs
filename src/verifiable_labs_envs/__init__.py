@@ -10,12 +10,13 @@ _REGISTRY: dict[str, str] = {
 }
 
 
-def load_environment(name: str):
+def load_environment(name: str, **kwargs):
     """Load an environment by registered name.
 
     Mirrors the ``verifiers.load_environment`` signature for forward
-    compatibility with the Prime Intellect Environments Hub, but returns
-    our local ``Environment`` object which supports array-valued I/O.
+    compatibility with the Prime Intellect Environments Hub. ``kwargs``
+    are forwarded to the per-env ``load_environment`` factory (e.g.
+    ``calibration_quantile=...`` or ``use_real_data=True``).
     """
     if name not in _REGISTRY:
         available = ", ".join(sorted(_REGISTRY))
@@ -23,7 +24,7 @@ def load_environment(name: str):
     import importlib
 
     module = importlib.import_module(_REGISTRY[name])
-    return module.load_environment()
+    return module.load_environment(**kwargs)
 
 
 def list_environments() -> list[str]:

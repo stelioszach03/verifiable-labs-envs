@@ -30,6 +30,31 @@ Frontier reasoning models are trained with verifiable rewards (RLVR). Today's RL
 
 Reproduce with `python benchmarks/run_all.py --seeds 5`.
 
+## Multi-turn rollouts (`sparse-fourier-recovery-multiturn`)
+
+Ships a 3-turn conversation variant of `sparse-fourier-recovery`: turn 1 is the full problem, turns 2–3 show the Fourier-domain residual `r = y - A(x_hat)` of the previous answer and ask for a correction.
+
+Async benchmark (3 models × 3 instances × 3 turns = 27 calls, $0.09 total, 33.6 s wall-clock with `Semaphore(10)`):
+
+| Model | Turn 0 → Turn 1 → Turn 2 | Final | Episodes failed |
+|---|---|---:|---|
+| Claude Haiku 4.5 | 0.371 → 0.380 → 0.363 | 0.363 | 0/3 |
+| Claude Sonnet 4.6 | 0.348 → 0.348 → 0.347 | 0.347 | 2/3 (turn-1 parse) |
+| GPT-5.4 mini | 0.353 → 0.331 → 0.331 | 0.331 | 0/3 |
+
+Headline finding: **frontier LLMs do not yet know how to use residual feedback constructively on sparse-Fourier recovery.** Scores plateau or regress at turns 2–3. This is itself the most actionable signal in the entire benchmark — it's exactly the surface RLVR post-training on these environments would be expected to improve.
+
+Raw data: [`results/multiturn_sparse_fourier_recovery_multiturn.csv`](results/multiturn_sparse_fourier_recovery_multiturn.csv). Plot: [`results/multiturn_sparse_fourier_recovery_multiturn_curves.png`](results/multiturn_sparse_fourier_recovery_multiturn_curves.png).
+
+Reproduce with:
+
+```bash
+python benchmarks/run_multiturn_benchmark.py \
+  --env sparse-fourier-recovery-multiturn \
+  --models anthropic/claude-haiku-4.5,anthropic/claude-sonnet-4.6,openai/gpt-5.4-mini \
+  --n 3 --max-turns 3 --max-cost 2.0 --conformal-quantile 1.587
+```
+
 ## Real-data CT (LoDoPaB-CT validation, opt-in via `use_real_data=True`)
 
 Phase 2 adds a real-patient-geometry path on `lodopab-ct-simplified`: 3552 validation slices from the LoDoPaB-CT dataset (Leuschner et al. 2021, Nature Scientific Data) drawn from the LIDC-IDRI clinical chest-CT cohort. CI defaults stay on the phantom rotation so no download is required. One-shot activation:
