@@ -51,6 +51,7 @@ coverage.xml
 
 # Data — never commit large data, always download on demand
 data/
+!leaderboard/data/
 datasets/
 *.h5
 *.npz

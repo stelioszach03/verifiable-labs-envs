@@ -22,7 +22,13 @@ import gradio as gr
 import pandas as pd
 
 HERE = Path(__file__).resolve().parent
-DATA_CSV = HERE / "data" / "llm_benchmark_v2.csv"
+# llm_benchmark_all.csv merges Sprint-1 v2, Sprint-giga phase-retrieval v1,
+# Sprint-giga MRI v1, and Sprint-giga meta-benchmark v3 into one schema-
+# compatible file via scripts/merge_leaderboard_data.py in the monorepo.
+DATA_CSV = HERE / "data" / "llm_benchmark_all.csv"
+# Fallback to the old v2-only file if the merged file is missing at runtime.
+if not DATA_CSV.exists():
+    DATA_CSV = HERE / "data" / "llm_benchmark_v2.csv"
 HEATMAP_PNG = HERE / "data" / "benchmark_v2_heatmap.png"
 SUBMISSIONS_TSV = HERE / "submissions.tsv"
 
@@ -33,6 +39,11 @@ ENV_ORDER = [
     "super-resolution-div2k-x4",
     "lodopab-ct-simplified",
     "lodopab-ct-simplified-multiturn",
+    # Added sprint-giga (2026-04-24):
+    "phase-retrieval",
+    "phase-retrieval-multiturn",
+    "mri-knee-reconstruction",
+    "mri-knee-reconstruction-multiturn",
 ]
 ENV_LABEL = {
     "sparse-fourier-recovery": "SparseF",
@@ -41,17 +52,25 @@ ENV_LABEL = {
     "super-resolution-div2k-x4": "SuperRes",
     "lodopab-ct-simplified": "CT",
     "lodopab-ct-simplified-multiturn": "CT-MT",
+    "phase-retrieval": "PhaseRet",
+    "phase-retrieval-multiturn": "PhaseRet-MT",
+    "mri-knee-reconstruction": "MRI",
+    "mri-knee-reconstruction-multiturn": "MRI-MT",
 }
 
 
 def _load_final_turn() -> pd.DataFrame:
-    """Reward of highest-turn successful row per (model, env, seed)."""
-    best: dict[tuple[str, str, int], tuple[int, float, bool]] = {}
+    """Reward of highest-turn successful row per (model, env, seed).
+
+    Tolerates both the v2 schema (seed already int) and the merged schema
+    (seed is string since instance_id was carried forward as text).
+    """
+    best: dict[tuple[str, str, str], tuple[int, float, bool]] = {}
     fail_counts: dict[tuple[str, str], int] = defaultdict(int)
     total_counts: dict[tuple[str, str], int] = defaultdict(int)
     with DATA_CSV.open() as fh:
         for row in csv.DictReader(fh):
-            key = (row["env"], row["model"], int(row["seed"]))
+            key = (row["env"], row["model"], str(row["seed"]))
             total_counts[(row["env"], row["model"])] += 1
             try:
                 reward = float(row["reward"])
@@ -154,11 +173,26 @@ between turns. The LLM is expected to propose a correction each turn.
 Reward comes from the final turn's prediction; `meta.turn_rewards`
 exposes the trajectory.
 
-## Tool-use env
+## Tool-use env (v0.3 — primitive composition)
 
-Four explicit tools (`fft`, `ifft`, `ista`, `check_residual`) that the
-LLM can call up to five times before emitting its final answer. We
-score the final answer; meta records the tool-call count and sequence.
+Five primitive tools (`fft`, `ifft`, soft-`threshold`, `compute_residual`,
+`sparsity_norm`) that the LLM must compose into ISTA-like iteration. The
+v0.1 tool set contained an `ista_tool` oracle that returned the classical
+OMP answer directly; any model called it once and copied the output. That
+was an *oracle-delegation artifact*, caught and removed in v0.3. A
+regression test asserts no single primitive can produce a reward above
+the empty-answer floor. Full reconciliation:
+[sparse_fourier_reconciliation.md](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/results/sparse_fourier_reconciliation.md).
+
+## Sprint-giga envs (added 2026-04-24)
+
+- **phase-retrieval / -multiturn**: recover a k-sparse signal from
+  `y = |F(x)|` (magnitude only — phase lost). Gerchberg-Saxton baseline.
+  Sign-invariant NMSE because `|F(-x)| = |F(x)|`.
+- **mri-knee-reconstruction / -multiturn**: accelerated MRI — recover a
+  grayscale image from 4×-undersampled Cartesian k-space. Zero-filled
+  inverse FFT baseline. v1 uses skimage synthetic ground truth at 16×16;
+  fastMRI integration deferred to v2.
 
 ## References
 

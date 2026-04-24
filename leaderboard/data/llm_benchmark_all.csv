@@ -1,0 +1,157 @@
+source,env,model,seed,turn,reward,components,parse_ok,usd_cost
+v2,sparse-fourier-recovery,openai/gpt-5.4-mini,1,1,0.3241,"nmse=0.135, support=0.000, conformal=0.900",True,0.000953
+v2,sparse-fourier-recovery,anthropic/claude-haiku-4.5,0,1,0.3517,"nmse=0.129, support=0.000, conformal=1.000",True,0.001361
+v2,sparse-fourier-recovery,anthropic/claude-haiku-4.5,1,1,0.3765,"nmse=0.116, support=0.100, conformal=1.000",True,0.001361
+v2,sparse-fourier-recovery,openai/gpt-5.4,1,1,0.2703,"nmse=0.001, support=0.000, conformal=0.900",True,0.003087
+v2,sparse-fourier-recovery,openai/gpt-5.4,0,1,0.3162,"nmse=0.041, support=0.100, conformal=0.900",True,0.003073
+v2,sparse-fourier-recovery,openai/gpt-5.4-mini,0,1,0.3511,"nmse=0.128, support=0.000, conformal=1.000",True,0.000953
+v2,super-resolution-div2k-x4,openai/gpt-5.4-mini,1,1,0.7520,"psnr=0.580, ssim=0.819, conformal=0.915",True,0.009795
+v2,super-resolution-div2k-x4,openai/gpt-5.4-mini,0,1,0.3154,"psnr=0.000, ssim=0.413, conformal=0.639",True,0.009768
+v2,sparse-fourier-recovery,anthropic/claude-sonnet-4.6,0,1,0.3395,"nmse=0.099, support=0.000, conformal=1.000",True,0.018306
+v2,sparse-fourier-recovery,anthropic/claude-sonnet-4.6,1,1,0.2700,"nmse=0.000, support=0.000, conformal=0.900",True,0.018276
+v2,super-resolution-div2k-x4,anthropic/claude-haiku-4.5,0,1,0.6018,"psnr=0.274, ssim=0.649, conformal=0.992",True,0.012630
+v2,super-resolution-div2k-x4,anthropic/claude-haiku-4.5,1,1,0.8510,"psnr=0.814, ssim=0.846, conformal=0.906",True,0.012630
+v2,lodopab-ct-simplified,openai/gpt-5.4-mini,0,1,0.2994,"psnr=0.000, ssim=0.501, conformal=0.497",True,0.009810
+v2,lodopab-ct-simplified,openai/gpt-5.4-mini,1,1,0.7111,"psnr=0.462, ssim=0.813, conformal=0.941",True,0.009810
+v2,lodopab-ct-simplified,anthropic/claude-haiku-4.5,0,1,0.5719,"psnr=0.226, ssim=0.608, conformal=0.997",True,0.012651
+v2,lodopab-ct-simplified,anthropic/claude-haiku-4.5,1,1,0.7073,"psnr=0.456, ssim=0.810, conformal=0.939",True,0.012651
+v2,super-resolution-div2k-x4,openai/gpt-5.4,1,1,0.8489,"psnr=0.791, ssim=0.863, conformal=0.912",True,0.031697
+v2,sparse-fourier-recovery-multiturn,anthropic/claude-haiku-4.5,0,1,0.3463,"nmse=0.116, support=0.000, conformal=1.000",True,0.001315
+v2,sparse-fourier-recovery-multiturn,anthropic/claude-haiku-4.5,0,2,0.3474,"nmse=0.119, support=0.000, conformal=1.000",True,0.001736
+v2,sparse-fourier-recovery-multiturn,anthropic/claude-haiku-4.5,0,3,0.3469,"nmse=0.117, support=0.000, conformal=1.000",True,0.002157
+v2,sparse-fourier-recovery-multiturn,anthropic/claude-haiku-4.5,1,1,0.3807,"nmse=0.127, support=0.100, conformal=1.000",True,0.001315
+v2,sparse-fourier-recovery-multiturn,anthropic/claude-haiku-4.5,1,2,0.3807,"nmse=0.127, support=0.100, conformal=1.000",True,0.001736
+v2,sparse-fourier-recovery-multiturn,anthropic/claude-haiku-4.5,1,3,0.3541,"nmse=0.135, support=0.100, conformal=0.900",True,0.002157
+v2,sparse-fourier-recovery-multiturn,openai/gpt-5.4-mini,0,1,0.3554,"nmse=0.138, support=0.100, conformal=0.900",True,0.000925
+v2,sparse-fourier-recovery-multiturn,openai/gpt-5.4-mini,0,2,0.3554,"nmse=0.138, support=0.100, conformal=0.900",True,0.001213
+v2,sparse-fourier-recovery-multiturn,openai/gpt-5.4-mini,0,3,0.3554,"nmse=0.138, support=0.100, conformal=0.900",True,0.001501
+v2,sparse-fourier-recovery-multiturn,openai/gpt-5.4-mini,1,1,0.3699,"nmse=0.100, support=0.100, conformal=1.000",True,0.000925
+v2,sparse-fourier-recovery-multiturn,openai/gpt-5.4-mini,1,2,0.3699,"nmse=0.100, support=0.100, conformal=1.000",True,0.001213
+v2,sparse-fourier-recovery-multiturn,openai/gpt-5.4-mini,1,3,0.3699,"nmse=0.100, support=0.100, conformal=1.000",True,0.001502
+v2,super-resolution-div2k-x4,openai/gpt-5.4,0,1,0.5925,"psnr=0.259, ssim=0.629, conformal=1.000",True,0.031697
+v2,super-resolution-div2k-x4,anthropic/claude-sonnet-4.6,1,1,0.8480,"psnr=0.803, ssim=0.847, conformal=0.909",True,0.039318
+v2,lodopab-ct-simplified,anthropic/claude-sonnet-4.6,1,1,0.6038,"psnr=0.262, ssim=0.691, conformal=0.972",True,0.040641
+v2,sparse-fourier-recovery-multiturn,openai/gpt-5.4,0,1,0.3525,"nmse=0.131, support=0.000, conformal=1.000",True,0.002992
+v2,sparse-fourier-recovery-multiturn,openai/gpt-5.4,0,2,0.3522,"nmse=0.130, support=0.000, conformal=1.000",True,0.003953
+v2,sparse-fourier-recovery-multiturn,openai/gpt-5.4,0,3,0.3514,"nmse=0.129, support=0.000, conformal=1.000",True,0.002305
+v2,sparse-fourier-recovery-multiturn,openai/gpt-5.4,1,1,0.3201,"nmse=0.125, support=0.000, conformal=0.900",True,0.002992
+v2,sparse-fourier-recovery-multiturn,openai/gpt-5.4,1,2,0.3181,"nmse=0.120, support=0.000, conformal=0.900",True,0.003955
+v2,sparse-fourier-recovery-multiturn,openai/gpt-5.4,1,3,0.3786,"nmse=0.121, support=0.100, conformal=1.000",True,0.002311
+v2,super-resolution-div2k-x4,anthropic/claude-sonnet-4.6,0,1,0.6050,"psnr=0.279, ssim=0.654, conformal=0.990",True,0.039228
+v2,lodopab-ct-simplified,anthropic/claude-sonnet-4.6,0,1,0.5555,"psnr=0.216, ssim=0.584, conformal=0.980",True,0.040806
+v2,lodopab-ct-simplified,openai/gpt-5.4,0,1,0.5373,"psnr=0.173, ssim=0.600, conformal=0.959",True,0.036643
+v2,lodopab-ct-simplified,openai/gpt-5.4,1,1,0.6647,"psnr=0.373, ssim=0.752, conformal=0.966",True,0.031746
+v2,sparse-fourier-recovery-multiturn,anthropic/claude-sonnet-4.6,0,1,0.3594,"nmse=0.149, support=0.200, conformal=0.800",True,0.011763
+v2,sparse-fourier-recovery-multiturn,anthropic/claude-sonnet-4.6,0,2,0.3493,"nmse=0.123, support=0.000, conformal=1.000",True,0.010764
+v2,sparse-fourier-recovery-multiturn,anthropic/claude-sonnet-4.6,0,3,0.3501,"nmse=0.125, support=0.000, conformal=1.000",True,0.015300
+v2,sparse-fourier-recovery-tools,anthropic/claude-haiku-4.5,0,1,0.3480,"nmse=0.120, support=0.000, conformal=1.000",True,0.005925
+v2,sparse-fourier-recovery-tools,anthropic/claude-haiku-4.5,1,1,0.3198,"nmse=0.124, support=0.000, conformal=0.900",True,0.006265
+v2,lodopab-ct-simplified-multiturn,openai/gpt-5.4-mini,0,1,0.5719,"psnr=0.226, ssim=0.608, conformal=0.997",True,0.009809
+v2,lodopab-ct-simplified-multiturn,openai/gpt-5.4-mini,0,2,0.4459,"psnr=0.096, ssim=0.593, conformal=0.766",True,0.012947
+v2,lodopab-ct-simplified-multiturn,openai/gpt-5.4-mini,0,3,0.3698,"psnr=0.000, ssim=0.520, conformal=0.713",True,0.011617
+v2,sparse-fourier-recovery-tools,openai/gpt-5.4-mini,0,1,0.3539,"nmse=0.135, support=0.000, conformal=1.000",True,0.001073
+v2,lodopab-ct-simplified-multiturn,anthropic/claude-haiku-4.5,1,1,0.7110,"psnr=0.467, ssim=0.812, conformal=0.935",True,0.012653
+v2,lodopab-ct-simplified-multiturn,anthropic/claude-haiku-4.5,1,2,,,False,0.016559
+v2,sparse-fourier-recovery-tools,openai/gpt-5.4-mini,1,1,,,False,0.001068
+v2,sparse-fourier-recovery-tools,openai/gpt-5.4,0,1,0.3065,"nmse=0.016, support=0.000, conformal=1.000",True,0.003455
+v2,sparse-fourier-recovery-multiturn,anthropic/claude-sonnet-4.6,1,1,0.3113,"nmse=0.103, support=0.000, conformal=0.900",True,0.013668
+v2,sparse-fourier-recovery-multiturn,anthropic/claude-sonnet-4.6,1,2,0.3655,"nmse=0.089, support=0.100, conformal=1.000",True,0.015600
+v2,sparse-fourier-recovery-multiturn,anthropic/claude-sonnet-4.6,1,3,0.3066,"nmse=0.091, support=0.000, conformal=0.900",True,0.018522
+v2,sparse-fourier-recovery-tools,openai/gpt-5.4,1,1,,,False,0.003530
+v2,lodopab-ct-simplified-multiturn,anthropic/claude-haiku-4.5,0,1,0.5720,"psnr=0.226, ssim=0.609, conformal=0.996",True,0.012653
+v2,lodopab-ct-simplified-multiturn,anthropic/claude-haiku-4.5,0,2,0.4885,"psnr=0.176, ssim=0.521, conformal=0.873",True,0.016885
+v2,lodopab-ct-simplified-multiturn,anthropic/claude-haiku-4.5,0,3,0.3436,"psnr=0.098, ssim=0.472, conformal=0.542",True,0.021120
+v2,lodopab-ct-simplified-multiturn,openai/gpt-5.4-mini,1,1,0.6012,"psnr=0.325, ssim=0.796, conformal=0.775",True,0.009809
+v2,lodopab-ct-simplified-multiturn,openai/gpt-5.4-mini,1,2,0.4175,"psnr=0.165, ssim=0.769, conformal=0.403",True,0.012941
+v2,lodopab-ct-simplified-multiturn,openai/gpt-5.4-mini,1,3,0.3723,"psnr=0.095, ssim=0.742, conformal=0.373",True,0.011605
+v2,sparse-fourier-recovery-tools,anthropic/claude-sonnet-4.6,0,1,0.3321,"nmse=0.080, support=0.000, conformal=1.000",True,0.021108
+v2,sparse-fourier-recovery-tools,anthropic/claude-sonnet-4.6,1,1,0.3410,"nmse=0.102, support=0.100, conformal=0.900",True,0.028908
+v2,lodopab-ct-simplified-multiturn,openai/gpt-5.4,0,1,0.5894,"psnr=0.196, ssim=0.714, conformal=0.989",True,0.032608
+v2,lodopab-ct-simplified-multiturn,openai/gpt-5.4,0,2,0.5952,"psnr=0.212, ssim=0.715, conformal=0.986",True,0.037673
+v2,lodopab-ct-simplified-multiturn,openai/gpt-5.4,0,3,0.5907,"psnr=0.213, ssim=0.703, conformal=0.982",True,0.038707
+v2,lodopab-ct-simplified-multiturn,anthropic/claude-sonnet-4.6,1,1,0.7120,"psnr=0.464, ssim=0.817, conformal=0.938",True,0.039312
+v2,lodopab-ct-simplified-multiturn,anthropic/claude-sonnet-4.6,1,2,,,False,0.052062
+v2,lodopab-ct-simplified-multiturn,anthropic/claude-sonnet-4.6,0,1,0.4893,"psnr=0.146, ssim=0.547, conformal=0.889",True,0.039327
+v2,lodopab-ct-simplified-multiturn,anthropic/claude-sonnet-4.6,0,2,0.5831,"psnr=0.204, ssim=0.675, conformal=0.996",True,0.055173
+v2,lodopab-ct-simplified-multiturn,anthropic/claude-sonnet-4.6,0,3,0.5678,"psnr=0.206, ssim=0.637, conformal=0.981",True,0.067182
+v2,lodopab-ct-simplified-multiturn,openai/gpt-5.4,1,1,0.7063,"psnr=0.446, ssim=0.810, conformal=0.950",True,0.032608
+v2,lodopab-ct-simplified-multiturn,openai/gpt-5.4,1,2,0.7139,"psnr=0.468, ssim=0.818, conformal=0.939",True,0.037664
+v2,lodopab-ct-simplified-multiturn,openai/gpt-5.4,1,3,0.7166,"psnr=0.475, ssim=0.818, conformal=0.938",True,0.038687
+phase-v1,phase-retrieval,anthropic/claude-haiku-4.5,0,1,0.5123,"nmse=0.081, support=0.750, conformal=0.850",True,0.003535
+phase-v1,phase-retrieval-multiturn,anthropic/claude-haiku-4.5,0,3,0.3872,"nmse=0.105, support=0.250, conformal=0.900",True,0.002712
+phase-v1,phase-retrieval,anthropic/claude-haiku-4.5,1,1,,,False,0.004580
+phase-v1,phase-retrieval-multiturn,anthropic/claude-haiku-4.5,1,3,0.2981,"nmse=0.070, support=0.000, conformal=0.900",True,0.002712
+phase-v1,phase-retrieval,anthropic/claude-haiku-4.5,2,1,0.3969,"nmse=0.130, support=0.250, conformal=0.900",True,0.004795
+phase-v1,phase-retrieval-multiturn,anthropic/claude-haiku-4.5,2,3,0.3083,"nmse=0.096, support=0.000, conformal=0.900",True,0.002715
+phase-v1,phase-retrieval,openai/gpt-5.4-mini,0,1,0.3910,"nmse=0.153, support=0.250, conformal=0.850",True,0.000587
+phase-v1,phase-retrieval-multiturn,openai/gpt-5.4-mini,0,3,0.3236,"nmse=0.134, support=0.000, conformal=0.900",True,0.001825
+phase-v1,phase-retrieval,openai/gpt-5.4-mini,1,1,0.3213,"nmse=0.128, support=0.000, conformal=0.900",True,0.000592
+phase-v1,phase-retrieval-multiturn,openai/gpt-5.4-mini,1,3,0.3221,"nmse=0.130, support=0.000, conformal=0.900",True,0.001822
+phase-v1,phase-retrieval,openai/gpt-5.4-mini,2,1,0.3823,"nmse=0.131, support=0.250, conformal=0.850",True,0.000587
+phase-v1,phase-retrieval-multiturn,openai/gpt-5.4-mini,2,3,0.3841,"nmse=0.135, support=0.250, conformal=0.850",True,0.001798
+phase-v1,phase-retrieval,openai/gpt-5.4-nano,0,1,0.3139,"nmse=0.110, support=0.000, conformal=0.900",True,0.000152
+phase-v1,phase-retrieval-multiturn,openai/gpt-5.4-nano,0,3,0.3064,"nmse=0.091, support=0.000, conformal=0.900",True,0.000477
+phase-v1,phase-retrieval,openai/gpt-5.4-nano,1,1,0.2748,"nmse=0.012, support=0.000, conformal=0.900",True,0.000151
+phase-v1,phase-retrieval-multiturn,openai/gpt-5.4-nano,1,3,0.3810,"nmse=0.127, support=0.250, conformal=0.850",True,0.000476
+phase-v1,phase-retrieval,openai/gpt-5.4-nano,2,1,0.3076,"nmse=0.094, support=0.000, conformal=0.900",True,0.000151
+phase-v1,phase-retrieval-multiturn,openai/gpt-5.4-nano,2,3,0.3712,"nmse=0.103, support=0.250, conformal=0.850",True,0.000478
+mri-v1,mri-knee-reconstruction,anthropic/claude-haiku-4.5,0,1,0.6389,"psnr=0.364, ssim=0.685, conformal=0.959",True,0.004753
+mri-v1,mri-knee-reconstruction-multiturn,anthropic/claude-haiku-4.5,0,3,0.6389,"psnr=0.364, ssim=0.685, conformal=0.959",True,0.013416
+mri-v1,mri-knee-reconstruction,anthropic/claude-haiku-4.5,1,1,0.9025,"psnr=0.955, ssim=0.835, conformal=0.900",True,0.004753
+mri-v1,mri-knee-reconstruction-multiturn,anthropic/claude-haiku-4.5,1,3,0.9025,"psnr=0.955, ssim=0.835, conformal=0.900",True,0.013416
+mri-v1,mri-knee-reconstruction,anthropic/claude-haiku-4.5,2,1,0.5052,"psnr=0.218, ssim=0.547, conformal=0.846",True,0.004753
+mri-v1,mri-knee-reconstruction-multiturn,anthropic/claude-haiku-4.5,2,3,0.5085,"psnr=0.220, ssim=0.555, conformal=0.846",True,0.013416
+mri-v1,mri-knee-reconstruction,openai/gpt-5.4-mini,0,1,0.6389,"psnr=0.364, ssim=0.685, conformal=0.959",True,0.002978
+mri-v1,mri-knee-reconstruction-multiturn,openai/gpt-5.4-mini,0,3,0.6260,"psnr=0.349, ssim=0.685, conformal=0.936",True,0.009896
+mri-v1,mri-knee-reconstruction,openai/gpt-5.4-mini,1,1,0.8942,"psnr=0.934, ssim=0.836, conformal=0.900",True,0.002978
+mri-v1,mri-knee-reconstruction-multiturn,openai/gpt-5.4-mini,1,3,0.8824,"psnr=0.901, ssim=0.836, conformal=0.904",True,0.009896
+mri-v1,mri-knee-reconstruction,openai/gpt-5.4-mini,2,1,0.4877,"psnr=0.210, ssim=0.524, conformal=0.823",True,0.002951
+mri-v1,mri-knee-reconstruction-multiturn,openai/gpt-5.4-mini,2,3,0.4929,"psnr=0.213, ssim=0.528, conformal=0.830",True,0.009923
+mri-v1,mri-knee-reconstruction,openai/gpt-5.4-nano,0,1,0.6269,"psnr=0.348, ssim=0.678, conformal=0.948",True,0.000813
+mri-v1,mri-knee-reconstruction-multiturn,openai/gpt-5.4-nano,0,3,0.6389,"psnr=0.364, ssim=0.685, conformal=0.959",True,0.002717
+mri-v1,mri-knee-reconstruction,openai/gpt-5.4-nano,1,1,0.8849,"psnr=0.909, ssim=0.838, conformal=0.900",True,0.000813
+mri-v1,mri-knee-reconstruction-multiturn,openai/gpt-5.4-nano,1,3,0.7110,"psnr=0.476, ssim=0.820, conformal=0.916",True,0.002717
+mri-v1,mri-knee-reconstruction,openai/gpt-5.4-nano,2,1,0.4509,"psnr=0.187, ssim=0.463, conformal=0.791",True,0.000813
+mri-v1,mri-knee-reconstruction-multiturn,openai/gpt-5.4-nano,2,3,0.4178,"psnr=0.127, ssim=0.459, conformal=0.764",True,0.002717
+meta-v3,sparse-fourier-recovery,anthropic/claude-haiku-4.5,0,1,0.3517,"nmse=0.129, support=0.000, conformal=1.000",True,0.001361
+meta-v3,sparse-fourier-recovery,anthropic/claude-haiku-4.5,1,1,0.3765,"nmse=0.116, support=0.100, conformal=1.000",True,0.001361
+meta-v3,sparse-fourier-recovery,openai/gpt-5.4-mini,0,1,0.3434,"nmse=0.109, support=0.000, conformal=1.000",True,0.000953
+meta-v3,sparse-fourier-recovery,openai/gpt-5.4-mini,1,1,0.2853,"nmse=0.038, support=0.000, conformal=0.900",True,0.000953
+meta-v3,sparse-fourier-recovery,openai/gpt-5.4-nano,0,1,0.3840,"nmse=0.135, support=0.100, conformal=1.000",True,0.000250
+meta-v3,sparse-fourier-recovery,openai/gpt-5.4-nano,1,1,0.3341,"nmse=0.010, support=0.100, conformal=1.000",True,0.000251
+meta-v3,super-resolution-div2k-x4,anthropic/claude-haiku-4.5,0,1,,,False,0.012565
+meta-v3,super-resolution-div2k-x4,anthropic/claude-haiku-4.5,1,1,,,False,0.012565
+meta-v3,super-resolution-div2k-x4,openai/gpt-5.4-mini,0,1,,,False,0.010937
+meta-v3,super-resolution-div2k-x4,openai/gpt-5.4-mini,1,1,,,False,0.010937
+meta-v3,super-resolution-div2k-x4,openai/gpt-5.4-nano,0,1,,,False,0.003019
+meta-v3,super-resolution-div2k-x4,openai/gpt-5.4-nano,1,1,,,False,0.003019
+meta-v3,lodopab-ct-simplified,anthropic/claude-haiku-4.5,0,1,,,False,0.012586
+meta-v3,lodopab-ct-simplified,anthropic/claude-haiku-4.5,1,1,,,False,0.012586
+meta-v3,lodopab-ct-simplified,openai/gpt-5.4-mini,0,1,,,False,0.010952
+meta-v3,lodopab-ct-simplified,openai/gpt-5.4-mini,1,1,,,False,0.010952
+meta-v3,lodopab-ct-simplified,openai/gpt-5.4-nano,0,1,,,False,0.003023
+meta-v3,lodopab-ct-simplified,openai/gpt-5.4-nano,1,1,,,False,0.003023
+meta-v3,phase-retrieval,anthropic/claude-haiku-4.5,0,1,0.5123,"nmse=0.081, support=0.750, conformal=0.850",True,0.003535
+meta-v3,phase-retrieval,anthropic/claude-haiku-4.5,1,1,,,False,0.004580
+meta-v3,phase-retrieval,openai/gpt-5.4-mini,0,1,0.3176,"nmse=0.119, support=0.000, conformal=0.900",True,0.000592
+meta-v3,phase-retrieval,openai/gpt-5.4-mini,1,1,0.3177,"nmse=0.119, support=0.000, conformal=0.900",True,0.000587
+meta-v3,phase-retrieval,openai/gpt-5.4-nano,0,1,0.2829,"nmse=0.032, support=0.000, conformal=0.900",True,0.000152
+meta-v3,phase-retrieval,openai/gpt-5.4-nano,1,1,0.3726,"nmse=0.069, support=0.250, conformal=0.900",True,0.000152
+meta-v3,mri-knee-reconstruction,anthropic/claude-haiku-4.5,0,1,0.6178,"psnr=0.364, ssim=0.685, conformal=0.889",True,0.004753
+meta-v3,mri-knee-reconstruction,anthropic/claude-haiku-4.5,1,1,0.9025,"psnr=0.955, ssim=0.835, conformal=0.900",True,0.004753
+meta-v3,mri-knee-reconstruction,openai/gpt-5.4-mini,0,1,0.3696,"psnr=0.097, ssim=0.498, conformal=0.604",True,0.002951
+meta-v3,mri-knee-reconstruction,openai/gpt-5.4-mini,1,1,0.8856,"psnr=0.910, ssim=0.831, conformal=0.908",True,0.002978
+meta-v3,mri-knee-reconstruction,openai/gpt-5.4-nano,0,1,0.2753,"psnr=0.000, ssim=0.357, conformal=0.561",True,0.000813
+meta-v3,mri-knee-reconstruction,openai/gpt-5.4-nano,1,1,0.7613,"psnr=0.602, ssim=0.808, conformal=0.927",True,0.000813
+meta-v3,super-resolution-div2k-x4,anthropic/claude-haiku-4.5,0,1,0.5794,"psnr=0.272, ssim=0.648, conformal=0.920",True,0.012630
+meta-v3,super-resolution-div2k-x4,anthropic/claude-haiku-4.5,1,1,0.8535,"psnr=0.814, ssim=0.846, conformal=0.915",True,0.012630
+meta-v3,super-resolution-div2k-x4,openai/gpt-5.4-mini,0,1,0.3374,"psnr=0.000, ssim=0.461, conformal=0.664",True,0.009768
+meta-v3,super-resolution-div2k-x4,openai/gpt-5.4-mini,1,1,0.6732,"psnr=0.375, ssim=0.785, conformal=0.960",True,0.009795
+meta-v3,super-resolution-div2k-x4,openai/gpt-5.4-nano,0,1,,,False,0.002756
+meta-v3,super-resolution-div2k-x4,openai/gpt-5.4-nano,1,1,0.7965,"psnr=0.676, ssim=0.824, conformal=0.930",True,0.002708
+meta-v3,lodopab-ct-simplified,anthropic/claude-haiku-4.5,0,1,0.5437,"psnr=0.226, ssim=0.608, conformal=0.903",True,0.012651
+meta-v3,lodopab-ct-simplified,anthropic/claude-haiku-4.5,1,1,0.6954,"psnr=0.456, ssim=0.810, conformal=0.900",True,0.012651
+meta-v3,lodopab-ct-simplified,openai/gpt-5.4-mini,0,1,0.4225,"psnr=0.030, ssim=0.467, conformal=0.901",True,0.009810
+meta-v3,lodopab-ct-simplified,openai/gpt-5.4-mini,1,1,0.7011,"psnr=0.466, ssim=0.815, conformal=0.900",True,0.009783
+meta-v3,lodopab-ct-simplified,openai/gpt-5.4-nano,0,1,,,False,0.002878
+meta-v3,lodopab-ct-simplified,openai/gpt-5.4-nano,1,1,,,False,0.002842
