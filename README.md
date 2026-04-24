@@ -2,7 +2,11 @@
 
 Reinforcement-learning environments for scientific reasoning — physics-grounded inverse problems with uncertainty-calibrated rewards.
 
-> **Status (2026-04-26):** Day 4 of an 11-day sprint. All three planned environments shipped: `sparse-fourier-recovery` (1D compressed sensing), `super-resolution-div2k-x4` (2D 4x SR with bicubic baseline), and `lodopab-ct-simplified` (2D parallel-beam CT with FBP baseline). 79 tests green, full suite under 1 s.
+> **Status (2026-04-24, post Sprint 1):** Six environments (3 single-turn + 2 multi-turn + 1 tool-use) live on Prime Intellect Environments Hub. Static leaderboard live on HuggingFace Spaces. 176 tests green, full suite under 2 s.
+>
+> - 🔗 Leaderboard: https://huggingface.co/spaces/stelioszach03/scientific-rl-benchmark
+> - 🔗 Prime Intellect Hub envs: [`stelioszach/sparse-fourier-recovery`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-multiturn), [`-tools`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-tools), [`super-resolution-div2k-x4`](https://app.primeintellect.ai/dashboard/environments/stelioszach/super-resolution-div2k-x4), [`lodopab-ct-simplified`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified-multiturn).
+> - 🔗 Full Sprint 1 summary: [`docs/SPRINT_1_COMPLETE.md`](docs/SPRINT_1_COMPLETE.md).
 
 ## What this is
 
@@ -177,9 +181,19 @@ pip install -e ".[dev]"
 pytest                                  # 176+ tests green
 ```
 
-### Single environment (downstream consumers)
+### Single environment via Prime Intellect Hub (now live)
 
-Each of the six environments is also shipped as a thin verifiers-compatible package under `packages/`. Install just the one you need:
+All six envs are published on the [Prime Intellect Environments Hub](https://app.primeintellect.ai/dashboard/environments):
+
+```bash
+pip install prime
+prime login
+prime env install stelioszach/sparse-fourier-recovery
+# or any of: sparse-fourier-recovery-multiturn, sparse-fourier-recovery-tools,
+#            super-resolution-div2k-x4, lodopab-ct-simplified, lodopab-ct-simplified-multiturn
+```
+
+### Single environment via GitHub subdirectory
 
 ```bash
 pip install "git+https://github.com/stelioszach03/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-sparse-fourier"
@@ -193,12 +207,6 @@ Then:
 from verifiable_labs_sparse_fourier import load_environment
 env = load_environment()
 out = env.run_baseline(seed=0)
-```
-
-Prime Intellect Hub listing is pending `prime login` (see [`docs/PRIME_INTELLECT.md`](docs/PRIME_INTELLECT.md)). Once live:
-
-```bash
-prime env install verifiable-labs/sparse-fourier-recovery
 ```
 
 ## Quickstart
