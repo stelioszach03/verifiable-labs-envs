@@ -47,6 +47,7 @@ class CompletionResult:
     latency_s: float
     model: str  # as reported by the server (routing may have changed it)
     usd_cost: float | None = None  # populated if the provider reports it
+    tool_calls: list[dict[str, Any]] | None = None  # populated when tools= is passed and model responds with a tool call
 
 
 # ──────────────────────────────────────────
@@ -69,15 +70,23 @@ class LLMSolver(ABC):
         """Single chat-completion call. Must raise ``LLMSolverError`` on unrecoverable failure."""
 
     @abstractmethod
-    def complete_turns(self, messages: list[dict[str, str]]) -> CompletionResult:
+    def complete_turns(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]] | None = None,
+    ) -> CompletionResult:
         """Multi-turn chat-completion call. ``messages`` is an OpenAI-format
-        list of ``{'role': 'system'|'user'|'assistant', 'content': str}`` dicts.
+        list of ``{'role': 'system'|'user'|'assistant'|'tool', 'content': ...}``
+        dicts; ``assistant`` messages may additionally carry a ``tool_calls``
+        key when the previous response included tool calls.
 
-        Used by multi-turn environments (e.g. `sparse-fourier-multiturn`) that
-        iterate solver responses with intermediate environment feedback.
+        If ``tools`` is provided (OpenAI function-calling JSON schema list),
+        the model may respond with ``tool_calls`` instead of ``content``.
+        That case populates ``CompletionResult.tool_calls``; caller is
+        responsible for dispatching the tool calls, appending tool-role
+        result messages, and calling again.
 
-        Single-turn envs continue to use ``.complete()``; both should produce
-        the same cost and latency semantics.
+        Used by multi-turn and tool-use environments.
         """
 
     def solve(self, env_name: str, instance: Any) -> Any:
@@ -153,29 +162,36 @@ class OpenRouterSolver(LLMSolver):
             timeout=self.timeout_s,
         )
 
-    def _invoke(self, messages: list[dict[str, str]]) -> CompletionResult:
+    def _invoke(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]] | None = None,
+    ) -> CompletionResult:
         """Shared transport: send ``messages``, return ``CompletionResult``."""
         start = time.perf_counter()
+        create_kwargs: dict[str, Any] = dict(
+            model=self.model,
+            messages=messages,
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
+            extra_body={"usage": {"include": True}},
+        )
+        if tools:
+            create_kwargs["tools"] = tools
         try:
-            response = self._client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=self.temperature,
-                max_tokens=self.max_tokens,
-                extra_body={"usage": {"include": True}},  # OpenRouter cost reporting
-            )
+            response = self._client.chat.completions.create(**create_kwargs)
         except Exception as exc:  # openai.APIError, TimeoutError, etc.
             raise LLMSolverError(
                 f"OpenRouter call for model={self.model!r} failed: {type(exc).__name__}: {exc}"
             ) from exc
         latency = time.perf_counter() - start
 
-        text = response.choices[0].message.content or ""
+        message = response.choices[0].message
+        text = message.content or ""
         usage = response.usage
         prompt_tokens = int(getattr(usage, "prompt_tokens", 0) or 0)
         completion_tokens = int(getattr(usage, "completion_tokens", 0) or 0)
 
-        # OpenRouter populates usage.cost when ``extra_body={"usage": {"include": True}}``.
         usd_cost: float | None = None
         raw_cost = getattr(usage, "cost", None)
         if raw_cost is not None:
@@ -184,6 +200,20 @@ class OpenRouterSolver(LLMSolver):
             except (TypeError, ValueError):
                 usd_cost = None
 
+        tool_calls: list[dict[str, Any]] | None = None
+        raw_tool_calls = getattr(message, "tool_calls", None) or None
+        if raw_tool_calls:
+            tool_calls = []
+            for tc in raw_tool_calls:
+                tool_calls.append({
+                    "id": getattr(tc, "id", "") or "",
+                    "type": getattr(tc, "type", "function") or "function",
+                    "function": {
+                        "name": getattr(tc.function, "name", "") or "",
+                        "arguments": getattr(tc.function, "arguments", "") or "",
+                    },
+                })
+
         return CompletionResult(
             text=text,
             prompt_tokens=prompt_tokens,
@@ -191,6 +221,7 @@ class OpenRouterSolver(LLMSolver):
             latency_s=latency,
             model=getattr(response, "model", self.model),
             usd_cost=usd_cost,
+            tool_calls=tool_calls,
         )
 
     def complete(self, system: str, user: str) -> CompletionResult:
@@ -199,8 +230,12 @@ class OpenRouterSolver(LLMSolver):
             {"role": "user", "content": user},
         ])
 
-    def complete_turns(self, messages: list[dict[str, str]]) -> CompletionResult:
-        return self._invoke(messages)
+    def complete_turns(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]] | None = None,
+    ) -> CompletionResult:
+        return self._invoke(messages, tools=tools)
 
 
 # ──────────────────────────────────────────
@@ -275,18 +310,39 @@ class FakeLLMSolver(LLMSolver):
             usd_cost=self._usd_cost,
         )
 
-    def complete_turns(self, messages: list[dict[str, str]]) -> CompletionResult:
+    def complete_turns(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]] | None = None,  # noqa: ARG002 -- accepted for API parity
+    ) -> CompletionResult:
         self._turn_calls.append([dict(m) for m in messages])
-        text: str
         if callable(self._response):
-            text = self._response(messages, None)
+            raw = self._response(messages, None)
         elif isinstance(self._response, list):
             if not self._response:
                 raise LLMSolverError("FakeLLMSolver response queue is empty")
-            text = self._response.pop(0)
+            raw = self._response.pop(0)
         else:
-            text = str(self._response)
-        prompt_tokens = sum(len((m.get("content") or "").split()) for m in messages)
+            raw = self._response
+
+        # Accept 3 canned-response shapes:
+        #   - str   -> plain text final content
+        #   - dict  -> {"text": str, "tool_calls": [...]} for tool-call dispatch
+        #   - CompletionResult -> pass through verbatim (advanced scenarios)
+        if isinstance(raw, CompletionResult):
+            return raw
+        if isinstance(raw, dict):
+            text = str(raw.get("text", "") or "")
+            tool_calls = raw.get("tool_calls")
+        else:
+            text = str(raw)
+            tool_calls = None
+
+        prompt_tokens = 0
+        for m in messages:
+            content = m.get("content")
+            if isinstance(content, str):
+                prompt_tokens += len(content.split())
         return CompletionResult(
             text=text,
             prompt_tokens=prompt_tokens,
@@ -294,6 +350,7 @@ class FakeLLMSolver(LLMSolver):
             latency_s=0.0,
             model=self.label,
             usd_cost=self._usd_cost,
+            tool_calls=tool_calls,
         )
 
 

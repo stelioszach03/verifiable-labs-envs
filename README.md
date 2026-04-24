@@ -46,6 +46,35 @@ Headline finding: **frontier LLMs do not yet know how to use residual feedback c
 
 Raw data: [`results/multiturn_sparse_fourier_recovery_multiturn.csv`](results/multiturn_sparse_fourier_recovery_multiturn.csv). Plot: [`results/multiturn_sparse_fourier_recovery_multiturn_curves.png`](results/multiturn_sparse_fourier_recovery_multiturn_curves.png).
 
+## Tool-use rollouts (`sparse-fourier-recovery-tools`)
+
+Same underlying problem as `sparse-fourier-recovery`, but the LLM is given 4 Python tools it may call before committing to a final answer:
+
+- `fft_tool(support, amps)` → apply ``A = S·F`` to a candidate and see its observed coefficients.
+- `ifft_tool(re_at_mask, im_at_mask)` → zero-fill + inverse DFT (the dirty-image heuristic).
+- `ista_tool()` → run the classical OMP baseline on this instance.
+- `check_residual_tool(support, amps)` → report ``||y − A(x_hat)||_2`` for a candidate.
+
+Cap: 5 tool calls per episode. Tools reference instance-bound state, so call payloads stay small.
+
+Async benchmark (3 models × 3 instances, 54 LLM-calls max, **$0.175 total, 18.0 s wall-clock** via `Semaphore(10)`):
+
+| Model | Final mean | Tools used | Total cost |
+|---|---:|---:|---:|
+| Claude Haiku 4.5 | **0.858** | 9 | $0.04 |
+| Claude Sonnet 4.6 | **0.858** | 9 | $0.12 |
+| GPT-5.4 mini | **0.858** | 9 | $0.01 |
+
+**Headline finding**: all three tiers converge to the **same mean reward** (0.858) — 2.4× the single-turn sparse-F score. Every model calls `ista_tool` first, gets the OMP answer, then verifies with `check_residual_tool`. The tool-use env shows the envs are a clean substrate for tool-RL training: frontier and budget models alike discover the same good strategy when given the right tools, with cost differing **~10×** (Sonnet/Haiku/mini).
+
+Raw data: [`results/tools_sparse_fourier_recovery_tools.csv`](results/tools_sparse_fourier_recovery_tools.csv). Reproduce:
+
+```bash
+python benchmarks/run_tools_benchmark.py \
+  --models anthropic/claude-haiku-4.5,anthropic/claude-sonnet-4.6,openai/gpt-5.4-mini \
+  --n 3 --max-tool-calls 5 --max-cost 2.0 --conformal-quantile 1.587
+```
+
 ### Multi-turn CT (`lodopab-ct-simplified-multiturn`, phantom mode, 3 models × 3 instances × 3 turns, $0.56, 141 s)
 
 Same 3-turn design: turn 1 takes a 32×32 FBP, turn 2–3 take the sinogram-residual back-projection (downsampled to 32×32, encoded as signed int8 + scale factor).

@@ -16,6 +16,7 @@ def test_registry_lists_expected_envs() -> None:
         "lodopab-ct-simplified-multiturn",
         "sparse-fourier-recovery",
         "sparse-fourier-recovery-multiturn",
+        "sparse-fourier-recovery-tools",
         "super-resolution-div2k-x4",
     ]
 

@@ -1,0 +1,10 @@
+timestamp,env,model,instance_id,reward,components,tool_calls,tool_sequence,parse_ok,usd_cost,prompt_tokens,completion_tokens,episode_latency_s,n_llm_calls,error
+2026-04-24T08:18:34.958318+00:00,sparse-fourier-recovery-tools,anthropic/claude-haiku-4.5,0,0.9309,"nmse=0.977, support=0.900, conformal=0.900",3,"ista_tool,check_residual_tool,fft_tool",True,0.012682,9837,569,10.562,4,
+2026-04-24T08:18:35.029084+00:00,sparse-fourier-recovery-tools,anthropic/claude-haiku-4.5,1,0.7726,"nmse=0.731, support=0.600, conformal=1.000",3,"ista_tool,check_residual_tool,fft_tool",True,0.012574,9759,563,9.255,4,
+2026-04-24T08:18:35.029260+00:00,sparse-fourier-recovery-tools,anthropic/claude-haiku-4.5,2,0.8719,"nmse=0.905, support=0.800, conformal=0.900",3,"ista_tool,check_residual_tool,ifft_tool",True,0.015559,10489,1014,15.959,4,
+2026-04-24T08:18:35.029338+00:00,sparse-fourier-recovery-tools,anthropic/claude-sonnet-4.6,0,0.9309,"nmse=0.977, support=0.900, conformal=0.900",3,"ista_tool,ifft_tool,check_residual_tool",True,0.040041,9327,804,13.136,3,
+2026-04-24T08:18:35.029406+00:00,sparse-fourier-recovery-tools,anthropic/claude-sonnet-4.6,1,0.7726,"nmse=0.731, support=0.600, conformal=1.000",3,"ista_tool,ifft_tool,check_residual_tool",True,0.041595,9320,909,17.899,3,
+2026-04-24T08:18:35.029468+00:00,sparse-fourier-recovery-tools,anthropic/claude-sonnet-4.6,2,0.8719,"nmse=0.905, support=0.800, conformal=0.900",3,"ista_tool,ifft_tool,check_residual_tool",True,0.040836,9322,858,16.177,3,
+2026-04-24T08:18:35.029529+00:00,sparse-fourier-recovery-tools,openai/gpt-5.4-mini,0,0.9309,"nmse=0.977, support=0.900, conformal=0.900",4,"ista_tool,check_residual_tool,ifft_tool,check_residual_tool",True,0.005209,9044,495,8.347,5,
+2026-04-24T08:18:35.029591+00:00,sparse-fourier-recovery-tools,openai/gpt-5.4-mini,1,0.7726,"nmse=0.731, support=0.600, conformal=1.000",2,"ista_tool,check_residual_tool",True,0.00218,3946,134,3.838,3,
+2026-04-24T08:18:35.029664+00:00,sparse-fourier-recovery-tools,openai/gpt-5.4-mini,2,0.8719,"nmse=0.905, support=0.800, conformal=0.900",3,"ista_tool,ifft_tool,check_residual_tool",True,0.004459,6112,433,6.941,3,
