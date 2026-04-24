@@ -233,7 +233,19 @@ Every environment in this repo is structurally resistant to the three attacks th
 - [`docs/conformal.md`](docs/conformal.md) — the conformal-coverage reward term: why it's there, how it's calibrated, what it rewards.
 - [`docs/CONTAMINATION.md`](docs/CONTAMINATION.md) — contamination resistance analysis, per-env effective instance count, empirical probe methodology.
 - [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) — benchmark aggregation, cross-env correlation interpretation, failure taxonomy.
+- [`docs/PRIME_INTELLECT.md`](docs/PRIME_INTELLECT.md) — package split + Hub publish instructions.
+- [`docs/LEADERBOARD.md`](docs/LEADERBOARD.md) — Gradio leaderboard + HF Spaces deploy.
 - [`docs/env1_sparse_fourier_design.md`](docs/env1_sparse_fourier_design.md) — Env 1 architecture and reward specification.
+
+## Leaderboard
+
+Static [Gradio leaderboard](leaderboard/app.py) backed by the v2 benchmark CSV — three tabs (Overview, Methodology, Submit). Run locally:
+
+```bash
+cd leaderboard && pip install -r requirements.txt && python app.py
+```
+
+HF Spaces deploy pending `HF_TOKEN` setup; see [`docs/LEADERBOARD.md`](docs/LEADERBOARD.md) for the exact deploy command.
 
 ## Author
 
