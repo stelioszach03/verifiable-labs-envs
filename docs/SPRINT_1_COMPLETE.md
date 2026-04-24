@@ -201,3 +201,6 @@ The env was pushed to the Hub as
   at 5-tool). Over the $0.30 rebench target, within the $1.00 hard cap.
 
 Cumulative Sprint 0 + Sprint 1 + polish spend: **~$7.64 / $15 OpenRouter cap**.
+
+Full polish report with before/after table, Prime verification matrix,
+rebench data, and handoff status: [`docs/SPRINT_1_POLISH_REPORT.md`](SPRINT_1_POLISH_REPORT.md).

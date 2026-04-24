@@ -115,8 +115,42 @@ the consumer has, our env instances now carry the attribute the base
   multi-turn LLM rollouts) are not exercised here. Those require either the
   `ct-real` extras or an `OPENROUTER_API_KEY`, which is out of scope for a
   pure install-verification run. They are exercised by the repo's pytest
-  suite (176 green on 2026-04-24) against the local checkout.
+  suite (184 green on 2026-04-24 after Task B's primitive tests) against
+  the local checkout.
 - The `prime env install stelioszach/<env>` one-shot install is blocked for
   private envs (the CLI instructs users to pull + `pip install -e .` instead,
   which is what the reproducer above does). Public visibility is a separate
   post-YC-submission task.
+
+## Post-Task-B recheck — tools env v0.3.0 from Hub
+
+After Task B pushed the primitive-composition redesign of
+`sparse-fourier-recovery-tools` as v0.3.0 to the Hub, the Task-A fresh-venv
+reproducer was re-run just for this env:
+
+```bash
+"$VENV/bin/prime" --plain env pull stelioszach/sparse-fourier-recovery-tools -t tools
+(cd tools && "$VENV/bin/pip" install -e . --no-cache-dir)
+"$VENV/bin/python" -c "
+from verifiers import load_environment
+from verifiable_labs_envs.envs.sparse_fourier_tools import TOOL_SCHEMAS
+e = load_environment('sparse-fourier-recovery-tools')
+tool_names = sorted(t['function']['name'] for t in TOOL_SCHEMAS)
+print('tools:', tool_names)
+print('baseline:', e.run_baseline(seed=0)['reward'])
+"
+```
+
+Observed:
+
+```
+tools: ['compute_residual_tool', 'fft_tool', 'ifft_tool', 'sparsity_norm_tool', 'threshold_tool']
+baseline: 0.9308768169392316
+```
+
+5/5 expected primitives present, `ista_tool` absent, baseline reward
+matches the single-turn env as expected (same underlying instance +
+classical OMP). **One caveat for external reproducers**: on the first
+install after a `@main` push, pip's cache can serve the previous Git-dep
+checkout; pass `--no-cache-dir` (as above) or `pip install ... --force-reinstall`
+to guarantee the latest monorepo source is pulled.
