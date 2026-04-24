@@ -1,8 +1,14 @@
 # Prime Intellect Environments Hub — live
 
 All six Verifiable Labs environments are live on the Prime Intellect
-Environments Hub under the `stelioszach` account. A `verifiable-labs`
-organisation handle is queued for rename after org creation.
+Environments Hub under the `stelioszach` account at **v0.2.0**. A
+`verifiable-labs` organisation handle is queued for rename after org creation.
+
+> **v0.2.0 is the first version that actually installs from a clean venv.**
+> v0.1.0 shipped with two artifacts (a `verifiers>=0.1.13` pin that rejected
+> the only available dev builds, and missing `env_id` attribute on env
+> instances). Both were caught and corrected during Sprint 1 Polish Task A —
+> full reproducer in [`docs/PRIME_INTELLECT_VERIFICATION.md`](PRIME_INTELLECT_VERIFICATION.md).
 
 ## Install any env
 
