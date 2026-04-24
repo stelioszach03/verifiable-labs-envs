@@ -28,7 +28,6 @@ if str(SRC) not in sys.path:
 
 from verifiable_labs_envs import load_environment  # noqa: E402
 
-
 # Source CSVs with LLM rewards (final-turn reward per (env, model, seed)).
 CSVS = [
     REPO / "results" / "llm_benchmark_v2.csv",       # Sprint-1 v2 sweep
@@ -178,7 +177,7 @@ def main() -> None:
         wins_bonf = sum(1 for r in rows if r["mean_delta"] > 0 and r["p_bonferroni"] < 0.05)
         losses_bonf = sum(1 for r in rows if r["mean_delta"] < 0 and r["p_bonferroni"] < 0.05)
         mean_delta = fmean(r["mean_delta"] for r in rows)
-        print(f"\n-- Uncorrected (α=0.05) --")
+        print("\n-- Uncorrected (α=0.05) --")
         print(f"classical significantly better: {wins}/{total}")
         print(f"no significant difference:      {ties}/{total}")
         print(f"LLM significantly better:       {losses}/{total}")

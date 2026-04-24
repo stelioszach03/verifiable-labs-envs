@@ -27,7 +27,6 @@ if str(SRC) not in sys.path:
 
 from verifiable_labs_envs import load_environment  # noqa: E402
 
-
 # Envs with a classical baseline + a run_baseline method.
 ENVS = [
     "sparse-fourier-recovery",
