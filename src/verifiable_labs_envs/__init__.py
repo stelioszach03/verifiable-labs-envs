@@ -7,6 +7,7 @@ _REGISTRY: dict[str, str] = {
     "sparse-fourier-recovery-multiturn": "verifiable_labs_envs.envs.sparse_fourier_multiturn",
     "super-resolution-div2k-x4": "verifiable_labs_envs.envs.super_resolution",
     "lodopab-ct-simplified": "verifiable_labs_envs.envs.lodopab_ct",
+    "lodopab-ct-simplified-multiturn": "verifiable_labs_envs.envs.lodopab_ct_multiturn",
 }
 
 

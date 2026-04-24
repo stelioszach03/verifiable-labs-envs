@@ -1,5 +1,8 @@
 """Per-environment LLM adapters. Importing this package registers all of them."""
 from verifiable_labs_envs.solvers.adapters.lodopab_ct import LodopabCtLLMAdapter
+from verifiable_labs_envs.solvers.adapters.lodopab_ct_multiturn import (
+    LodopabCtMultiturnAdapter,
+)
 from verifiable_labs_envs.solvers.adapters.sparse_fourier import SparseFourierLLMAdapter
 from verifiable_labs_envs.solvers.adapters.sparse_fourier_multiturn import (
     SparseFourierMultiturnAdapter,
@@ -11,10 +14,12 @@ register_adapter(SparseFourierLLMAdapter())
 register_adapter(SparseFourierMultiturnAdapter())
 register_adapter(SuperResolutionLLMAdapter())
 register_adapter(LodopabCtLLMAdapter())
+register_adapter(LodopabCtMultiturnAdapter())
 
 __all__ = [
     "SparseFourierLLMAdapter",
     "SparseFourierMultiturnAdapter",
     "SuperResolutionLLMAdapter",
     "LodopabCtLLMAdapter",
+    "LodopabCtMultiturnAdapter",
 ]

@@ -1,0 +1,23 @@
+timestamp,env,model,instance_id,turn,reward,components,parse_ok,usd_cost,prompt_tokens,completion_tokens,latency_s,error
+2026-04-24T08:07:31.569731+00:00,lodopab-ct-simplified-multiturn,anthropic/claude-haiku-4.5,0,0,0.5721,"psnr=0.226, ssim=0.609, conformal=0.996",True,0.012653,2348,2061,20.266,
+2026-04-24T08:07:51.860288+00:00,lodopab-ct-simplified-multiturn,anthropic/claude-haiku-4.5,0,1,0.4882,"psnr=0.176, ssim=0.521, conformal=0.872",True,0.016885,6580,2061,16.373,
+2026-04-24T08:08:08.257275+00:00,lodopab-ct-simplified-multiturn,anthropic/claude-haiku-4.5,0,2,0.3438,"psnr=0.098, ssim=0.472, conformal=0.542",True,0.02112,10815,2061,16.425,
+2026-04-24T08:07:31.649954+00:00,lodopab-ct-simplified-multiturn,anthropic/claude-haiku-4.5,1,0,0.711,"psnr=0.467, ssim=0.812, conformal=0.935",True,0.012653,2348,2061,20.743,
+2026-04-24T08:07:52.416268+00:00,lodopab-ct-simplified-multiturn,anthropic/claude-haiku-4.5,1,1,,,False,0.016559,6574,1997,22.435,"parse:expected 32 entries in 'image', got 31"
+2026-04-24T08:07:31.665933+00:00,lodopab-ct-simplified-multiturn,anthropic/claude-haiku-4.5,2,0,0.5946,"psnr=0.253, ssim=0.675, conformal=0.970",True,0.012653,2348,2061,21.853,
+2026-04-24T08:07:53.541709+00:00,lodopab-ct-simplified-multiturn,anthropic/claude-haiku-4.5,2,1,,,False,0.01656,6575,1997,17.61,"parse:expected 32 entries in 'image', got 31"
+2026-04-24T08:07:31.677313+00:00,lodopab-ct-simplified-multiturn,anthropic/claude-sonnet-4.6,0,0,,,False,0.039297,2349,2150,27.309,"parse:expected 32 entries in 'image[20]', got 31"
+2026-04-24T08:07:31.688731+00:00,lodopab-ct-simplified-multiturn,anthropic/claude-sonnet-4.6,1,0,0.6412,"psnr=0.328, ssim=0.716, conformal=0.984",True,0.040182,2349,2209,26.054,
+2026-04-24T08:07:57.766682+00:00,lodopab-ct-simplified-multiturn,anthropic/claude-sonnet-4.6,1,1,0.6848,"psnr=0.393, ssim=0.768, conformal=0.990",True,0.053688,6726,2234,46.299,
+2026-04-24T08:08:44.090309+00:00,lodopab-ct-simplified-multiturn,anthropic/claude-sonnet-4.6,1,2,0.7025,"psnr=0.449, ssim=0.787, conformal=0.956",True,0.065619,11123,2150,43.94,
+2026-04-24T08:07:31.700452+00:00,lodopab-ct-simplified-multiturn,anthropic/claude-sonnet-4.6,2,0,0.5956,"psnr=0.253, ssim=0.678, conformal=0.969",True,0.040047,2349,2200,44.708,
+2026-04-24T08:08:16.425263+00:00,lodopab-ct-simplified-multiturn,anthropic/claude-sonnet-4.6,2,1,0.6053,"psnr=0.266, ssim=0.684, conformal=0.979",True,0.052782,6714,2176,46.927,
+2026-04-24T08:09:03.375809+00:00,lodopab-ct-simplified-multiturn,anthropic/claude-sonnet-4.6,2,2,0.611,"psnr=0.272, ssim=0.686, conformal=0.987",True,0.065076,11057,2127,49.304,
+2026-04-24T08:07:31.712427+00:00,lodopab-ct-simplified-multiturn,openai/gpt-5.4-mini,0,0,0.5721,"psnr=0.226, ssim=0.609, conformal=0.996",True,0.011019,2314,2063,11.696,
+2026-04-24T08:07:43.431347+00:00,lodopab-ct-simplified-multiturn,openai/gpt-5.4-mini,0,1,0.5721,"psnr=0.226, ssim=0.609, conformal=0.996",True,0.01294665,6533,2057,10.995,
+2026-04-24T08:07:54.452896+00:00,lodopab-ct-simplified-multiturn,openai/gpt-5.4-mini,0,2,0.5721,"psnr=0.226, ssim=0.609, conformal=0.996",True,0.0116181,10752,2057,11.451,
+2026-04-24T08:07:31.724060+00:00,lodopab-ct-simplified-multiturn,openai/gpt-5.4-mini,1,0,0.7122,"psnr=0.468, ssim=0.815, conformal=0.935",True,0.011019,2314,2063,15.264,
+2026-04-24T08:07:47.012753+00:00,lodopab-ct-simplified-multiturn,openai/gpt-5.4-mini,1,1,0.7119,"psnr=0.467, ssim=0.815, conformal=0.935",True,0.01296915,6527,2063,15.575,
+2026-04-24T08:08:02.614557+00:00,lodopab-ct-simplified-multiturn,openai/gpt-5.4-mini,1,2,0.7105,"psnr=0.465, ssim=0.816, conformal=0.933",True,0.0129915,10740,2057,14.106,
+2026-04-24T08:07:31.736022+00:00,lodopab-ct-simplified-multiturn,openai/gpt-5.4-mini,2,0,0.5823,"psnr=0.241, ssim=0.673, conformal=0.947",True,0.011019,2314,2063,16.717,
+2026-04-24T08:07:48.477855+00:00,lodopab-ct-simplified-multiturn,openai/gpt-5.4-mini,2,1,,,False,0.0126549,6528,1993,23.564,"parse:expected 32 entries in 'image', got 31"

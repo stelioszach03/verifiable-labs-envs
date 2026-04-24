@@ -13,6 +13,7 @@ def test_registry_lists_expected_envs() -> None:
     envs = vle.list_environments()
     assert envs == [
         "lodopab-ct-simplified",
+        "lodopab-ct-simplified-multiturn",
         "sparse-fourier-recovery",
         "sparse-fourier-recovery-multiturn",
         "super-resolution-div2k-x4",

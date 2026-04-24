@@ -46,6 +46,20 @@ Headline finding: **frontier LLMs do not yet know how to use residual feedback c
 
 Raw data: [`results/multiturn_sparse_fourier_recovery_multiturn.csv`](results/multiturn_sparse_fourier_recovery_multiturn.csv). Plot: [`results/multiturn_sparse_fourier_recovery_multiturn_curves.png`](results/multiturn_sparse_fourier_recovery_multiturn_curves.png).
 
+### Multi-turn CT (`lodopab-ct-simplified-multiturn`, phantom mode, 3 models × 3 instances × 3 turns, $0.56, 141 s)
+
+Same 3-turn design: turn 1 takes a 32×32 FBP, turn 2–3 take the sinogram-residual back-projection (downsampled to 32×32, encoded as signed int8 + scale factor).
+
+| Model | Turn 0 → Turn 1 → Turn 2 | Final mean | Episodes failed |
+|---|---|---:|---|
+| Claude Sonnet 4.6 | 0.618 → 0.645 → **0.657** | 0.657 | 1/3 (turn-1 parse) |
+| GPT-5.4 mini | 0.622 → 0.642 → 0.641 | 0.622 | 1/3 (turn-2 parse) |
+| Claude Haiku 4.5 | 0.626 → 0.488 → **0.344** | 0.550 | 2/3 (turn-2 parse) |
+
+**Key finding (different from sparse-F!)**: Sonnet 4.6 improves **monotonically** across turns (+3.9 pp), GPT-5.4 mini plateaus after the first-turn bump, and Claude Haiku 4.5 **regresses severely** (−28.2 pp turn 2 → turn 3) — the residual-image feedback actively confuses it. Multi-turn rollouts surface a differential capability that single-turn scores completely mask.
+
+Raw data: [`results/multiturn_lodopab_ct_simplified_multiturn.csv`](results/multiturn_lodopab_ct_simplified_multiturn.csv). Plot: [`results/multiturn_lodopab_ct_simplified_multiturn_curves.png`](results/multiturn_lodopab_ct_simplified_multiturn_curves.png).
+
 Reproduce with:
 
 ```bash
