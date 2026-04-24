@@ -36,6 +36,9 @@ CSVS = [
     REPO / "results" / "phase_retrieval_v1_benchmark.csv",
     REPO / "results" / "mri_knee_v1_benchmark.csv",
     REPO / "results" / "opus_nano_fill_v2.csv",       # sprint-paper fill-in
+    REPO / "results" / "complete_matrix_single_turn.csv",  # paper-final 1A
+    REPO / "results" / "complete_matrix_multi_turn.csv",   # paper-final 1B
+    REPO / "results" / "tools_v2_complete.csv",            # paper-final 1C
 ]
 
 
@@ -148,34 +151,41 @@ def main() -> None:
             f"95%CI=[{lo:+.3f},{hi:+.3f}] p={p:.3g}"
         )
 
-    out = REPO / "results" / "stat_tests.csv"
+    # Bonferroni correction for multiple comparisons.
+    m = len(rows)
+    if m > 0:
+        for r in rows:
+            r["p_bonferroni"] = round(min(1.0, r["p_two_sided"] * m), 4)
+
+    out = REPO / "results" / "stat_tests_comprehensive.csv"
     out.parent.mkdir(parents=True, exist_ok=True)
     with out.open("w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=[
             "env", "model", "n_paired", "mean_classical", "mean_llm",
-            "mean_delta", "ci_low_95", "ci_high_95", "p_two_sided",
+            "mean_delta", "ci_low_95", "ci_high_95",
+            "p_two_sided", "p_bonferroni",
         ])
         w.writeheader()
         w.writerows(rows)
     print(f"\nwrote {out} ({len(rows)} comparisons)")
 
-    # Aggregate: what fraction of comparisons have classical > LLM at p<0.05?
+    # Aggregate: significance at uncorrected 0.05 and at Bonferroni 0.05.
     if rows:
         total = len(rows)
-        wins = sum(
-            1 for r in rows
-            if r["mean_delta"] > 0 and r["p_two_sided"] < 0.05
-        )
+        wins = sum(1 for r in rows if r["mean_delta"] > 0 and r["p_two_sided"] < 0.05)
         ties = sum(1 for r in rows if r["p_two_sided"] >= 0.05)
-        losses = sum(
-            1 for r in rows
-            if r["mean_delta"] < 0 and r["p_two_sided"] < 0.05
-        )
+        losses = sum(1 for r in rows if r["mean_delta"] < 0 and r["p_two_sided"] < 0.05)
+        wins_bonf = sum(1 for r in rows if r["mean_delta"] > 0 and r["p_bonferroni"] < 0.05)
+        losses_bonf = sum(1 for r in rows if r["mean_delta"] < 0 and r["p_bonferroni"] < 0.05)
         mean_delta = fmean(r["mean_delta"] for r in rows)
-        print(f"\nclassical significantly better (p<0.05): {wins}/{total}")
-        print(f"no significant difference:               {ties}/{total}")
-        print(f"LLM significantly better:                 {losses}/{total}")
-        print(f"mean Δ (classical − LLM) across all:      {mean_delta:+.3f}")
+        print(f"\n-- Uncorrected (α=0.05) --")
+        print(f"classical significantly better: {wins}/{total}")
+        print(f"no significant difference:      {ties}/{total}")
+        print(f"LLM significantly better:       {losses}/{total}")
+        print(f"-- Bonferroni-corrected (α=0.05, m={m}) --")
+        print(f"classical significantly better: {wins_bonf}/{total}")
+        print(f"LLM significantly better:       {losses_bonf}/{total}")
+        print(f"\nmean Δ (classical − LLM) across all:      {mean_delta:+.3f}")
 
 
 if __name__ == "__main__":

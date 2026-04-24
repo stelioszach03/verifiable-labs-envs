@@ -58,10 +58,14 @@ SINGLE_TURN_ENVS = (
     "sparse-fourier-recovery",
     "super-resolution-div2k-x4",
     "lodopab-ct-simplified",
+    "phase-retrieval",
+    "mri-knee-reconstruction",
 )
 MULTITURN_ENVS = (
     "sparse-fourier-recovery-multiturn",
     "lodopab-ct-simplified-multiturn",
+    "phase-retrieval-multiturn",
+    "mri-knee-reconstruction-multiturn",
 )
 TOOL_ENVS = (
     "sparse-fourier-recovery-tools",

@@ -83,7 +83,7 @@ def main(n_samples: int = 100, seed_start: int = 20_000) -> None:
             f"std={row['std_coverage']:.4f}  n={len(coverages)}"
         )
 
-    out = REPO / "results" / "coverage_validation.csv"
+    out = REPO / "results" / f"coverage_validation_n{n_samples}.csv"
     out.parent.mkdir(parents=True, exist_ok=True)
     with out.open("w", newline="") as fh:
         w = csv.DictWriter(

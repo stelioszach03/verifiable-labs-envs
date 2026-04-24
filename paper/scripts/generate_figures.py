@@ -60,6 +60,9 @@ LLM_CSVS = [
     REPO / "results" / "phase_retrieval_v1_benchmark.csv",
     REPO / "results" / "mri_knee_v1_benchmark.csv",
     REPO / "results" / "opus_nano_fill_v2.csv",
+    REPO / "results" / "complete_matrix_single_turn.csv",   # paper-final 1A
+    REPO / "results" / "complete_matrix_multi_turn.csv",    # paper-final 1B
+    REPO / "results" / "tools_v2_complete.csv",             # paper-final 1C
 ]
 
 
@@ -308,7 +311,10 @@ def fig3_multiturn() -> Path:
 # ─────────────────────────────────────────────────────────────
 
 def fig4_coverage() -> Path:
-    cov_csv = REPO / "results" / "coverage_validation.csv"
+    # Prefer the N=200 run if available; fall back to N=100.
+    cov_csv = REPO / "results" / "coverage_validation_n200.csv"
+    if not cov_csv.exists():
+        cov_csv = REPO / "results" / "coverage_validation.csv"
     if not cov_csv.exists():
         raise FileNotFoundError(cov_csv)
     with cov_csv.open() as fh:
@@ -358,8 +364,12 @@ def fig4_coverage() -> Path:
 # ─────────────────────────────────────────────────────────────
 
 def fig5_tools() -> Path:
-    # v0.3 primitive-only rewards per model
-    path_v3 = REPO / "results" / "llm_benchmark_tools_v2.csv"
+    # v0.3 primitive-only rewards per model — prefer the complete 6-model run
+    # from Phase 1C (tools_v2_complete.csv) and fall back to the earlier
+    # 3-cheap-model run if it's missing.
+    path_v3 = REPO / "results" / "tools_v2_complete.csv"
+    if not path_v3.exists():
+        path_v3 = REPO / "results" / "llm_benchmark_tools_v2.csv"
     with path_v3.open() as fh:
         rows = [r for r in csv.DictReader(fh) if r.get("parse_ok") == "True"]
     by_model = defaultdict(list)
