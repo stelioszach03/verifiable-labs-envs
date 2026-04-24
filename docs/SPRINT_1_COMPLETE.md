@@ -80,6 +80,43 @@ Deploys with `cd leaderboard && python app.py` locally (verified via import smok
 7. **Residual feedback in the multi-turn format is not a uniform win** — it helps only models that can maintain coherence across the 3-turn conversation, which is itself a capability axis.
 8. **Procedural regeneration defeats fixed-string memorization** structurally, not empirically — the memorization probe merely confirms that the pipeline actually responds to its input (cross-seed std ≥ 0.02 on every tested model).
 
+## Post-merge fixes (2026-04-24 afternoon)
+
+Three tasks ran against `main` after the initial Sprint 1 merge to address loose ends and finalize distribution.
+
+### Task A — tool-use finding reconciliation (commit `ec5d823`)
+
+The Task-4.1 report of "tool-use converges at 0.858, 2.4× single-turn" was reconciled against Phase 6 v2's "sparse-Fourier stays flat across rollout formats." Direct CSV inspection showed the Task-4.1 numbers are **byte-identical** across three different models per seed — the fingerprint of all three models calling the `ista_tool` oracle (which is literally the classical OMP solver) and passing its deterministic output back as their final answer. **Verdict C (nuanced)**: both readings are correct for their measurement. The "2.4× improvement on compressed sensing" framing conflated oracle-delegation with reasoning; the corrected framing in the README now says the tool-use env measures "does the model correctly delegate to provided classical-solver oracles", which is a legitimate tool-use capability axis. Full analysis: [`results/sparse_fourier_reconciliation.md`](../results/sparse_fourier_reconciliation.md).
+
+### Task B — Phase 6 lost-data postmortem (same commit `ec5d823`)
+
+[`docs/incidents/2026-04-24-phase6-lost-data.md`](incidents/2026-04-24-phase6-lost-data.md) documents the $3.01 loss from the first Phase 6 run: `asyncio.gather(..., return_exceptions=False)` + end-of-run CSV write + in-task budget check combined to discard all completed tasks' return values when `BudgetExceeded` fired mid-run. Fix (incremental per-task CSV append, `return_exceptions=True`) was already applied to the Phase 6 rerun; the postmortem codifies the lesson for future harnesses.
+
+### Task C — Prime Intellect Hub (commit `2167a80`)
+
+All six environments are now live on the Prime Intellect Environments Hub under the `stelioszach` account:
+
+- [`stelioszach/sparse-fourier-recovery`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery)
+- [`stelioszach/sparse-fourier-recovery-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-multiturn)
+- [`stelioszach/sparse-fourier-recovery-tools`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-tools)
+- [`stelioszach/super-resolution-div2k-x4`](https://app.primeintellect.ai/dashboard/environments/stelioszach/super-resolution-div2k-x4)
+- [`stelioszach/lodopab-ct-simplified`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified)
+- [`stelioszach/lodopab-ct-simplified-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified-multiturn)
+
+Install: `prime env install stelioszach/<env-id>`.
+
+### Task D — HuggingFace Spaces leaderboard (same commit `2167a80`)
+
+Live at **https://huggingface.co/spaces/stelioszach03/scientific-rl-benchmark**. Three tabs (Overview / Methodology / Submit) backed by the v2 benchmark CSV + heatmap PNG from the `leaderboard/` directory. Deploy via `HfApi.upload_folder`. Submission form writes to per-Space `submissions.tsv` on HF's persistent storage.
+
+### Post-merge spend
+
+Zero additional LLM API calls in this round — all four tasks used existing CSV data or zero-cost publish infrastructure. Cumulative Sprint 1 + post-merge spend remains ~$7.00 against the $15 OpenRouter cap.
+
+### Security note
+
+The HF token was shared inline in chat during Task D. Recommend rotating it at <https://huggingface.co/settings/tokens> before any future automated deploys.
+
 ## Remaining non-technical work
 
 - Finalize the YC application writing (text lives in `~/Documents/yc-s26/application.md`) — update with the v2 benchmark numbers + new finding bullets.
