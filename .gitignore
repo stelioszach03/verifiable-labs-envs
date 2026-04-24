@@ -71,6 +71,14 @@ results/**/*.pt
 .LSOverride
 Icon
 
+# iCloud Drive auto-duplicate suffixes (" 2.py", " 2.toml", etc.)
+*\ 2.py
+*\ 2.toml
+*\ 2.md
+*\ 2.pyc
+*\ 2.csv
+*LICENSE\ 2
+
 # IDEs
 .idea/
 .vscode/
