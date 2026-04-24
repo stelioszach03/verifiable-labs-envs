@@ -52,33 +52,46 @@ Raw data: [`results/multiturn_sparse_fourier_recovery_multiturn.csv`](results/mu
 
 ## Tool-use rollouts (`sparse-fourier-recovery-tools`)
 
-Same underlying problem as `sparse-fourier-recovery`, but the LLM is given 4 Python tools it may call before committing to a final answer:
+Same underlying problem as `sparse-fourier-recovery`, but the LLM is given **5 Python primitive tools** it must compose itself over ISTA-like iterations before committing to a final answer. No tool returns a full reconstruction on its own — the model has to iterate `forward → residual → adjoint → threshold` to converge.
 
-- `fft_tool(support, amps)` → apply ``A = S·F`` to a candidate and see its observed coefficients.
-- `ifft_tool(re_at_mask, im_at_mask)` → zero-fill + inverse DFT (the dirty-image heuristic).
-- `ista_tool()` → run the classical OMP baseline on this instance.
-- `check_residual_tool(support, amps)` → report ``||y − A(x_hat)||_2`` for a candidate.
+- `fft_tool(signal_x1000)` → apply ``A = S·F`` to a length-n dense candidate.
+- `ifft_tool(spectrum_re_x1000, spectrum_im_x1000)` → adjoint of A (zero-fill at mask + inverse DFT).
+- `threshold_tool(signal_x1000, tau_x1000)` → elementwise soft-threshold (the ISTA proximal step).
+- `compute_residual_tool(signal_x1000)` → returns `r = y − A(x)` + L2 / max-abs.
+- `sparsity_norm_tool(signal_x1000)` → returns ‖x‖₁, ‖x‖₂, nonzero count.
 
-Cap: 5 tool calls per episode. Tools reference instance-bound state, so call payloads stay small.
+Cap: 30 tool calls per episode (rebench used 5–15). Tools reference instance-bound state so call payloads stay small.
 
-Async benchmark (3 models × 3 instances, 54 LLM-calls max, **$0.175 total, 18.0 s wall-clock** via `Semaphore(10)`):
+> **History — v0.1 was an oracle-delegation artifact.** The original
+> tool-use env exposed an `ista_tool()` that returned the OMP oracle's
+> answer. In the Task-4.1 benchmark all three tested models called it
+> once and scored a byte-identical **0.858** per seed — the fingerprint
+> of oracle adoption, not reasoning. v0.3 (2026-04-24 polish) removes
+> `ista_tool` and replaces it with the five primitives above. A
+> regression test (`test_no_single_tool_call_leaks_the_answer`) verifies
+> no primitive transmits the target to the model.
 
-| Model | Final mean | Tools used | Total cost |
-|---|---:|---:|---:|
-| Claude Haiku 4.5 | **0.858** | 9 | $0.04 |
-| Claude Sonnet 4.6 | **0.858** | 9 | $0.12 |
-| GPT-5.4 mini | **0.858** | 9 | $0.01 |
+v0.3 rebench (3 cheap models × 3 seeds, **$0.64 total** under $1 cap):
 
-**Headline finding** (revised post-Phase-6 reconciliation): all three tiers converge to the **same mean reward** (0.858) — but this is not a reasoning gain. The oracle tool `ista_tool()` exposes the classical OMP solver; every model learns to call it within 3 tool calls and emits its output verbatim as the final answer. The identical cross-model rewards (byte-identical reward / NMSE / support-F1 / conformal components across 3 models × 3 seeds) are the fingerprint of oracle-delegation.
+| Model | Mean reward (parsed) | Parse fails | Best episode |
+|---|---:|---|---:|
+| Claude Haiku 4.5 | 0.404 (n=1) | 1/2 seeds | 0.404 |
+| GPT-5.4 mini | 0.403 (n=3) | 0/3 | 0.408 |
+| GPT-5.4 nano | — | 3/3 | FAIL |
 
-What this env therefore measures is **tool-use adoption on a scientific task** — does the model correctly delegate to the provided classical solver? — not compressed-sensing reasoning. That is still a useful RLVR training signal: it discriminates "model uses the provided tool" from "model tries to solve from scratch" (the latter scores ≈0.33 as in Phase 6 v2 when tool dispatch is disabled). Full reconciliation: [`results/sparse_fourier_reconciliation.md`](results/sparse_fourier_reconciliation.md).
-
-Raw data: [`results/tools_sparse_fourier_recovery_tools.csv`](results/tools_sparse_fourier_recovery_tools.csv). Reproduce:
+Empty-answer floor ≈ **0.354**, classical OMP baseline ≈ **0.931**.
+All parsed rewards cluster just above the empty-answer floor — the
+primitive tool set is genuinely hard, cheap LLMs cannot yet compose
+ISTA from primitives. Tool sequences differ across models (no
+byte-identical v0.1-style pattern). Full analysis:
+[`results/sparse_fourier_reconciliation.md`](results/sparse_fourier_reconciliation.md)
+("v0.3 follow-up"). Raw data:
+[`results/llm_benchmark_tools_v2.csv`](results/llm_benchmark_tools_v2.csv). Reproduce:
 
 ```bash
-python benchmarks/run_tools_benchmark.py \
-  --models anthropic/claude-haiku-4.5,anthropic/claude-sonnet-4.6,openai/gpt-5.4-mini \
-  --n 3 --max-tool-calls 5 --max-cost 2.0 --conformal-quantile 1.587
+python benchmarks/run_tools_v2_rebench.py \
+  --models anthropic/claude-haiku-4.5,openai/gpt-5.4-mini,openai/gpt-5.4-nano \
+  --n-instances 3 --max-tool-calls 5 --max-cost 0.30 --conformal-quantile 1.587
 ```
 
 ### Multi-turn CT (`lodopab-ct-simplified-multiturn`, phantom mode, 3 models × 3 instances × 3 turns, $0.56, 141 s)
@@ -139,7 +152,7 @@ Full 6-environment sweep including multi-turn and tool-use variants. Opus 4.7 dr
 Three new findings the v2 sweep surfaces:
 
 - **Multi-turn helps *frontier* models on CT, hurts *small* models** — GPT-5.4 CT 0.60 → CT-MT 0.65, Sonnet 0.58 → 0.64; Haiku CT 0.64 → CT-MT 0.53, mini 0.51 → 0.37. Budget models can't maintain coherence across the residual-feedback protocol; frontier models use the extra turns productively.
-- **Sparse-Fourier stays flat across single-turn / multi-turn / tool-use** (all 0.29–0.37). No rollout format unlocks compressed sensing for any tested model.
+- **Sparse-Fourier stays flat across single-turn / multi-turn / tool-use** (all 0.29–0.37). No rollout format unlocks compressed sensing for any tested model. The `SparseF-Tools` column in the v2 table above was a v0.1 run where the tool-use env still shipped the `ista_tool` oracle; after the v0.3 rebench with primitive-only tools (see the tool-use section above), cheap LLMs cluster right at the empty-answer floor — reinforcing this finding, not contradicting it.
 - **SuperRes saturates for the Claude-Sonnet / Claude-Haiku / GPT-5.4 cluster** at ~0.72–0.73, with GPT-5.4-mini trailing at 0.53. Compression-style image denoising is the easiest task in the battery; all frontier models converge.
 
 Heatmap: [`results/benchmark_v2_heatmap.png`](results/benchmark_v2_heatmap.png). Raw data: [`results/llm_benchmark_v2.csv`](results/llm_benchmark_v2.csv). Full summary with caveats: [`results/benchmark_v2_summary.md`](results/benchmark_v2_summary.md).

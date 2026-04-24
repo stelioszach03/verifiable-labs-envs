@@ -1,4 +1,4 @@
-"""Tool-use sparse Fourier recovery (fft, ifft, ista, check_residual).
+"""Tool-use sparse Fourier recovery — primitive composition (fft, ifft, threshold, compute_residual, sparsity_norm). No solver oracle.
 
 Prime Intellect Hub wrapper around ``verifiable_labs_envs.envs.sparse_fourier_tools``.
 The monorepo at https://github.com/stelioszach03/verifiable-labs-envs is the

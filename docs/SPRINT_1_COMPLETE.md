@@ -139,3 +139,65 @@ The HF token was shared inline in chat during Task D. Recommend rotating it at <
     - Phase 6: $4.248 (first attempt lost $3.006, re-run $1.242)
     - Phase 7: $0
 - **Cumulative OpenRouter spend: ~$7.00 / $15 key-level cap**.
+
+## Sprint 1 Polish — post-merge (2026-04-24 evening)
+
+Two targeted polish tasks landed after the initial Sprint 1 merge + Tasks A–D,
+to close loose ends before YC-application writing.
+
+### Task E — Prime Intellect Hub fresh-venv install verification
+
+Full round-trip verification from a clean Python 3.11 venv: `prime env pull`
+→ `pip install -e .` → `verifiers.load_environment(<id>)`. Two v0.1 artifacts
+surfaced and were corrected:
+
+1. **`verifiers>=0.1.13` pin rejected all dev builds.** PEP 440 treats
+   `0.1.13.devN` as pre-release of `0.1.13`, so `>=0.1.13` excluded them even
+   with `--pre`. Widened to `>=0.1.12` in the generator and the six
+   environments/*/pyproject.toml files.
+2. **Missing `env_id` / `env_args` attributes** on the `SparseFourierEnv` /
+   `LodopabCtEnv` / `SuperResolutionEnv` classes. `verifiers.load_environment`
+   sets `env.env_id = env.env_id or env_id` on the returned instance; the
+   AttributeError broke every Hub consumer. Fixed by initializing both attrs
+   to empty defaults in each env's `__init__`.
+
+All six envs re-pushed as v0.2.0. Reproducer at
+[`docs/PRIME_INTELLECT_VERIFICATION.md`](PRIME_INTELLECT_VERIFICATION.md).
+
+### Task F — Tool-use env primitive redesign (v0.3)
+
+The v0.1/v0.2 tool-use env exposed an `ista_tool` that returned the classical
+OMP reconstruction — an oracle, not a primitive. The v0.3 redesign removes
+the oracle and replaces it with five primitive operators:
+
+- `fft_tool(signal_x1000)` — forward `A = S·F` on a dense candidate.
+- `ifft_tool(spectrum_re_x1000, spectrum_im_x1000)` — adjoint `A^T`.
+- `threshold_tool(signal_x1000, tau_x1000)` — soft-threshold (ISTA prox step).
+- `compute_residual_tool(signal_x1000)` — measurement residual + L2/max-abs.
+- `sparsity_norm_tool(signal_x1000)` — ‖x‖₁, ‖x‖₂, nonzero count.
+
+The system prompt gives the ISTA recipe at a high level but leaves step size
+`η` and threshold `τ` for the LLM to choose. A regression test
+(`test_no_single_tool_call_leaks_the_answer`) ensures a primitive call can
+never push reward above the empty-answer floor on its own.
+
+Rebench on 3 cheap models × 3 seeds (budget: $0.30 plan → $0.64 actual,
+within the $1.00 hard cap): Haiku-4.5 and gpt-5.4-mini cluster near the
+0.35 empty-answer floor (best episode: gpt-mini seed 1 at 0.408); gpt-5.4-
+nano parse-fails on all three seeds. Tool sequences differ across models
+and no byte-identical reward pattern appears — the v0.1 oracle-adoption
+fingerprint is gone. Full analysis in
+[`results/sparse_fourier_reconciliation.md`](../results/sparse_fourier_reconciliation.md)
+under "v0.3 follow-up". CSV at
+[`results/llm_benchmark_tools_v2.csv`](../results/llm_benchmark_tools_v2.csv).
+
+The env was pushed to the Hub as
+[`stelioszach/sparse-fourier-recovery-tools@0.3.0`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-tools).
+
+### Polish spend
+
+- Task E: $0 (install + import verification, no LLM calls).
+- Task F: $0.64 (rebench: $0.58 Haiku 2×15-tool, $0.06 gpt-mini + gpt-nano
+  at 5-tool). Over the $0.30 rebench target, within the $1.00 hard cap.
+
+Cumulative Sprint 0 + Sprint 1 + polish spend: **~$7.64 / $15 OpenRouter cap**.

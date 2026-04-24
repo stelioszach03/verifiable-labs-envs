@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "verifiable-labs-sparse-fourier-tools"
-version = "0.1.0"
-description = "Tool-use sparse Fourier recovery (fft, ifft, ista, check_residual)"
+version = "0.3.0"
+description = "Tool-use sparse Fourier recovery — primitive composition (fft, ifft, threshold, compute_residual, sparsity_norm). No solver oracle."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { file = "LICENSE" }

@@ -1,8 +1,18 @@
 # Prime Intellect Environments Hub — live
 
 All six Verifiable Labs environments are live on the Prime Intellect
-Environments Hub under the `stelioszach` account at **v0.2.0**. A
-`verifiable-labs` organisation handle is queued for rename after org creation.
+Environments Hub under the `stelioszach` account. Five are at **v0.2.0**
+and one (`sparse-fourier-recovery-tools`) is at **v0.3.0** (see below).
+A `verifiable-labs` organisation handle is queued for rename after org
+creation.
+
+> `sparse-fourier-recovery-tools@0.3.0` is the primitive-composition
+> redesign of the tool-use env. v0.1/v0.2 exposed an `ista_tool` that
+> returned the OMP oracle's answer; v0.3 replaces it with five primitive
+> operators (fft, ifft, soft-threshold, compute_residual, sparsity_norm)
+> so the LLM has to *compose* ISTA rather than delegate. Full rationale
+> in [`results/sparse_fourier_reconciliation.md`](../results/sparse_fourier_reconciliation.md)
+> and [`docs/SPRINT_1_COMPLETE.md`](SPRINT_1_COMPLETE.md) Task F.
 
 > **v0.2.0 is the first version that actually installs from a clean venv.**
 > v0.1.0 shipped with two artifacts (a `verifiers>=0.1.13` pin that rejected
@@ -24,7 +34,7 @@ prime env install stelioszach/<env-name>
 |---|---|---|
 | `sparse-fourier-recovery` | https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery | `prime env install stelioszach/sparse-fourier-recovery` |
 | `sparse-fourier-recovery-multiturn` | https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-multiturn | `prime env install stelioszach/sparse-fourier-recovery-multiturn` |
-| `sparse-fourier-recovery-tools` | https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-tools | `prime env install stelioszach/sparse-fourier-recovery-tools` |
+| `sparse-fourier-recovery-tools` **(v0.3.0)** | https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-tools | `prime env install stelioszach/sparse-fourier-recovery-tools` |
 | `super-resolution-div2k-x4` | https://app.primeintellect.ai/dashboard/environments/stelioszach/super-resolution-div2k-x4 | `prime env install stelioszach/super-resolution-div2k-x4` |
 | `lodopab-ct-simplified` | https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified | `prime env install stelioszach/lodopab-ct-simplified` |
 | `lodopab-ct-simplified-multiturn` | https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified-multiturn | `prime env install stelioszach/lodopab-ct-simplified-multiturn` |

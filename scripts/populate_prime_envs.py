@@ -18,23 +18,34 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 ENVS_DIR = REPO / "environments"
 
-# (prime-env-id, python-module-name-with-underscores, monorepo-env-module, tagline)
+# (prime-env-id, python-module-name-with-underscores, monorepo-env-module,
+#  tagline, version). Version is bumped per env on breaking API changes;
+#  v0.2.0 is the Task-A fix baseline (verifiers pin + env_id attr).
 SPECS = [
     ("sparse-fourier-recovery", "sparse_fourier_recovery", "sparse_fourier",
-     "1D sparse Fourier recovery with OMP baseline and conformal σ̂."),
+     "1D sparse Fourier recovery with OMP baseline and conformal σ̂.", "0.2.0"),
     ("sparse-fourier-recovery-multiturn", "sparse_fourier_recovery_multiturn",
      "sparse_fourier_multiturn",
-     "3-turn sparse Fourier recovery with residual feedback between turns."),
+     "3-turn sparse Fourier recovery with residual feedback between turns.",
+     "0.2.0"),
+    # v0.3.0: tool set rebuilt as primitives (fft, ifft, threshold,
+    # compute_residual, sparsity_norm). v0.1/v0.2 exposed an `ista_tool`
+    # oracle; measurement on it was an artifact (oracle delegation, not
+    # reasoning). See docs/SPRINT_1_COMPLETE.md Task F and
+    # results/sparse_fourier_reconciliation.md.
     ("sparse-fourier-recovery-tools", "sparse_fourier_recovery_tools",
      "sparse_fourier_tools",
-     "Tool-use sparse Fourier recovery (fft, ifft, ista, check_residual)."),
+     "Tool-use sparse Fourier recovery — primitive composition (fft, ifft, "
+     "threshold, compute_residual, sparsity_norm). No solver oracle.",
+     "0.3.0"),
     ("super-resolution-div2k-x4", "super_resolution_div2k_x4", "super_resolution",
-     "4× single-image super-resolution with a bicubic baseline."),
+     "4× single-image super-resolution with a bicubic baseline.", "0.2.0"),
     ("lodopab-ct-simplified", "lodopab_ct_simplified", "lodopab_ct",
-     "2D parallel-beam CT (phantom or real LoDoPaB slices via use_real_data)."),
+     "2D parallel-beam CT (phantom or real LoDoPaB slices via use_real_data).",
+     "0.2.0"),
     ("lodopab-ct-simplified-multiturn", "lodopab_ct_simplified_multiturn",
      "lodopab_ct_multiturn",
-     "3-turn CT reconstruction with FBP-domain residual feedback."),
+     "3-turn CT reconstruction with FBP-domain residual feedback.", "0.2.0"),
 ]
 
 
@@ -127,15 +138,15 @@ See the monorepo README + docs for the reward spec, contamination story, and ben
 
 
 def main() -> None:
-    for env_id, mod_name, monorepo_mod, tagline in SPECS:
+    for env_id, mod_name, monorepo_mod, tagline, version in SPECS:
         d = ENVS_DIR / mod_name
         if not d.exists():
             print(f"skip {env_id}: directory {d} not initialized (run `prime env init` first)")
             continue
         (d / f"{mod_name}.py").write_text(_py_body(mod_name, monorepo_mod, tagline))
-        (d / "pyproject.toml").write_text(_pyproject(env_id, mod_name, tagline))
+        (d / "pyproject.toml").write_text(_pyproject(env_id, mod_name, tagline, version))
         (d / "README.md").write_text(_readme(env_id, monorepo_mod, tagline))
-        print(f"wrote {d.relative_to(REPO)}")
+        print(f"wrote {d.relative_to(REPO)}  v{version}")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 # sparse-fourier-recovery-tools
 
-Tool-use sparse Fourier recovery (fft, ifft, ista, check_residual).
+Tool-use sparse Fourier recovery — primitive composition (fft, ifft, threshold, compute_residual, sparsity_norm). No solver oracle.
 
 Verifiable Labs Scientific-RL environment. Published as a thin wrapper around the monorepo at https://github.com/stelioszach03/verifiable-labs-envs — the wrapper pulls the monorepo as a Git dependency so the full source of truth (rewards, forward operators, LLM adapter, conformal calibration) stays in one place.
 

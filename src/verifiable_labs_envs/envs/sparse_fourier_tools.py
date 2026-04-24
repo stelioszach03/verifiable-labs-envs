@@ -1,24 +1,31 @@
-"""Environment 1c — tool-use sparse-Fourier recovery.
+"""Environment 1c — tool-use sparse-Fourier recovery (primitive composition).
 
-The LLM solves the standard sparse-Fourier problem but may call up to 5
-Python tools before committing to a final ``(support_idx, support_amp_x1000)``
-answer:
+The LLM solves the standard sparse-Fourier problem but must *compose* ISTA
+from five primitive operators rather than delegate to a solver oracle. No
+single primitive is itself a reconstruction: the model has to iterate
+``forward → residual → adjoint → threshold`` to converge.
 
-- ``fft_tool``            apply ``A = S . F`` to a candidate sparse vector.
-- ``ifft_tool``           zero-fill + inverse DFT (the dirty-image heuristic).
-- ``ista_tool``           run the classical OMP baseline on this instance.
-- ``check_residual_tool`` report ``||y - A(x_hat)||_2`` for a candidate.
+Available tools:
 
-Tools reference the instance-bound measurement ``y`` and mask implicitly,
-so tool-call payloads stay small. Meta records the tool-call count and
-ordered tool-name sequence per episode.
+- ``fft_tool(signal_x1000)``                 apply ``A = S·F`` to a length-n dense candidate; returns m measured coefficients.
+- ``ifft_tool(spectrum_re_x1000, spectrum_im_x1000)``  zero-fill m coefficients at the mask + inverse DFT; returns a length-n real signal (the ``A^T`` adjoint of a measurement vector).
+- ``threshold_tool(signal_x1000, tau_x1000)``  elementwise soft-threshold ``sign(x) · max(|x| − τ, 0)`` — the ISTA proximal step.
+- ``compute_residual_tool(signal_x1000)``    returns ``r = y − A(x)`` as (re, im) arrays plus L2/max-abs; no oracle knowledge of the truth.
+- ``sparsity_norm_tool(signal_x1000)``       returns ``‖x‖₁``, ``‖x‖₂`` and the count of nonzero entries above a small tolerance.
 
-Reward is computed on the final answer; tool calls do not score directly,
-though frontier models should use them to improve that answer.
+Older v0.1 names ``check_residual_tool`` and ``ista_tool`` are not exposed.
+``check_residual_tool`` was renamed to ``compute_residual_tool`` for symmetry
+with the dense-signal primitive set. ``ista_tool`` was an OMP oracle — any
+model that called it copied the classical baseline verbatim. Keeping it
+would have corrupted the "does the model actually compose ISTA" signal, so
+it is deleted.
+
+Reward is computed on the final parsed ``(support_idx, support_amp_x1000)``
+answer, same as the single-turn env. Tool calls do not score directly —
+they are the *means* by which the model converges to that answer.
 """
 from __future__ import annotations
 
-import contextlib
 import json
 from typing import Any
 
@@ -32,7 +39,6 @@ from verifiable_labs_envs.envs.sparse_fourier import (
     Prediction,
     SparseFourierEnv,
     _cached_quantile,
-    ista_baseline,
 )
 from verifiable_labs_envs.forward_ops import (
     sparse_fourier_adjoint,
@@ -41,7 +47,8 @@ from verifiable_labs_envs.forward_ops import (
 from verifiable_labs_envs.solvers.llm_solver import EnvAdapter, LLMSolver
 
 NAME = "sparse-fourier-recovery-tools"
-DEFAULT_MAX_TOOL_CALLS: int = 5
+DEFAULT_MAX_TOOL_CALLS: int = 30
+_NZ_TOL: float = 1e-3  # tolerance for "nonzero" in sparsity_norm_tool
 
 
 # ──────────────────────────────────────────
@@ -55,25 +62,20 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "function": {
             "name": "fft_tool",
             "description": (
-                "Apply A = S . F to a candidate k-sparse signal and return the m complex "
-                "Fourier coefficients at the observed mask positions (scaled x1000, real and "
-                "imaginary parts)."
+                "Apply A = S·F to a length-n dense candidate signal and return the m "
+                "complex Fourier coefficients at the observed mask positions, scaled x1000 "
+                "(real and imaginary parts, integer)."
             ),
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "support_idx": {
+                    "signal_x1000": {
                         "type": "array",
                         "items": {"type": "integer"},
-                        "description": "length-k indices of nonzero entries.",
-                    },
-                    "support_amp_x1000": {
-                        "type": "array",
-                        "items": {"type": "integer"},
-                        "description": "amplitudes x1000 at those indices (same order).",
+                        "description": "length-n dense real signal, scaled x1000.",
                     },
                 },
-                "required": ["support_idx", "support_amp_x1000"],
+                "required": ["signal_x1000"],
                 "additionalProperties": False,
             },
         },
@@ -84,24 +86,24 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
             "name": "ifft_tool",
             "description": (
                 "Zero-fill the given frequency coefficients at the observed mask positions "
-                "and return the real inverse-DFT signal (the \"dirty image\" of the "
-                "measurement). Useful as a first-guess heuristic."
+                "and return the real inverse-DFT signal of length n (the adjoint A^T applied "
+                "to a measurement vector)."
             ),
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "real_x1000_at_mask": {
+                    "spectrum_re_x1000": {
                         "type": "array",
                         "items": {"type": "integer"},
                         "description": "real parts x1000 at each of the m mask positions, in mask order.",
                     },
-                    "imag_x1000_at_mask": {
+                    "spectrum_im_x1000": {
                         "type": "array",
                         "items": {"type": "integer"},
                         "description": "imaginary parts x1000 at each of the m mask positions.",
                     },
                 },
-                "required": ["real_x1000_at_mask", "imag_x1000_at_mask"],
+                "required": ["spectrum_re_x1000", "spectrum_im_x1000"],
                 "additionalProperties": False,
             },
         },
@@ -109,34 +111,71 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
     {
         "type": "function",
         "function": {
-            "name": "ista_tool",
+            "name": "threshold_tool",
             "description": (
-                "Run the classical orthogonal-matching-pursuit (OMP) solver on THIS instance "
-                "and return its support + amplitudes. Use when you want a strong baseline to "
-                "compare against your own proposal."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {},
-                "additionalProperties": False,
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "check_residual_tool",
-            "description": (
-                "For a proposed (support_idx, support_amp_x1000), compute the Fourier "
-                "residual r = y - A(x_hat) and return its L2 norm (x1000) and max-abs (x1000)."
+                "Elementwise soft-threshold operator: return sign(x) · max(|x| − τ, 0) for "
+                "each entry of the input signal. This is the proximal step of ISTA/FISTA "
+                "for an L1 regularizer. Entries with |x| ≤ τ become exactly zero."
             ),
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "support_idx": {"type": "array", "items": {"type": "integer"}},
-                    "support_amp_x1000": {"type": "array", "items": {"type": "integer"}},
+                    "signal_x1000": {
+                        "type": "array",
+                        "items": {"type": "integer"},
+                        "description": "length-n real signal, scaled x1000.",
+                    },
+                    "tau_x1000": {
+                        "type": "integer",
+                        "description": "threshold τ scaled x1000; must be >= 0.",
+                    },
                 },
-                "required": ["support_idx", "support_amp_x1000"],
+                "required": ["signal_x1000", "tau_x1000"],
+                "additionalProperties": False,
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "compute_residual_tool",
+            "description": (
+                "Given a length-n dense candidate signal, compute the Fourier residual "
+                "r = y − A(x) and return its per-coefficient real/imag parts (x1000), L2 "
+                "norm (x1000), and max-abs (x1000). Use this to monitor convergence."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "signal_x1000": {
+                        "type": "array",
+                        "items": {"type": "integer"},
+                        "description": "length-n real signal, scaled x1000.",
+                    },
+                },
+                "required": ["signal_x1000"],
+                "additionalProperties": False,
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "sparsity_norm_tool",
+            "description": (
+                "Return ||x||_1 (x1000), ||x||_2 (x1000), and the count of entries with "
+                "|x| > 1e-3. Helpful for deciding when to shrink or grow the threshold τ."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "signal_x1000": {
+                        "type": "array",
+                        "items": {"type": "integer"},
+                        "description": "length-n real signal, scaled x1000.",
+                    },
+                },
+                "required": ["signal_x1000"],
                 "additionalProperties": False,
             },
         },
@@ -149,23 +188,30 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
 # ──────────────────────────────────────────
 
 
-def _sparse_from_args(args: dict[str, Any], instance: Instance) -> np.ndarray:
-    support = args.get("support_idx", []) or []
-    amp = args.get("support_amp_x1000", []) or []
-    x = np.zeros(instance.n, dtype=np.float64)
-    for idx, a in zip(support, amp, strict=False):
+def _dense_from_args(args: dict[str, Any], instance: Instance) -> np.ndarray | dict[str, Any]:
+    """Parse a dense length-n signal from a tool-call payload.
+
+    Returns either the numpy array on success, or an error dict the caller
+    should return directly. Length mismatch is the one failure the LLM will
+    routinely hit; explicit is better than silent truncation here.
+    """
+    raw = args.get("signal_x1000", []) or []
+    n = instance.n
+    if len(raw) != n:
+        return {"error": f"expected signal_x1000 of length {n}; got {len(raw)}"}
+    x = np.zeros(n, dtype=np.float64)
+    for i, v in enumerate(raw):
         try:
-            idx_i = int(idx)
+            x[i] = float(v) / 1000.0
         except (TypeError, ValueError):
-            continue
-        if 0 <= idx_i < instance.n:
-            with contextlib.suppress(TypeError, ValueError):
-                x[idx_i] = float(a) / 1000.0
+            return {"error": f"non-numeric entry at index {i}: {v!r}"}
     return x
 
 
 def _tool_fft(args: dict[str, Any], instance: Instance) -> dict[str, Any]:
-    x = _sparse_from_args(args, instance)
+    x = _dense_from_args(args, instance)
+    if isinstance(x, dict):
+        return x
     y_hat = sparse_fourier_forward(x.astype(np.complex128), instance.mask)
     return {
         "y_hat_re_x1000": [int(round(float(v) * 1000)) for v in y_hat.real.tolist()],
@@ -174,11 +220,15 @@ def _tool_fft(args: dict[str, Any], instance: Instance) -> dict[str, Any]:
 
 
 def _tool_ifft(args: dict[str, Any], instance: Instance) -> dict[str, Any]:
-    re = args.get("real_x1000_at_mask", []) or []
-    im = args.get("imag_x1000_at_mask", []) or []
+    re = args.get("spectrum_re_x1000", []) or []
+    im = args.get("spectrum_im_x1000", []) or []
     m = instance.mask.size
     if len(re) != m or len(im) != m:
-        return {"error": f"expected {m} coefficients in each array; got re={len(re)}, im={len(im)}"}
+        return {
+            "error": (
+                f"expected {m} coefficients in each array; got re={len(re)}, im={len(im)}"
+            )
+        }
     try:
         coeffs = np.array(
             [float(r) / 1000.0 + 1j * float(i) / 1000.0 for r, i in zip(re, im, strict=False)],
@@ -190,32 +240,62 @@ def _tool_ifft(args: dict[str, Any], instance: Instance) -> dict[str, Any]:
     return {"signal_x1000": [int(round(float(v) * 1000)) for v in z.real.tolist()]}
 
 
-def _tool_ista(args: dict[str, Any], instance: Instance) -> dict[str, Any]:  # noqa: ARG001
-    pred = ista_baseline(**instance.as_inputs())
-    support = pred.support_hat if pred.support_hat is not None else np.array([], dtype=np.int64)
+def _tool_threshold(args: dict[str, Any], instance: Instance) -> dict[str, Any]:
+    x = _dense_from_args(args, instance)
+    if isinstance(x, dict):
+        return x
+    tau_raw = args.get("tau_x1000")
+    if tau_raw is None:
+        return {"error": "missing required argument tau_x1000"}
+    try:
+        tau = float(tau_raw) / 1000.0
+    except (TypeError, ValueError):
+        return {"error": f"tau_x1000 must be numeric; got {tau_raw!r}"}
+    if tau < 0:
+        return {"error": f"tau_x1000 must be >= 0; got {tau_raw}"}
+    shrunk = np.sign(x) * np.maximum(np.abs(x) - tau, 0.0)
     return {
-        "support_idx": [int(i) for i in support.tolist()],
-        "support_amp_x1000": [int(round(float(pred.x_hat[i]) * 1000)) for i in support.tolist()],
+        "signal_x1000": [int(round(float(v) * 1000)) for v in shrunk.tolist()],
+        "nonzero_count": int(np.sum(np.abs(shrunk) > _NZ_TOL)),
     }
 
 
-def _tool_check_residual(args: dict[str, Any], instance: Instance) -> dict[str, Any]:
-    x = _sparse_from_args(args, instance)
+def _tool_compute_residual(args: dict[str, Any], instance: Instance) -> dict[str, Any]:
+    x = _dense_from_args(args, instance)
+    if isinstance(x, dict):
+        return x
     y_hat = sparse_fourier_forward(x.astype(np.complex128), instance.mask)
     residual = np.asarray(instance.y) - np.asarray(y_hat)
     l2 = float(np.linalg.norm(residual))
     max_abs = float(np.max(np.abs(residual))) if residual.size else 0.0
     return {
+        "residual_re_x1000": [int(round(float(v) * 1000)) for v in residual.real.tolist()],
+        "residual_im_x1000": [int(round(float(v) * 1000)) for v in residual.imag.tolist()],
         "residual_l2_x1000": int(round(l2 * 1000)),
         "residual_max_abs_x1000": int(round(max_abs * 1000)),
+    }
+
+
+def _tool_sparsity_norm(args: dict[str, Any], instance: Instance) -> dict[str, Any]:
+    x = _dense_from_args(args, instance)
+    if isinstance(x, dict):
+        return x
+    l1 = float(np.sum(np.abs(x)))
+    l2 = float(np.linalg.norm(x))
+    nz = int(np.sum(np.abs(x) > _NZ_TOL))
+    return {
+        "l1_x1000": int(round(l1 * 1000)),
+        "l2_x1000": int(round(l2 * 1000)),
+        "nonzero_count": nz,
     }
 
 
 _TOOL_DISPATCH = {
     "fft_tool": _tool_fft,
     "ifft_tool": _tool_ifft,
-    "ista_tool": _tool_ista,
-    "check_residual_tool": _tool_check_residual,
+    "threshold_tool": _tool_threshold,
+    "compute_residual_tool": _tool_compute_residual,
+    "sparsity_norm_tool": _tool_sparsity_norm,
 }
 
 
@@ -240,7 +320,7 @@ def dispatch_tool(name: str, arguments: str | dict, instance: Instance) -> dict[
 
 
 class SparseFourierToolsEnv(SparseFourierEnv):
-    """``SparseFourierEnv`` with a tool-use rollout entry point."""
+    """``SparseFourierEnv`` with a primitive-composition tool-use rollout."""
 
     name: str = NAME
 
@@ -263,15 +343,16 @@ class SparseFourierToolsEnv(SparseFourierEnv):
         *,
         adapter: EnvAdapter | None = None,
         max_tool_calls: int | None = None,
-        max_loops: int = 10,
+        max_loops: int = 40,
     ) -> dict[str, Any]:
         """Run a tool-use rollout.
 
-        The LLM is given the standard sparse-F prompt plus the 4 tool schemas.
-        It may emit up to ``max_tool_calls`` tool invocations; each is
-        dispatched server-side via :func:`dispatch_tool`, and the result is
-        appended as a ``tool``-role message. After the cap (or when the LLM
-        returns a no-tool message), we parse the final JSON answer.
+        The LLM is given the standard sparse-F prompt plus the 5 primitive tool
+        schemas and must compose them into ISTA-like iterations. Each tool call
+        is dispatched server-side via :func:`dispatch_tool`; its result is
+        appended as a ``tool``-role message. After at most ``max_tool_calls``
+        calls (or when the LLM emits no tool call), we parse the final JSON
+        answer.
 
         ``max_loops`` bounds the outer while-loop as a safety net against
         runaway LLMs (e.g. a model that keeps emitting tool calls after being
@@ -319,18 +400,18 @@ class SparseFourierToolsEnv(SparseFourierEnv):
                 continue
 
             if result.tool_calls and tool_calls_total >= tool_cap:
-                # Over the cap: ask for final answer explicitly and stop tool-dispatch.
                 messages.append({
                     "role": "assistant",
                     "content": result.text or "",
                     "tool_calls": result.tool_calls,
                 })
-                # Refuse to execute further tool calls; synthesize an error-tool reply.
                 for call in result.tool_calls:
                     messages.append({
                         "role": "tool",
                         "tool_call_id": call.get("id", ""),
-                        "content": json.dumps({"error": "tool-call cap reached; output final JSON answer now"}),
+                        "content": json.dumps(
+                            {"error": "tool-call cap reached; output final JSON answer now"}
+                        ),
                     })
                 messages.append({
                     "role": "user",
@@ -341,7 +422,6 @@ class SparseFourierToolsEnv(SparseFourierEnv):
                 })
                 continue
 
-            # No tool calls -> expect final content
             final_text = result.text or ""
             break
 
