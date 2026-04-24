@@ -118,7 +118,27 @@ Spot-check numbers (this repo, Apr 2026):
 
 Raw data: [`results/ct_real_spotcheck.csv`](results/ct_real_spotcheck.csv).
 
-## LLM benchmark (OpenRouter, 5 seeds each, total spend $1.89)
+## v2 benchmark — 4 models × 6 envs (Sprint 1)
+
+Full 6-environment sweep including multi-turn and tool-use variants. Opus 4.7 dropped from this sweep because Sonnet ≈ Opus within noise in Sprint 0 and keeping it would have blown the $3 cap.
+
+| model | SparseF | SparseF-MT | SparseF-Tools | SuperRes | CT | CT-MT | mean |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| claude-haiku-4.5 | 0.364 | 0.351 | 0.334 | 0.726 | 0.640 | 0.527 | **0.490** |
+| claude-sonnet-4.6 | 0.305 | 0.328 | 0.337 | 0.726 | 0.580 | 0.640 | **0.486** |
+| gpt-5.4 | 0.293 | 0.365 | 0.306 | 0.721 | 0.601 | 0.654 | **0.490** |
+| gpt-5.4-mini | 0.338 | 0.363 | 0.354 | 0.534 | 0.505 | 0.371 | **0.411** |
+| **env mean** | 0.325 | 0.352 | 0.333 | 0.677 | 0.581 | 0.548 | |
+
+Three new findings the v2 sweep surfaces:
+
+- **Multi-turn helps *frontier* models on CT, hurts *small* models** — GPT-5.4 CT 0.60 → CT-MT 0.65, Sonnet 0.58 → 0.64; Haiku CT 0.64 → CT-MT 0.53, mini 0.51 → 0.37. Budget models can't maintain coherence across the residual-feedback protocol; frontier models use the extra turns productively.
+- **Sparse-Fourier stays flat across single-turn / multi-turn / tool-use** (all 0.29–0.37). No rollout format unlocks compressed sensing for any tested model.
+- **SuperRes saturates for the Claude-Sonnet / Claude-Haiku / GPT-5.4 cluster** at ~0.72–0.73, with GPT-5.4-mini trailing at 0.53. Compression-style image denoising is the easiest task in the battery; all frontier models converge.
+
+Heatmap: [`results/benchmark_v2_heatmap.png`](results/benchmark_v2_heatmap.png). Raw data: [`results/llm_benchmark_v2.csv`](results/llm_benchmark_v2.csv). Full summary with caveats: [`results/benchmark_v2_summary.md`](results/benchmark_v2_summary.md).
+
+## LLM benchmark v1 (OpenRouter, 5 seeds each, total spend $1.89)
 
 | Model | SparseFourier | SuperRes | LoDoPaB-CT | Mean (3 envs) |
 |---|---:|---:|---:|---:|
