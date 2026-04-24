@@ -60,6 +60,16 @@ datasets/
 *.tar
 *.tar.gz
 *.zip
+!paper/openreview_submission/supplementary.zip
+
+# LaTeX build artefacts — keep .tex + .bib, ignore intermediates
+paper/**/*.aux
+paper/**/*.bbl
+paper/**/*.blg
+paper/**/*.log
+paper/**/*.out
+paper/**/*.toc
+paper/**/*.synctex.gz
 
 # Results artifacts larger than a few KB — commit CSV summaries, not raw runs
 results/**/checkpoints/

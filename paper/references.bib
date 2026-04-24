@@ -1,0 +1,271 @@
+%% References for "Conformal-Calibrated Rewards for Scientific RLVR"
+%% All entries verified via arXiv IDs, DOIs, or official venue pages as of
+%% 2026-04-24. Each comment line records the verification source used.
+
+%% ---------- RLVR / reasoning benchmarks ----------
+
+% https://arxiv.org/abs/2310.06770
+@inproceedings{jimenez2024swebench,
+  title     = {{SWE}-bench: Can Language Models Resolve Real-World {G}it{H}ub Issues?},
+  author    = {Jimenez, Carlos E. and Yang, John and Wettig, Alexander and Yao, Shunyu and Pei, Kexin and Press, Ofir and Narasimhan, Karthik},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2024},
+  url       = {https://arxiv.org/abs/2310.06770}
+}
+
+% https://arxiv.org/abs/2311.12022
+@article{rein2023gpqa,
+  title   = {{GPQA}: A Graduate-Level Google-Proof {Q}\&{A} Benchmark},
+  author  = {Rein, David and Hou, Betty Li and Stickland, Asa Cooper and Petty, Jackson and Pang, Richard Yuanzhe and Dirani, Julien and Michael, Julian and Bowman, Samuel R.},
+  journal = {arXiv preprint arXiv:2311.12022},
+  year    = {2023},
+  url     = {https://arxiv.org/abs/2311.12022}
+}
+
+% https://arxiv.org/abs/2103.03874
+@inproceedings{hendrycks2021math,
+  title     = {Measuring Mathematical Problem Solving with the {MATH} Dataset},
+  author    = {Hendrycks, Dan and Burns, Collin and Kadavath, Saurav and Arora, Akul and Basart, Steven and Tang, Eric and Song, Dawn and Steinhardt, Jacob},
+  booktitle = {NeurIPS Datasets and Benchmarks Track},
+  year      = {2021},
+  url       = {https://arxiv.org/abs/2103.03874}
+}
+
+% https://arxiv.org/abs/2107.03374
+@article{chen2021humaneval,
+  title   = {Evaluating Large Language Models Trained on Code},
+  author  = {Chen, Mark and Tworek, Jerry and Jun, Heewoo and Yuan, Qiming and de Oliveira Pinto, Henrique Ponde and Kaplan, Jared and others},
+  journal = {arXiv preprint arXiv:2107.03374},
+  year    = {2021},
+  url     = {https://arxiv.org/abs/2107.03374}
+}
+
+% https://arxiv.org/abs/2501.12948
+@article{deepseek2025r1,
+  title   = {{D}eep{S}eek-{R1}: Incentivizing Reasoning Capability in {LLM}s via Reinforcement Learning},
+  author  = {{DeepSeek-AI}},
+  journal = {arXiv preprint arXiv:2501.12948},
+  year    = {2025},
+  url     = {https://arxiv.org/abs/2501.12948}
+}
+
+% Public system card at https://openai.com/index/learning-to-reason-with-llms/
+@misc{openai2024o1,
+  title        = {Learning to Reason with {LLM}s},
+  author       = {{OpenAI}},
+  howpublished = {\url{https://openai.com/index/learning-to-reason-with-llms/}},
+  year         = {2024}
+}
+
+%% ---------- Scientific inverse problems: imaging ----------
+
+% Adler & Öktem, Learned Primal-Dual, IEEE TMI 2018. DOI:10.1109/TMI.2018.2799231
+% arXiv:1707.06474
+@article{adler2018learned,
+  title   = {Learned Primal-Dual Reconstruction},
+  author  = {Adler, Jonas and \"{O}ktem, Ozan},
+  journal = {IEEE Transactions on Medical Imaging},
+  volume  = {37},
+  number  = {6},
+  pages   = {1322--1332},
+  year    = {2018},
+  doi     = {10.1109/TMI.2018.2799231}
+}
+
+% Jin, McCann, Froustey, Unser — Deep CNN for Inverse Problems — IEEE TIP 2017
+% arXiv:1611.03679
+@article{jin2017deep,
+  title   = {Deep Convolutional Neural Network for Inverse Problems in Imaging},
+  author  = {Jin, Kyong Hwan and McCann, Michael T. and Froustey, Emmanuel and Unser, Michael},
+  journal = {IEEE Transactions on Image Processing},
+  volume  = {26},
+  number  = {9},
+  pages   = {4509--4522},
+  year    = {2017},
+  doi     = {10.1109/TIP.2017.2713099}
+}
+
+% Fessler — Optimization methods for MR image reconstruction — IEEE SPM 2020
+% DOI:10.1109/MSP.2019.2943645
+@article{fessler2020optimization,
+  title   = {Optimization Methods for Magnetic Resonance Image Reconstruction: Key Models and Optimization Algorithms},
+  author  = {Fessler, Jeffrey A.},
+  journal = {IEEE Signal Processing Magazine},
+  volume  = {37},
+  number  = {1},
+  pages   = {33--40},
+  year    = {2020},
+  doi     = {10.1109/MSP.2019.2943645}
+}
+
+% Ongie, Jalal, Metzler, Baraniuk, Dimakis, Willett — IEEE JSAIT 2020
+% arXiv:2005.06001
+@article{ongie2020deep,
+  title   = {Deep Learning Techniques for Inverse Problems in Imaging},
+  author  = {Ongie, Gregory and Jalal, Ajil and Metzler, Christopher A. and Baraniuk, Richard G. and Dimakis, Alexandros G. and Willett, Rebecca},
+  journal = {IEEE Journal on Selected Areas in Information Theory},
+  volume  = {1},
+  number  = {1},
+  pages   = {39--56},
+  year    = {2020},
+  doi     = {10.1109/JSAIT.2020.2991563}
+}
+
+%% ---------- Compressed sensing foundations ----------
+
+% Candès & Tao — IEEE TIT 2006 — "Near-optimal signal recovery..."
+@article{candes2006near,
+  title   = {Near-Optimal Signal Recovery from Random Projections: Universal Encoding Strategies?},
+  author  = {Cand\`{e}s, Emmanuel J. and Tao, Terence},
+  journal = {IEEE Transactions on Information Theory},
+  volume  = {52},
+  number  = {12},
+  pages   = {5406--5425},
+  year    = {2006},
+  doi     = {10.1109/TIT.2006.885507}
+}
+
+% Donoho — IEEE TIT 2006 — "Compressed sensing"
+@article{donoho2006compressed,
+  title   = {Compressed Sensing},
+  author  = {Donoho, David L.},
+  journal = {IEEE Transactions on Information Theory},
+  volume  = {52},
+  number  = {4},
+  pages   = {1289--1306},
+  year    = {2006},
+  doi     = {10.1109/TIT.2006.871582}
+}
+
+%% ---------- Conformal prediction ----------
+
+% Vovk, Gammerman, Shafer — Algorithmic Learning in a Random World, Springer 2005
+@book{vovk2005algorithmic,
+  title     = {Algorithmic Learning in a Random World},
+  author    = {Vovk, Vladimir and Gammerman, Alexander and Shafer, Glenn},
+  publisher = {Springer},
+  year      = {2005},
+  isbn      = {978-0-387-00152-4}
+}
+
+% Angelopoulos & Bates — Foundations & Trends in ML 2023
+% arXiv:2107.07511
+@article{angelopoulos2023gentle,
+  title   = {A Gentle Introduction to Conformal Prediction and Distribution-Free Uncertainty Quantification},
+  author  = {Angelopoulos, Anastasios N. and Bates, Stephen},
+  journal = {Foundations and Trends in Machine Learning},
+  volume  = {16},
+  number  = {4},
+  pages   = {494--591},
+  year    = {2023},
+  doi     = {10.1561/2200000101}
+}
+
+% Lei & Wasserman — Distribution-free prediction bands — JRSS-B 2014
+% DOI:10.1111/rssb.12021
+@article{lei2014distribution,
+  title   = {Distribution-Free Prediction Bands for Non-Parametric Regression},
+  author  = {Lei, Jing and Wasserman, Larry},
+  journal = {Journal of the Royal Statistical Society: Series B},
+  volume  = {76},
+  number  = {1},
+  pages   = {71--96},
+  year    = {2014},
+  doi     = {10.1111/rssb.12021}
+}
+
+% Romano, Patterson, Candès — NeurIPS 2019 — CQR — arXiv:1905.03222
+@inproceedings{romano2019conformalized,
+  title     = {Conformalized Quantile Regression},
+  author    = {Romano, Yaniv and Patterson, Evan and Cand\`{e}s, Emmanuel J.},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2019},
+  url       = {https://arxiv.org/abs/1905.03222}
+}
+
+%% ---------- Datasets ----------
+
+% Agustsson & Timofte — DIV2K — CVPR Workshops 2017
+% DOI:10.1109/CVPRW.2017.150
+@inproceedings{agustsson2017ntire,
+  title     = {{NTIRE} 2017 Challenge on Single Image Super-Resolution: Dataset and Study},
+  author    = {Agustsson, Eirikur and Timofte, Radu},
+  booktitle = {CVPR Workshops},
+  year      = {2017},
+  doi       = {10.1109/CVPRW.2017.150}
+}
+
+% Leuschner, Schmidt, Baguer, Maass — LoDoPaB-CT — Scientific Data 2021
+% arXiv:1910.01113
+@article{leuschner2021lodopab,
+  title   = {{L}o{D}o{P}a{B}-{CT}, a Benchmark Dataset for Low-Dose Computed Tomography Reconstruction},
+  author  = {Leuschner, Johannes and Schmidt, Maximilian and Baguer, Daniel Otero and Maass, Peter},
+  journal = {Scientific Data},
+  volume  = {8},
+  number  = {1},
+  pages   = {109},
+  year    = {2021},
+  doi     = {10.1038/s41597-021-00893-z}
+}
+
+%% ---------- Phase retrieval ----------
+
+% Gerchberg & Saxton — Optik 1972 — foundational
+@article{gerchberg1972practical,
+  title   = {A Practical Algorithm for the Determination of the Phase from Image and Diffraction Plane Pictures},
+  author  = {Gerchberg, R. W. and Saxton, W. O.},
+  journal = {Optik},
+  volume  = {35},
+  pages   = {237--246},
+  year    = {1972}
+}
+
+% Candès, Strohmer, Voroninski — PhaseLift — CPAM 2013
+% arXiv:1109.4499
+@article{candes2013phaselift,
+  title   = {Phase{L}ift: Exact and Stable Signal Recovery from Magnitude Measurements via Convex Programming},
+  author  = {Cand\`{e}s, Emmanuel J. and Strohmer, Thomas and Voroninski, Vladislav},
+  journal = {Communications on Pure and Applied Mathematics},
+  volume  = {66},
+  number  = {8},
+  pages   = {1241--1274},
+  year    = {2013},
+  doi     = {10.1002/cpa.21432}
+}
+
+%% ---------- RLVR training infrastructure ----------
+
+% Will Brown et al. — Verifiers Python library (github.com/willccbb/verifiers)
+% Cited as software, not as a paper.
+@misc{brown2024verifiers,
+  title        = {Verifiers: A Framework for {LLM} Environment Evaluation},
+  author       = {Brown, Will and contributors},
+  howpublished = {\url{https://github.com/willccbb/verifiers}},
+  year         = {2024}
+}
+
+% Prime Intellect Environments Hub — cited as platform documentation
+@misc{primeintellect2024hub,
+  title        = {Prime Intellect Environments Hub},
+  author       = {{Prime Intellect}},
+  howpublished = {\url{https://app.primeintellect.ai/environments}},
+  year         = {2024}
+}
+
+%% ---------- Model cards ----------
+
+% Anthropic Claude model cards — the Claude 4 family card
+@misc{anthropic2025claude4,
+  title        = {Claude 4 and Claude 4.5 Model Card},
+  author       = {{Anthropic}},
+  howpublished = {\url{https://www.anthropic.com/claude}},
+  year         = {2025}
+}
+
+% OpenAI GPT-5 system card
+@misc{openai2025gpt5,
+  title        = {{GPT}-5 System Card},
+  author       = {{OpenAI}},
+  howpublished = {\url{https://openai.com/research}},
+  year         = {2025}
+}

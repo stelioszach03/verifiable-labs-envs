@@ -1,0 +1,11 @@
+env,target_coverage,mean_coverage,std_coverage,min_coverage,max_coverage,n_samples
+sparse-fourier-recovery,0.9,0.889,0.1048,0.5,1.0,100
+sparse-fourier-recovery-multiturn,0.9,0.889,0.1048,0.5,1.0,100
+sparse-fourier-recovery-tools,0.9,0.889,0.1048,0.5,1.0,100
+super-resolution-div2k-x4,0.9,0.879,0.076,0.7639,0.9949,100
+lodopab-ct-simplified,0.9,0.9017,0.0269,0.8605,0.9425,100
+lodopab-ct-simplified-multiturn,0.9,0.9017,0.0269,0.8605,0.9425,100
+phase-retrieval,0.9,0.93,0.1461,0.25,1.0,100
+phase-retrieval-multiturn,0.9,0.93,0.1461,0.25,1.0,100
+mri-knee-reconstruction,0.9,0.8995,0.0671,0.7578,1.0,100
+mri-knee-reconstruction-multiturn,0.9,0.8995,0.0671,0.7578,1.0,100
