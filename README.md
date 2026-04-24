@@ -2,11 +2,17 @@
 
 Reinforcement-learning environments for scientific reasoning — physics-grounded inverse problems with uncertainty-calibrated rewards.
 
-> **Status (2026-04-24, post Sprint 1):** Six environments (3 single-turn + 2 multi-turn + 1 tool-use) live on Prime Intellect Environments Hub. Static leaderboard live on HuggingFace Spaces. 176 tests green, full suite under 2 s.
+> **Status (2026-04-24, post Sprint-giga):** **10 environments** live on Prime Intellect Environments Hub across 4 scientific domains (compressed sensing, super-resolution, medical CT, medical MRI, phase retrieval). Static leaderboard on HuggingFace Spaces. **254 tests green**, full suite under 2 s.
 >
 > - 🔗 Leaderboard: https://huggingface.co/spaces/stelioszach03/scientific-rl-benchmark
-> - 🔗 Prime Intellect Hub envs: [`stelioszach/sparse-fourier-recovery`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-multiturn), [`-tools`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-tools), [`super-resolution-div2k-x4`](https://app.primeintellect.ai/dashboard/environments/stelioszach/super-resolution-div2k-x4), [`lodopab-ct-simplified`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified-multiturn).
-> - 🔗 Full Sprint 1 summary: [`docs/SPRINT_1_COMPLETE.md`](docs/SPRINT_1_COMPLETE.md).
+> - 🔗 Prime Intellect Hub envs: [`phase-retrieval`](https://app.primeintellect.ai/dashboard/environments/stelioszach/phase-retrieval), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/phase-retrieval-multiturn), [`mri-knee-reconstruction`](https://app.primeintellect.ai/dashboard/environments/stelioszach/mri-knee-reconstruction), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/mri-knee-reconstruction-multiturn), [`sparse-fourier-recovery`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-multiturn), [`-tools`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-tools), [`super-resolution-div2k-x4`](https://app.primeintellect.ai/dashboard/environments/stelioszach/super-resolution-div2k-x4), [`lodopab-ct-simplified`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified-multiturn).
+> - 🔗 Sprint-giga outcomes: [`docs/SPRINT_GIGA_COMPLETE.md`](docs/SPRINT_GIGA_COMPLETE.md). Prior: [`docs/SPRINT_1_COMPLETE.md`](docs/SPRINT_1_COMPLETE.md).
+
+## 3 headline findings (meta-benchmark v3, 2026-04-24)
+
+1. **Classical baselines still beat every tested LLM on every env** — the battery is not saturated.
+2. **Sparse compressed-sensing outputs are the hardest for LLMs** (sparse-F and phase-retrieval cluster at ~0.35 mean across 3 cheap models). 2D-image envs (MRI / super-res / CT) are 2× easier for LLMs because they can parrot a provided classical baseline.
+3. **Claude Haiku 4.5 is the best cheap model for scientific reasoning**, with a 0.604 cross-env mean — consistently ahead of GPT-5.4-mini (0.465) and GPT-5.4-nano (0.458). Full table in [`results/meta_benchmark_v3_summary.md`](results/meta_benchmark_v3_summary.md).
 
 ## What this is
 
@@ -16,13 +22,20 @@ Frontier reasoning models are trained with verifiable rewards (RLVR). Today's RL
 2. The **reward** is a weighted sum of reconstruction quality (PSNR, SSIM, or task-appropriate metric) and **conformal-prediction coverage** — models are rewarded for honest posterior width, not overconfident point estimates.
 3. Measurements are **procedurally regenerated per evaluation call**, so fixed-string memorization is structurally impossible.
 
-## Environments (v0.0.1)
+## Environments (10 live on Prime Intellect Hub)
 
-| # | Environment | Status | Forward operator | Baseline |
+| # | Environment | Domain | Forward operator | Classical baseline |
 |---|---|---|---|---|
-| 1 | `sparse-fourier-recovery` | ✅ | subsampled orthonormal 1D DFT | OMP with LS-covariance σ̂ |
-| 2 | `super-resolution-div2k-x4` | ✅ | Gaussian blur + 4× decimation | bicubic with edge-weighted σ̂ |
-| 3 | `lodopab-ct-simplified` | ✅ | 2D parallel-beam Radon (60-angle) | FBP with edge-weighted σ̂ (phantom default; real-patient LoDoPaB-CT slices via `use_real_data=True`) |
+| 1 | `sparse-fourier-recovery` | compressed sensing | subsampled orthonormal 1D DFT | OMP with LS-covariance σ̂ |
+| 2 | `sparse-fourier-recovery-multiturn` | compressed sensing | same, 3-turn dialogue | residual-feedback refinement |
+| 3 | `sparse-fourier-recovery-tools` | compressed sensing | same, primitive-composition tool-use | fft/ifft/soft-threshold/residual/norm primitives |
+| 4 | `super-resolution-div2k-x4` | image | Gaussian blur + 4× decimation | bicubic with edge-weighted σ̂ |
+| 5 | `lodopab-ct-simplified` | medical imaging (CT) | 2D parallel-beam Radon | FBP with edge-weighted σ̂ (phantom default; real-patient LoDoPaB-CT via `use_real_data=True`) |
+| 6 | `lodopab-ct-simplified-multiturn` | medical imaging (CT) | same, 3-turn dialogue | FBP-residual feedback |
+| 7 | **`phase-retrieval`** (new sprint-giga) | crystallography / CDI | magnitude-only subsampled DFT | Gerchberg-Saxton (alternating projection) |
+| 8 | **`phase-retrieval-multiturn`** (new) | crystallography / CDI | same, 3-turn dialogue | magnitude-residual feedback |
+| 9 | **`mri-knee-reconstruction`** (new sprint-giga) | medical imaging (MRI) | 2D DFT + 4× Cartesian undersampling | zero-filled inverse FFT |
+|10 | **`mri-knee-reconstruction-multiturn`** (new) | medical imaging (MRI) | same, 3-turn dialogue | k-space residual feedback |
 
 ## Classical-baseline benchmark (5 seeds each, default hyperparameters)
 
