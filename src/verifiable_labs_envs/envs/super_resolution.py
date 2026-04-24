@@ -216,6 +216,8 @@ class SuperResolutionEnv:
         self.conformal_quantile = float(conformal_quantile)
         self.hyperparams = {**DEFAULT_HYPERPARAMS, **(hyperparams or {})}
         self.weights = {**DEFAULT_WEIGHTS, **(weights or {})}
+        self.env_id: str = ""
+        self.env_args: dict[str, Any] = {}
 
     def generate_instance(
         self, seed: int, image_name: str | None = None, **kwargs: Any

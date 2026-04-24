@@ -64,15 +64,20 @@ def load_environment(**kwargs: Any):
 '''
 
 
-def _pyproject(env_id: str, mod_name: str, tagline: str) -> str:
+def _pyproject(env_id: str, mod_name: str, tagline: str, version: str = "0.2.0") -> str:
     return f'''[project]
 name = "{env_id}"
 description = "{tagline}"
 tags = ["scientific-reasoning", "inverse-problems", "rlvr", "conformal", "eval"]
-version = "0.1.0"
+version = "{version}"
 requires-python = ">=3.11"
 dependencies = [
-    "verifiers>=0.1.13",
+    # verifiers>=0.1.12 (not >=0.1.13): the 0.1.13 line is dev-only at
+    # publish time, and PEP 440 treats 0.1.13.devN as < 0.1.13, so
+    # `>=0.1.13` would reject dev releases even with pip --pre. The
+    # widened pin lets Hub consumers install from stable releases. See
+    # docs/PRIME_INTELLECT_VERIFICATION.md for the reproducer.
+    "verifiers>=0.1.12",
     "verifiable-labs-envs @ git+https://github.com/stelioszach03/verifiable-labs-envs.git@main",
 ]
 

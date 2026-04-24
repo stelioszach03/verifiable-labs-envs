@@ -329,6 +329,8 @@ class LodopabCtEnv:
         self.hyperparams = {**DEFAULT_HYPERPARAMS, **(hyperparams or {})}
         self.weights = {**DEFAULT_WEIGHTS, **(weights or {})}
         self.use_real_data = bool(use_real_data)
+        self.env_id: str = ""
+        self.env_args: dict[str, Any] = {}
 
     def generate_instance(
         self, seed: int, phantom_name: str | None = None, **kwargs: Any

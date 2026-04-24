@@ -283,6 +283,10 @@ class SparseFourierEnv:
         self.conformal_quantile = float(conformal_quantile)
         self.hyperparams = {**DEFAULT_HYPERPARAMS, **(hyperparams or {})}
         self.weights = {**DEFAULT_WEIGHTS, **(weights or {})}
+        # verifiers.load_environment sets these back on the instance; declaring
+        # them here keeps ``env_instance.env_id or env_id`` from raising.
+        self.env_id: str = ""
+        self.env_args: dict[str, Any] = {}
 
     def generate_instance(self, seed: int, **kwargs: Any) -> Instance:
         merged = {**self.hyperparams, **kwargs}
