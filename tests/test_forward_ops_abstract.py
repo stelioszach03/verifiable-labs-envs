@@ -82,7 +82,8 @@ class TestFFTMask2DOp:
         z = op.pseudoinverse(y)
         assert z.dtype in (np.float64, np.float32)
 
-    def test_cartesian_mask_keeps_center_columns(self):
+    def test_cartesian_mask_keeps_dc_columns(self):
+        """DC-aligned convention: low-freq columns wrap around index 0."""
         mask = FFTMask2DOp.cartesian_undersample_mask(
             shape=(8, 16), acceleration=4, center_fraction=0.25,
             rng=np.random.default_rng(0),
@@ -91,9 +92,11 @@ class TestFFTMask2DOp:
         # All rows are identical (Cartesian undersampling).
         for r in range(1, 8):
             assert np.array_equal(mask[0], mask[r])
-        # Center columns (25% → 4 cols around center 8) are fully kept.
-        assert mask[0, 7] == 1.0
-        assert mask[0, 8] == 1.0
+        # DC (column 0) is always kept, along with wrap-around low frequencies.
+        assert mask[0, 0] == 1.0
+        # At center_fraction=0.25 (4 columns), cols {0, 1, 15, 14} are expected.
+        assert mask[0, 1] == 1.0
+        assert mask[0, 15] == 1.0
 
     def test_cartesian_mask_rejects_bad_params(self):
         with pytest.raises(ValueError):

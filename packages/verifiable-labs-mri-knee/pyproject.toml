@@ -1,0 +1,34 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "verifiable-labs-mri-knee"
+version = "1.0.0"
+description = "MRI knee reconstruction from 4x-undersampled Cartesian k-space with zero-filled-IFFT baseline + conformal σ̂."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [{ name = "Stelios Zacharioudakis" }]
+keywords = ["reinforcement-learning", "inverse-problems", "rlvr", "mri", "medical-imaging", "k-space", "scientific-ml"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "verifiable-labs-envs-core @ git+https://github.com/stelioszach03/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-envs-core",
+]
+
+[project.urls]
+Homepage = "https://github.com/stelioszach03/verifiable-labs-envs"
+Issues = "https://github.com/stelioszach03/verifiable-labs-envs/issues"
+
+[project.entry-points."verifiers.environments"]
+mri-knee-reconstruction = "verifiable_labs_mri_knee:load_environment"
+mri-knee-reconstruction-multiturn = "verifiable_labs_mri_knee:load_environment_multiturn"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/verifiable_labs_mri_knee"]

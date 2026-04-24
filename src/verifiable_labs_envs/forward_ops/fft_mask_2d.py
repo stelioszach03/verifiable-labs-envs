@@ -53,11 +53,15 @@ class FFTMask2DOp(ForwardOperator):
         center_fraction: float = 0.08,
         rng: np.random.Generator | None = None,
     ) -> np.ndarray:
-        """Standard fastMRI-style Cartesian mask: keep a dense center, random rest.
+        """Standard fastMRI-style Cartesian mask: keep a dense DC region, random rest.
 
-        Returns a (H, W) mask where entire *columns* are either kept or
-        dropped (1D undersampling along phase-encode direction, the real
-        MRI protocol).
+        Returns a (H, W) mask in **numpy FFT convention** (DC at index (0, 0),
+        low frequencies at the corners). The "center" `center_fraction` is
+        therefore implemented as the wrap-around center of k-space — columns
+        0..n_half and W-n_half..W-1.
+
+        Entire *columns* are either kept or dropped (1D undersampling along
+        phase-encode direction, the real MRI protocol).
         """
         if acceleration < 1:
             raise ValueError(f"acceleration must be >= 1; got {acceleration}")
@@ -68,8 +72,23 @@ class FFTMask2DOp(ForwardOperator):
         h, w = shape
         n_center = max(1, int(round(w * center_fraction)))
         mask_1d = np.zeros(w, dtype=np.float64)
-        center_start = (w - n_center) // 2
-        mask_1d[center_start : center_start + n_center] = 1.0
+
+        # DC-aligned center: pick the n_center columns with the smallest circular
+        # k-space distance from DC (index 0). Order: {0, 1, w-1, 2, w-2, 3, w-3, ...}.
+        ordered = [0]
+        d = 1
+        while len(ordered) < n_center and d <= w // 2:
+            if d < w and d not in ordered:
+                ordered.append(d)
+            if len(ordered) >= n_center:
+                break
+            neg = w - d
+            if 0 <= neg < w and neg not in ordered:
+                ordered.append(neg)
+            d += 1
+        for i in ordered[:n_center]:
+            mask_1d[i] = 1.0
+
         n_total_keep = max(n_center, w // acceleration)
         remaining_choices = [i for i in range(w) if mask_1d[i] == 0.0]
         n_extra = max(0, n_total_keep - n_center)

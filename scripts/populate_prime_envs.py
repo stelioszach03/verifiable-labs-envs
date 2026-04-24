@@ -53,6 +53,13 @@ SPECS = [
      "phase_retrieval_multiturn",
      "3-turn phase retrieval with magnitude-residual feedback between turns.",
      "1.0.0"),
+    ("mri-knee-reconstruction", "mri_knee_reconstruction", "mri_knee",
+     "MRI knee reconstruction from 4x-undersampled Cartesian k-space with "
+     "zero-filled-IFFT baseline and conformal σ̂.", "1.0.0"),
+    ("mri-knee-reconstruction-multiturn", "mri_knee_reconstruction_multiturn",
+     "mri_knee_multiturn",
+     "3-turn MRI knee reconstruction with k-space-residual feedback between turns.",
+     "1.0.0"),
 ]
 
 
