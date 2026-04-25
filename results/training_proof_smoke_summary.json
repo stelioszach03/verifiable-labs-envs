@@ -1,0 +1,56 @@
+{
+  "model": "anthropic/claude-haiku-4.5",
+  "cap_usd": 0.3,
+  "spent_usd": 0.09193400000000003,
+  "elapsed_s": 86.04145637498004,
+  "smoke": true,
+  "baseline": {
+    "seeds": [
+      60000,
+      60001,
+      60002
+    ],
+    "mean": 0.34144611195674957,
+    "std": 0.013756421436684032,
+    "parse_fail_rate": 0.0
+  },
+  "candidates": [
+    {
+      "name": "terse-baseline",
+      "mean": 0.3486625377884891,
+      "parse_fail_rate": 0.0
+    },
+    {
+      "name": "verbose-with-strategy",
+      "mean": 0.37238147069950156,
+      "parse_fail_rate": 0.0
+    },
+    {
+      "name": "step-numbered",
+      "mean": 0.3825085968451239,
+      "parse_fail_rate": 0.0
+    },
+    {
+      "name": "rewritten-directive",
+      "mean": 0.3516211905215961,
+      "parse_fail_rate": 0.0
+    }
+  ],
+  "best": {
+    "name": "step-numbered",
+    "mean_on_val": 0.3825085968451239
+  },
+  "heldout": {
+    "seeds": [
+      60100,
+      60101,
+      60102
+    ],
+    "default_mean": 0.3308295042665881,
+    "best_mean": 0.3306549711650084,
+    "delta": -0.00017453310157966584,
+    "ci_lo": -0.00037884800714771405,
+    "ci_hi": 0.0,
+    "n_bootstrap": 5000
+  }
+}
