@@ -1,20 +1,120 @@
-# verifiable-labs-envs
+# Verifiable Labs
 
-Reinforcement-learning environments for scientific reasoning — physics-grounded inverse problems with uncertainty-calibrated rewards.
+**Verifiable Labs is the API, SDK, and CLI layer for evaluating and training scientific AI agents on verifiable RL environments.**
 
-> **Status (2026-04-24, post Sprint-giga):** **10 environments** live on Prime Intellect Environments Hub across 4 scientific domains (compressed sensing, super-resolution, medical CT, medical MRI, phase retrieval). Static leaderboard on HuggingFace Spaces. **254 tests green**, full suite under 2 s.
->
-> - 🔗 Leaderboard: https://huggingface.co/spaces/stelioszach03/scientific-rl-benchmark
-> - 🔗 Prime Intellect Hub envs: [`phase-retrieval`](https://app.primeintellect.ai/dashboard/environments/stelioszach/phase-retrieval), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/phase-retrieval-multiturn), [`mri-knee-reconstruction`](https://app.primeintellect.ai/dashboard/environments/stelioszach/mri-knee-reconstruction), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/mri-knee-reconstruction-multiturn), [`sparse-fourier-recovery`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-multiturn), [`-tools`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-tools), [`super-resolution-div2k-x4`](https://app.primeintellect.ai/dashboard/environments/stelioszach/super-resolution-div2k-x4), [`lodopab-ct-simplified`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified-multiturn).
-> - 🔗 Sprint-giga outcomes: [`docs/SPRINT_GIGA_COMPLETE.md`](docs/SPRINT_GIGA_COMPLETE.md). Prior: [`docs/SPRINT_1_COMPLETE.md`](docs/SPRINT_1_COMPLETE.md).
+Most AI eval tools test chatbots and apps. Verifiable Labs generates scientific environments with **objective rewards**, **calibrated uncertainty**, **procedural regeneration**, **classical baselines**, and **training-signal potential** — tasks that are continuous, uncertainty-sensitive, and impossible to solve by memorising static benchmark answers.
 
-## 3 headline findings (meta-benchmark v3, 2026-04-24)
+> **Status:** v0.1.0-alpha (developer preview). 10 live environments across compressed sensing, super-resolution, medical CT/MRI, and phase retrieval. Hosted REST API + Python SDK + `verifiable` CLI shipped. The platform is open and rate-limited; treat the public endpoint as a developer playground until v0.2 (auth + Redis sessions). Full roadmap: [`docs/company/roadmap.md`](docs/company/roadmap.md).
+
+- 🔗 Hugging Face leaderboard — https://huggingface.co/spaces/stelioszach03/scientific-rl-benchmark
+- 🔗 Prime Intellect Hub envs — [`sparse-fourier-recovery`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-multiturn), [`-tools`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-tools), [`mri-knee-reconstruction`](https://app.primeintellect.ai/dashboard/environments/stelioszach/mri-knee-reconstruction), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/mri-knee-reconstruction-multiturn), [`phase-retrieval`](https://app.primeintellect.ai/dashboard/environments/stelioszach/phase-retrieval), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/phase-retrieval-multiturn), [`super-resolution-div2k-x4`](https://app.primeintellect.ai/dashboard/environments/stelioszach/super-resolution-div2k-x4), [`lodopab-ct-simplified`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified-multiturn).
+- 🔗 Paper (preprint, OpenReview submission pending) — [`paper/main.pdf`](paper/main.pdf)
+- 🔗 YC + Neo Residency one-pager — [`docs/yc_neo/ONE_PAGER.md`](docs/yc_neo/ONE_PAGER.md)
+
+## 90-second quickstart
+
+The full developer loop, from clone to a Markdown report a YC reviewer can read.
+
+```bash
+git clone https://github.com/stelioszach03/verifiable-labs-envs.git
+cd verifiable-labs-envs
+pip install -e ".[dev]"
+
+# 1. List the 10 envs.
+verifiable envs
+
+# 2. Run a zero-amplitude agent on sparse-Fourier (3 episodes, no API key needed).
+verifiable run \
+    --env sparse-fourier-recovery \
+    --agent examples/agents/zero_agent.py \
+    --n 3 --out runs/demo.jsonl
+
+# 3. Render a Markdown evaluation report.
+verifiable report --run runs/demo.jsonl --out reports/demo.md
+
+# 4. Compare two agents side-by-side.
+verifiable run --env sparse-fourier-recovery --agent examples/agents/random_agent.py \
+    --n 3 --out runs/random.jsonl
+verifiable compare --runs runs/demo.jsonl runs/random.jsonl
+```
+
+The JSONL written by `verifiable run` is a stable schema (`Trace` in [`src/verifiable_labs_envs/traces.py`](src/verifiable_labs_envs/traces.py)) so a CI workflow or a downstream tool can read it without manual parsing. A pre-rendered example lives at [`reports/zero_smoke.md`](reports/zero_smoke.md).
+
+## Three on-ramps
+
+| surface | use when | install |
+|---|---|---|
+| [`verifiable` CLI](docs/api-reference/cli.md) | local evaluation, CI gates, shipping a reproducible run | `pip install -e ".[dev]"` (this repo) |
+| [Python SDK](docs/api-reference/python-sdk.md) | scripted access to the hosted API; sync + async | `pip install verifiable-labs` |
+| [Hosted REST API](docs/api-reference/rest-api.md) | language-agnostic eval, no Python needed | `curl https://api.verifiable-labs.com/v1/health` |
+
+### SDK quickstart
+
+```python
+from verifiable_labs import Client
+
+with Client(base_url="https://api.verifiable-labs.com") as c:
+    env = c.env("stelioszach/sparse-fourier-recovery")
+    result = env.evaluate(seed=42, answer=my_model_output)
+    print(result.reward, result.components, result.coverage)
+```
+
+`AsyncClient` mirrors the sync API one-to-one. The SDK is currently `0.1.0a1` on TestPyPI; PyPI publication is the last step of the funding-sprint polish queue.
+
+### Hosted API quickstart
+
+```bash
+curl https://api.verifiable-labs.com/v1/health
+# {"status": "ok", "version": "0.1.0-alpha", ...}
+curl https://api.verifiable-labs.com/v1/environments | jq '.environments[].id'
+```
+
+OpenAPI UI at `/docs`. v0.1 is unauthenticated and rate-limited (30 req/min/IP); v0.2 adds per-user keys. See [`deploy/api/README.md`](deploy/api/README.md) for self-hosting (Render / Fly.io / Docker).
+
+## Onboarding your own agent
+
+The CLI's `--agent` flag accepts three forms:
+
+```bash
+# 1. Python file with a top-level `solve(observation: dict) -> dict`.
+verifiable run --env <id> --agent path/to/my_agent.py --n 5 --out runs/me.jsonl
+
+# 2. Subprocess (any language). Reads JSON on stdin, writes JSON on stdout.
+verifiable run --env <id> --agent "cmd:./my_solver --quiet" --n 5 --out runs/me.jsonl
+
+# 3. OpenAI-compatible HTTP endpoint (OpenAI / OpenRouter / local vLLM / etc.).
+OPENAI_API_KEY=sk-... OPENAI_BASE_URL=https://openrouter.ai/api/v1 \
+    verifiable run --env <id> --agent "openai:anthropic/claude-haiku-4.5" \
+    --n 5 --out runs/llm.jsonl
+```
+
+Five-minute onboarding guide: [`docs/ONBOARD_AGENT_5_MIN.md`](docs/ONBOARD_AGENT_5_MIN.md).
+Examples: [`examples/agents/`](examples/agents).
+
+## What exists today vs what's next
+
+| | shipped | planned |
+|---|---|---|
+| **environments** | 10 envs across 5 domains | 5 new envs (holographic 3D, EM tomography, seismic FWI, inverse rendering, protein distogram) — v0.2 |
+| **API** | `/v1/{health, environments, sessions, leaderboard}` (open, rate-limited) | per-user auth, Redis-backed sessions — v0.2 |
+| **SDK** | sync + async clients on TestPyPI | PyPI publish + `[envs]` extras for local mode — Tier-1 polish |
+| **CLI** | `envs · run · compare · report · init-env · validate-env` | static viewer / dashboard — v0.3 stretch |
+| **training signal** | prompt-search proof in [`notebooks/training_proof.ipynb`](notebooks/training_proof.ipynb), heuristic search in [`examples/training_signal_demo.py`](examples/training_signal_demo.py) | TRL / vLLM bindings — v0.2 |
+| **compliance** | aggregate report template + PDF generator | real attestation system — v0.3 speculative |
+
+Full roadmap: [`docs/company/roadmap.md`](docs/company/roadmap.md). YC + Neo Residency context: [`docs/yc_neo/ONE_PAGER.md`](docs/yc_neo/ONE_PAGER.md).
+
+---
+
+## Research findings (meta-benchmark v3, 2026-04-24)
+
+Three honest takeaways from the v0.1 benchmark sweep:
 
 1. **Classical baselines still beat every tested LLM on every env** — the battery is not saturated.
 2. **Sparse compressed-sensing outputs are the hardest for LLMs** (sparse-F and phase-retrieval cluster at ~0.35 mean across 3 cheap models). 2D-image envs (MRI / super-res / CT) are 2× easier for LLMs because they can parrot a provided classical baseline.
 3. **Claude Haiku 4.5 is the best cheap model for scientific reasoning**, with a 0.604 cross-env mean — consistently ahead of GPT-5.4-mini (0.465) and GPT-5.4-nano (0.458). Full table in [`results/meta_benchmark_v3_summary.md`](results/meta_benchmark_v3_summary.md).
 
-## What this is
+## Why "verifiable"
 
 Frontier reasoning models are trained with verifiable rewards (RLVR). Today's RL environments are mostly text-only, saturate quickly, and miss the continuous, ill-posed reasoning that real science requires. This package provides environments where:
 

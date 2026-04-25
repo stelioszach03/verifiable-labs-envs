@@ -1,0 +1,109 @@
+# Example: run a Verifiable Labs evaluation in CI.
+#
+# This is a *template* you can copy into your own repo to gate model
+# changes on the platform's reward signal. It runs the bundled
+# zero-amplitude agent on `sparse-fourier-recovery` (3 episodes), then
+# generates a Markdown report. JSONL + Markdown are uploaded as
+# workflow artefacts.
+#
+# Cost: $0. The zero agent makes no network calls.
+#
+# To wire your own agent:
+#   1. Replace `examples/agents/zero_agent.py` with a path to your
+#      agent file (or use `cmd:` / `openai:` syntax — see
+#      `docs/ONBOARD_AGENT_5_MIN.md`).
+#   2. Set OPENAI_API_KEY / OPENROUTER_API_KEY as repo secrets if your
+#      agent calls a paid API; the workflow will pass them through.
+#   3. Optionally tighten the reward floor — the soft-floor step below
+#      warns (does not fail) if mean reward drops below the threshold.
+
+name: verifiable-eval-example
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [funding-sprint-yc-neo, main]
+    paths:
+      - "src/verifiable_labs_envs/**"
+      - "examples/agents/**"
+      - ".github/workflows/verifiable-eval-example.yml"
+  pull_request:
+    paths:
+      - "src/verifiable_labs_envs/**"
+      - "examples/agents/**"
+
+jobs:
+  eval-demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install verifiable-labs-envs (editable)
+        run: pip install -e ".[dev]"
+
+      - name: List environments
+        run: verifiable envs
+
+      - name: Run zero agent (3 episodes, no API key needed)
+        env:
+          VL_ENV_ID: sparse-fourier-recovery
+          VL_AGENT_PATH: examples/agents/zero_agent.py
+        run: |
+          mkdir -p runs reports
+          verifiable run \
+              --env "$VL_ENV_ID" \
+              --agent "$VL_AGENT_PATH" \
+              --n 3 \
+              --start-seed 0 \
+              --out runs/ci_demo.jsonl \
+              --quiet
+
+      - name: Generate Markdown report
+        run: verifiable report --run runs/ci_demo.jsonl --out reports/ci_demo.md --quiet
+
+      - name: Print report (workflow log)
+        run: cat reports/ci_demo.md
+
+      # Soft floor: warn (not fail) if mean reward drops below 0.10.
+      # Set this to a stricter threshold + change `::warning::` → `exit 1` to
+      # gate merges on reward regression.
+      - name: Soft reward-floor check
+        env:
+          VL_REWARD_THRESHOLD: "0.10"
+        run: |
+          python - <<'PY'
+          import json, os, statistics, sys
+          from pathlib import Path
+
+          rewards = []
+          for line in Path("runs/ci_demo.jsonl").read_text().splitlines():
+              if not line.strip():
+                  continue
+              t = json.loads(line)
+              if t.get("parse_success"):
+                  rewards.append(float(t["reward"]))
+          if not rewards:
+              print("::warning::no parseable rewards in run")
+              sys.exit(0)
+          mean = statistics.fmean(rewards)
+          threshold = float(os.environ["VL_REWARD_THRESHOLD"])
+          print(f"mean reward = {mean:.3f} (threshold {threshold:.3f})")
+          if mean < threshold:
+              print(f"::warning::mean reward {mean:.3f} below soft floor {threshold:.3f}")
+          PY
+
+      - name: Upload run + report as artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verifiable-eval-demo
+          path: |
+            runs/ci_demo.jsonl
+            reports/ci_demo.md
+          if-no-files-found: warn
