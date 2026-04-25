@@ -72,6 +72,11 @@ docs = [
 Homepage = "https://github.com/verifiable-labs/envs"
 Issues = "https://github.com/verifiable-labs/envs/issues"
 
+[project.scripts]
+# Developer CLI — see src/verifiable_labs_envs/cli.py.
+# Funding-sprint Tier-1.5 (YC + Neo).
+verifiable = "verifiable_labs_envs.cli:main"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/verifiable_labs_envs", "src/verifiable_labs_api"]
 
