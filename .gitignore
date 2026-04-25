@@ -100,3 +100,11 @@ Icon
 .env
 .env.local
 *.key
+
+# iCloud Drive duplicate-resolution artifacts
+* 2.*
+* 3.*
+* 4.*
+*[0-9].md
+*[0-9].py
+LICENSE [0-9]
