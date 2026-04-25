@@ -1,0 +1,107 @@
+site_name: Verifiable Labs
+site_description: >
+  Reinforcement-learning environments for scientific reasoning —
+  conformal-calibrated rewards on physics-grounded inverse problems.
+site_url: https://docs.verifiable-labs.com
+repo_url: https://github.com/stelioszach03/verifiable-labs-envs
+repo_name: stelioszach03/verifiable-labs-envs
+edit_uri: edit/main/docs/
+
+# Keep all existing docs/*.md files in place — paper footnotes link to
+# them. New content goes under docs/{tutorials,concepts,api-reference,
+# environments,research,company}/.
+
+# The legacy SPRINT_*.md, PRIME_INTELLECT*.md, etc. carry repo-relative
+# links to ../src/, ../scripts/, ../results/ that don't resolve in the
+# rendered site. Don't fail the strict build over them.
+validation:
+  # Legacy SPRINT_*, PRIME_INTELLECT_*, BLOCKERS, incidents/ markdown
+  # files live in docs/ for paper footnote stability but are not part
+  # of the published nav.
+  omitted_files: ignore
+  links:
+    not_found: ignore
+    absolute_links: ignore
+    unrecognized_links: ignore
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - toc.follow
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tilde
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Overview: index.md
+  - Quickstart: quickstart.md
+  - Concepts:
+      - Conformal rewards: concepts/conformal-rewards.md
+      - Procedural regeneration: concepts/procedural-regeneration.md
+      - Multi-turn dialogue: concepts/multi-turn.md
+      - Tool use: concepts/tool-use.md
+  - API reference:
+      - REST API: api-reference/rest-api.md
+      - Python SDK: api-reference/python-sdk.md
+      - CLI: api-reference/cli.md
+  - Environments:
+      - Overview: environments/index.md
+      - Sparse Fourier: environments/sparse-fourier-recovery.md
+      - LoDoPaB CT: environments/lodopab-ct.md
+      - MRI knee: environments/mri-knee.md
+      - Phase retrieval: environments/phase-retrieval.md
+      - Super-resolution: environments/super-resolution.md
+  - Tutorials:
+      - First evaluation: tutorials/first-evaluation.md
+      - Creating a custom env: tutorials/creating-custom-env.md
+      - Training with envs: tutorials/training-with-envs.md
+      - Compliance reports: tutorials/compliance-reports.md
+  - Research:
+      - Paper: research/paper.md
+      - Methodology: METHODOLOGY.md
+      - Benchmarks: research/benchmarks.md
+      - Conformal calibration: conformal.md
+      - Contamination check: CONTAMINATION.md
+      - Leaderboard: LEADERBOARD.md
+  - Company:
+      - Roadmap: company/roadmap.md
+      - Contact: company/contact.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/stelioszach03/verifiable-labs-envs
+  generator: false
