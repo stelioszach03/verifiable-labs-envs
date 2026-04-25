@@ -82,6 +82,12 @@ markers = [
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+extend-exclude = [
+    # Inverse-problem env scaffold; placeholder tokens (__ENV_PY__ etc.)
+    # are substituted by scripts/create_env.py and aren't valid Python
+    # in their pre-render state.
+    "templates/inverse-problem/template",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
