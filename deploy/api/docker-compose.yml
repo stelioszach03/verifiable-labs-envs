@@ -1,0 +1,30 @@
+# Local dev compose — mounts the repo source so code changes are
+# picked up by uvicorn's --reload flag.
+#
+#   docker compose -f deploy/api/docker-compose.yml up --build
+#
+services:
+  api:
+    build:
+      context: ../..
+      dockerfile: deploy/api/Dockerfile
+    image: verifiable-labs-api:dev
+    ports:
+      - "8000:8000"
+    environment:
+      VL_API_RATE_LIMIT: "100/minute"
+      VL_API_CORS_ORIGINS: "*"
+    volumes:
+      # Live-reload local code edits — comment out for an immutable run.
+      - ../../src:/app/src:ro
+      - ../../results:/app/results:ro
+    command: >
+      uvicorn verifiable_labs_api.app:app
+      --host 0.0.0.0 --port 8000
+      --reload
+      --reload-dir /app/src
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/v1/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5

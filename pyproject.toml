@@ -39,6 +39,7 @@ dev = [
     "pytest-cov>=5.0",
     "ruff>=0.5",
     "mypy>=1.10",
+    "httpx>=0.27",         # FastAPI test client uses httpx under the hood
 ]
 baselines = [
     "torch>=2.3",
@@ -51,13 +52,21 @@ ct-real = [
     "setuptools<70",
     "h5py>=3.10",
 ]
+api = [
+    # Hosted Evaluation API — Tier 1 Task 1 (v0.1.0-alpha).
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.7",
+    "slowapi>=0.1.9",
+    "structlog>=24.1",
+]
 
 [project.urls]
 Homepage = "https://github.com/verifiable-labs/envs"
 Issues = "https://github.com/verifiable-labs/envs/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/verifiable_labs_envs"]
+packages = ["src/verifiable_labs_envs", "src/verifiable_labs_api"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

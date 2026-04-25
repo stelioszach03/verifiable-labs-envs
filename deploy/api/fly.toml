@@ -1,0 +1,40 @@
+# Fly.io deployment for the Verifiable Labs Evaluation API (backup
+# option to Render). Fly's free tier offers a small shared-cpu VM
+# that meets the alpha workload comfortably.
+#
+# Deploy:
+#   fly launch --name verifiable-labs-api --copy-config --no-deploy \
+#     --dockerfile deploy/api/Dockerfile
+#   fly deploy
+#
+# Custom domain (after DNS is configured):
+#   fly certs add api.verifiable-labs.com
+
+app = "verifiable-labs-api"
+primary_region = "fra"
+
+[build]
+  dockerfile = "deploy/api/Dockerfile"
+
+[env]
+  VL_API_RATE_LIMIT = "30/minute"
+  VL_API_CORS_ORIGINS = "*"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    timeout = "5s"
+    path = "/v1/health"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 512

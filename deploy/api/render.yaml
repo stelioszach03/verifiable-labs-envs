@@ -1,0 +1,30 @@
+# Render.com IaC for the Verifiable Labs Evaluation API.
+#
+# Free tier — single instance, sleeps after 15 min of inactivity.
+# Custom-domain DNS is left commented out; flip on once
+# verifiable-labs.com is registered and DNS records are in place.
+#
+# Apply with:
+#   render blueprint render.yaml --slug verifiable-labs-api
+# (or paste this file into the Render dashboard's Blueprint UI.)
+
+services:
+  - type: web
+    name: verifiable-labs-api
+    runtime: docker
+    plan: free
+    region: frankfurt
+    # Build the API image from the repo's deploy/api/Dockerfile.
+    dockerfilePath: ./deploy/api/Dockerfile
+    dockerContext: .
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /v1/health
+    envVars:
+      - key: VL_API_RATE_LIMIT
+        value: "30/minute"
+      - key: VL_API_CORS_ORIGINS
+        value: "*"
+    # Custom domain — uncomment after DNS is configured.
+    # domains:
+    #   - api.verifiable-labs.com
