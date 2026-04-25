@@ -32,6 +32,9 @@ ENV/
 # mkdocs build output
 /site/
 
+# Editor / IDE local state
+.claude/
+
 # Test / coverage
 .pytest_cache/
 .coverage
