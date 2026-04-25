@@ -28,19 +28,25 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Install package
+      - name: Install monorepo + API + SDK
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          # Monorepo with dev + api extras (api required for the SDK
+          # integration test that spins up uvicorn).
+          pip install -e ".[dev,api]"
+          # Editable SDK so packages/verifiable-labs/tests are runnable.
+          pip install -e packages/verifiable-labs
 
       - name: Lint with ruff
-        run: ruff check src tests benchmarks examples scripts
+        run: |
+          ruff check src tests benchmarks examples scripts \
+                     packages/verifiable-labs/src packages/verifiable-labs/tests
 
       - name: Run tests
         run: pytest
 
   build:
-    name: build wheel
+    name: build wheels
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -50,7 +56,10 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install build
-      - run: python -m build
+      - name: Build monorepo wheel
+        run: python -m build --outdir dist/
+      - name: Build SDK wheel
+        run: python -m build --outdir dist/ packages/verifiable-labs
       - uses: actions/upload-artifact@v4
         with:
           name: dist
