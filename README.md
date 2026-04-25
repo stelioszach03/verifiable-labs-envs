@@ -203,9 +203,44 @@ Reproduce with `python benchmarks/run_llm_benchmark.py --preset paid-full`. See 
 git clone https://github.com/stelioszach03/verifiable-labs-envs
 cd verifiable-labs-envs
 python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
-pytest                                  # 176+ tests green
+pip install -e ".[dev]"          # add ",api" to also install the FastAPI server
+pytest                            # 254+ tests green
 ```
+
+> **macOS + iCloud Drive — known venv gotcha (read this if you live in `~/Documents/`).**
+> If your repo clone is inside an iCloud-synced folder (the default `~/Documents/`
+> is synced if "Desktop & Documents Folders" is on in System Settings → Apple ID →
+> iCloud), iCloud Drive will sporadically corrupt the editable install's `.pth`
+> file by hardlinking it to a stale cached copy. The symptom is
+> `ModuleNotFoundError: No module named 'verifiable_labs_envs'` (or
+> `verifiable_labs_api`) right after a successful `pip install -e .`. The smoking
+> gun is link count `2` on `.venv/lib/python3.11/site-packages/_editable_impl_verifiable_labs_envs.pth`.
+>
+> **Fix (recommended): create the venv outside iCloud-synced storage and symlink
+> it back in:**
+>
+> ```bash
+> deactivate 2>/dev/null
+> mv .venv .venv.broken-icloud           # keep for forensics; delete later
+> mkdir -p ~/.venvs
+> python3.11 -m venv --copies ~/.venvs/verifiable-labs
+> ln -s ~/.venvs/verifiable-labs .venv   # all existing scripts still work
+> source .venv/bin/activate
+> pip install -e ".[dev,api]"
+> python -c "import verifiable_labs_envs, verifiable_labs_api; print('OK')"
+> ```
+>
+> **Alternative (in-place):** Apple respects the `.nosync` suffix on directories
+> as an "exclude from iCloud sync" flag. Rename `.venv` → `.venv.nosync` and
+> symlink:
+>
+> ```bash
+> mv .venv .venv.nosync
+> ln -s .venv.nosync .venv
+> pip install -e ".[dev,api]" --force-reinstall
+> ```
+>
+> Linux and Windows installers are unaffected.
 
 ### Single environment via Prime Intellect Hub (now live)
 

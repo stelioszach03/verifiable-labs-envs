@@ -28,6 +28,14 @@ Or via Docker Compose (auto-reload, mounts the repo source):
 docker compose -f deploy/api/docker-compose.yml up --build
 ```
 
+> **macOS + iCloud Drive note.** If `uvicorn verifiable_labs_api.app:app`
+> raises `ModuleNotFoundError: No module named 'verifiable_labs_api'` right
+> after a clean install, your `.venv/` is in an iCloud-synced directory and
+> the editable install's `.pth` file is being hardlinked to a stale cached
+> copy. See the "macOS + iCloud Drive — known venv gotcha" block in the
+> repo-level [README.md](../../README.md#install) for the
+> rebuild-outside-iCloud fix. Linux and Docker deploys are unaffected.
+
 ## Deploy options
 
 Three deploy targets are scaffolded; pick whichever the user wants
