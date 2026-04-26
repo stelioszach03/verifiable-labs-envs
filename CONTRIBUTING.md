@@ -69,4 +69,4 @@ By submitting a contribution to this repository you agree to license your work u
 
 ## Contact
 
-For coordination that doesn't fit a public issue (e.g., security disclosure, paper-collaboration discussions, downstream-use reports), email **MAINTAINER_EMAIL**.
+For coordination that doesn't fit a public issue (e.g., security disclosure, paper-collaboration discussions, downstream-use reports), email **stelios@stelioszach.com**.

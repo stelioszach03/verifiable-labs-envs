@@ -13,7 +13,7 @@
 
 **Please do not open a public GitHub issue, pull request, or discussion to report a security vulnerability.** Public reports give attackers a head start and put downstream users at risk.
 
-Instead, email **MAINTAINER_EMAIL** with:
+Instead, email **stelios@stelioszach.com** with:
 
 - A description of the issue and the affected component (`src/verifiable_labs_envs`, `src/verifiable_labs_api`, `packages/verifiable-labs/`, hosted API endpoints, CI workflows, etc.).
 - Steps to reproduce — minimal, deterministic, ideally a single Python snippet or `curl` invocation.
