@@ -171,7 +171,3 @@ frontend domain is decided.
   `env.run_rollout`. v0.2 routes turns through the env.
 - **Structured `answer` payloads** — currently rejected with HTTP 422.
   v0.2 accepts a `Prediction`-shaped dict directly.
-
-The full v0.1 → v0.2 plan lives in
-[`/docs/SPRINT_GIGA_COMPLETE.md`](../../docs/SPRINT_GIGA_COMPLETE.md)
-and the Tier 2 brief.

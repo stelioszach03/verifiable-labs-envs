@@ -31,8 +31,7 @@ SPECS = [
     # v0.3.0: tool set rebuilt as primitives (fft, ifft, threshold,
     # compute_residual, sparsity_norm). v0.1/v0.2 exposed an `ista_tool`
     # oracle; measurement on it was an artifact (oracle delegation, not
-    # reasoning). See docs/SPRINT_1_COMPLETE.md Task F and
-    # results/sparse_fourier_reconciliation.md.
+    # reasoning). See results/sparse_fourier_reconciliation.md.
     ("sparse-fourier-recovery-tools", "sparse_fourier_recovery_tools",
      "sparse_fourier_tools",
      "Tool-use sparse Fourier recovery — primitive composition (fft, ifft, "
@@ -100,8 +99,7 @@ dependencies = [
     # verifiers>=0.1.12 (not >=0.1.13): the 0.1.13 line is dev-only at
     # publish time, and PEP 440 treats 0.1.13.devN as < 0.1.13, so
     # `>=0.1.13` would reject dev releases even with pip --pre. The
-    # widened pin lets Hub consumers install from stable releases. See
-    # docs/PRIME_INTELLECT_VERIFICATION.md for the reproducer.
+    # widened pin lets Hub consumers install from stable releases.
     "verifiers>=0.1.12",
     "verifiable-labs-envs @ git+https://github.com/stelioszach03/verifiable-labs-envs.git@main",
 ]

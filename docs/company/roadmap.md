@@ -1,8 +1,7 @@
 # Roadmap
 
 Public-facing summary of what's shipped, what's in flight, and what's
-queued. See [`docs/SPRINT_GIGA_COMPLETE.md`](../SPRINT_GIGA_COMPLETE.md)
-for the full internal sprint history.
+queued.
 
 ## Shipped — v0.1.0-alpha
 

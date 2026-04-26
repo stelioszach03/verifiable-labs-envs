@@ -7,22 +7,10 @@ repo_url: https://github.com/stelioszach03/verifiable-labs-envs
 repo_name: stelioszach03/verifiable-labs-envs
 edit_uri: edit/main/docs/
 
-# Keep all existing docs/*.md files in place — paper footnotes link to
-# them. New content goes under docs/{tutorials,concepts,api-reference,
-# environments,research,company}/.
-
-# The legacy SPRINT_*.md, PRIME_INTELLECT*.md, etc. carry repo-relative
-# links to ../src/, ../scripts/, ../results/ that don't resolve in the
-# rendered site. Don't fail the strict build over them.
+# Tutorials/onboarding docs (CUSTOM_ENVIRONMENTS.md, ONBOARD_AGENT_5_MIN.md)
+# live at docs/ root for README link stability but aren't in the published nav.
 validation:
-  # Legacy SPRINT_*, PRIME_INTELLECT_*, BLOCKERS, incidents/ markdown
-  # files live in docs/ for paper footnote stability but are not part
-  # of the published nav.
   omitted_files: ignore
-  links:
-    not_found: ignore
-    absolute_links: ignore
-    unrecognized_links: ignore
 
 theme:
   name: material

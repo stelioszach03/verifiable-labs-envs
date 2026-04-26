@@ -124,7 +124,7 @@ sanity-checked against the existing envs for plumbing fit.
   conformal coverage of layer boundaries.
 - **Why now:** the geophysics community has open data (OpenFWI) but
   no calibrated RL benchmark; the 1D restriction sidesteps the
-  devito-on-macOS install pain documented in `docs/BLOCKERS.md`.
+  devito-on-macOS install pain.
 
 ### 4. Inverse rendering / radiance fields (`inverse-rendering-2d`)
 

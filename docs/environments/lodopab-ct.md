@@ -64,8 +64,7 @@ to CT for every model — strong evidence of weak cross-env transfer.
 The optional `[ct-real]` extras install `dival` + `odl` to run the
 env on actual LoDoPaB-CT challenge data (rather than the synthetic
 toy phantoms). This is opt-in because the dependency footprint is
-heavy. See [`docs/PRIME_INTELLECT.md`](../PRIME_INTELLECT.md) for the
-real-data evaluation pipeline.
+heavy.
 
 ## Source
 
