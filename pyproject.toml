@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "verifiable-labs-envs"
-version = "0.0.1"
+version = "0.1.0a1"
 description = "Reinforcement-learning environments for scientific reasoning: physics-grounded inverse problems with uncertainty-calibrated rewards."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -69,8 +69,8 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/verifiable-labs/envs"
-Issues = "https://github.com/verifiable-labs/envs/issues"
+Homepage = "https://github.com/stelioszach03/verifiable-labs-envs"
+Issues = "https://github.com/stelioszach03/verifiable-labs-envs/issues"
 
 [project.scripts]
 # Developer CLI — see src/verifiable_labs_envs/cli.py.
