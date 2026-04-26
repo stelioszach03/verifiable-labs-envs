@@ -7,6 +7,15 @@ source code in `src/` and `scripts/`.
 **Outcome:** **2 corrections applied, 50+ claims verified, 0 items
 flagged ambiguous.** Confidence for publication: **HIGH.**
 
+**Post-audit user decision (2026-04-26):** all cost-efficiency
+claims removed from the published version. The audit verified the
+cost numbers as correct, but the user preferred to publish without
+a cost discussion. The §4 Setup "Total LLM API spend" sentence and
+the §4 "Cost efficiency" paragraph were both deleted; the audited
+cost values are retained in this report under §"Cost-efficiency
+claims" for reproducibility, even though they no longer appear in
+the rendered PDF.
+
 ## Summary
 
 | | |
@@ -187,12 +196,21 @@ Verified from canonical complete_matrix sources, latest-turn per
 
 ### Cost-efficiency claims
 
-| metric | paper claim | computed (8-CSV merge of all benchmark spend) | match |
-|---|---:|---:|:---:|
-| nano | \$0.0014/ep | \$0.00139 | ✓ |
-| Opus 4.7 | \$0.0506/ep | \$0.04885 | ≈ ✓ (off by 0.4 %) |
-| Haiku 4.5 | \$0.0095/ep | \$0.00868 | ≈ ✓ (off by 0.8 %) |
-| 36× spread | 0.0506 / 0.0014 = 36.1 | 36 ✓ |
+**Post-audit user decision (2026-04-26): cost-efficiency claims
+removed from the published version.** The original audit verified
+the numbers below as correct against the canonical CSVs; the user
+preferred to publish without a cost discussion (the §4 Setup
+"Total LLM API spend" sentence and the §4 "Cost efficiency"
+paragraph were both deleted). Audited values, retained here for
+reproducibility:
+
+| metric | original paper claim | audited value (8-CSV merge of all benchmark spend) |
+|---|---:|---:|
+| nano | \$0.0014/ep | \$0.00139 |
+| Opus 4.7 | \$0.0506/ep | \$0.04885 |
+| Haiku 4.5 | \$0.0095/ep | \$0.00868 |
+| 36× spread | 0.0506 / 0.0014 = 36.1 | 36 |
+| total spend across 4 paper-final CSVs | \$5.49 (was \$5.35) | \$5.4916 |
 
 ### Citations
 

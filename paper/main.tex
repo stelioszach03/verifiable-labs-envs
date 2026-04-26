@@ -181,9 +181,8 @@ FBP, Gerchberg--Saxton, zero-filled IFFT. Models via OpenRouter:
 Claude Opus~4.7, Sonnet~4.6, Haiku~4.5, GPT-5.4, -mini, -nano
 \citep{anthropic2025claude4, openai2025gpt5}. Conformal:
 $\alpha{=}0.1$, $n_{\mathrm{cal}}{\ge}30$. Three instances per
-(env,~model) cell. Total LLM API spend across all four
-paper-final benchmark CSVs:
-\$5.49. Paired-bootstrap significance testing uses 10k resamples.
+(env,~model) cell. Paired-bootstrap significance testing uses 10k
+resamples.
 
 \begin{figure*}[!h]
   \centering
@@ -252,15 +251,6 @@ coverage guarantee empirically.
     $0.901{\pm}0.017$ against the $0.90$ target.}
   \label{fig:gap}
 \end{figure}
-
-\textbf{Cost efficiency.} Per-episode LLM cost spans $36{\times}$ from
-nano ($\$0.0014$/ep) to Opus~4.7 ($\$0.0506$/ep), with Haiku~4.5 the
-cheapest in the top LLM cluster ($\$0.0095$/ep). Classical baselines
-cost zero LLM API. For a fixed RL training budget, cheap-tier LLMs
-generate ${\sim}36{\times}$ more episodes, which matters when the
-training-signal gap is $0.072{-}0.199$ reward: cheap+many may beat
-expensive+few on wall-clock convergence. This is orthogonal to
-reasoning capability but central to practical RLVR deployment.
 
 \vspace{-4pt}
 \section{Discussion}
