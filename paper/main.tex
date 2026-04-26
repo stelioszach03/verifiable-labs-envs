@@ -318,17 +318,12 @@ statistical analysis, and conclusions were developed and verified by
 the author. Benchmark numerical results are computed directly from CSV
 outputs of model API calls without AI intermediation.
 
-{\small
-\bibliographystyle{plainnat}
-\bibliography{references}
-}
-
 \appendix
 \section{Supplementary figures}\label{sec:appendix}
 
-\begin{figure}[!h]
+\begin{figure}[H]
   \centering
-  \includegraphics[width=0.55\linewidth]{figures/fig3_multiturn.pdf}
+  \includegraphics[width=0.62\linewidth]{figures/fig3_multiturn.pdf}
   \caption{Mean reward delta (multi-turn minus single-turn) per model
     averaged over the multi-turn envs with paired data. GPT-5.4 is the
     only model with a meaningfully positive delta; all others are
@@ -337,9 +332,9 @@ outputs of model API calls without AI intermediation.
   \label{fig:multiturn}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[H]
   \centering
-  \includegraphics[width=0.55\linewidth]{figures/fig5_tools.pdf}
+  \includegraphics[width=0.62\linewidth]{figures/fig5_tools.pdf}
   \caption{Tool-use rewards on sparse Fourier recovery (v0.3
     primitive tools only). Six LLMs cluster in $[0.40, 0.55]$; classical
     OMP on the same instances reaches $0.87$. The v0.1 oracle-artefact
@@ -347,5 +342,10 @@ outputs of model API calls without AI intermediation.
     because the tool itself returned the classical answer.}
   \label{fig:tools}
 \end{figure}
+
+{\small
+\bibliographystyle{plainnat}
+\bibliography{references}
+}
 
 \end{document}
