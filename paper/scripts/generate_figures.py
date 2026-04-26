@@ -54,12 +54,16 @@ COLOUR_TARGET = "#5d4037"          # dark brown horizontal target line
 # Data loading
 # ─────────────────────────────────────────────────────────────
 
+# Canonical paper-final sources only. The earlier sweeps
+# (llm_benchmark_v2, meta_benchmark_v3, phase_retrieval_v1, mri_knee_v1,
+# opus_nano_fill_v2) are partial / superseded; mixing them with the
+# canonical complete_matrix_* shifts the cross-env means below the
+# paper-text values. Pre-publication audit (2026-04-26) narrowed this
+# to the three paper-final phases:
+#   1A complete_matrix_single_turn  — 6 models × 5 envs × 3 seeds
+#   1B complete_matrix_multi_turn   — multi-turn variants, 3 turns
+#   1C tools_v2_complete            — primitives-only tool-use sweep
 LLM_CSVS = [
-    REPO / "results" / "llm_benchmark_v2.csv",
-    REPO / "results" / "meta_benchmark_v3.csv",
-    REPO / "results" / "phase_retrieval_v1_benchmark.csv",
-    REPO / "results" / "mri_knee_v1_benchmark.csv",
-    REPO / "results" / "opus_nano_fill_v2.csv",
     REPO / "results" / "complete_matrix_single_turn.csv",   # paper-final 1A
     REPO / "results" / "complete_matrix_multi_turn.csv",    # paper-final 1B
     REPO / "results" / "tools_v2_complete.csv",             # paper-final 1C
@@ -260,12 +264,17 @@ def fig2_gap() -> Path:
 
 def fig3_multiturn() -> Path:
     llm = load_llm_rewards()
-    # domain pairs: (single, multiturn) env ids
+    # All four (single, multi-turn) domain pairs we have data on.
+    # Pre-publication audit (2026-04-26) widened this from 2 → 4 pairs
+    # so the figure matches the paper's text claim of "across the four
+    # multi-turn variants".
     pairs = [
         ("sparse-fourier-recovery", "sparse-fourier-recovery-multiturn"),
         ("lodopab-ct-simplified", "lodopab-ct-simplified-multiturn"),
+        ("mri-knee-reconstruction", "mri-knee-reconstruction-multiturn"),
+        ("phase-retrieval", "phase-retrieval-multiturn"),
     ]
-    # Collect mean Δ per model across the two domains
+    # Collect mean Δ per model across whatever domains have paired data.
     models = sorted({m for (_, m) in llm})
     rows = []
     for m in models:
@@ -275,7 +284,7 @@ def fig3_multiturn() -> Path:
             mt_vals = llm.get((mt, m), [])
             if st_vals and mt_vals:
                 deltas.append(fmean(mt_vals) - fmean(st_vals))
-        if len(deltas) >= 2:
+        if len(deltas) >= 1:
             rows.append((m, fmean(deltas)))
 
     # Sort by delta ascending (most-negative first = "multiturn hurts")
@@ -297,7 +306,7 @@ def fig3_multiturn() -> Path:
         offset = 0.004 if d >= 0 else -0.004
         ha = "left" if d >= 0 else "right"
         ax.text(d + offset, i, f"{d:+.3f}", va="center", ha=ha, fontsize=7.5)
-    ax.set_title("Multi-turn delta per model\n(sparse-F + CT domain mean)")
+    ax.set_title("Multi-turn delta per model\n(mean over available domains)")
 
     path = OUT / "fig3_multiturn.pdf"
     fig.savefig(path)
