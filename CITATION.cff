@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use Verifiable Labs Envs in academic work, please cite both the software (this record) and the preferred-citation paper below."
+title: "Verifiable Labs Envs: Scientific RL Environments with Calibrated Uncertainty"
+type: software
+version: 0.1.0-alpha
+date-released: 2026-04-26
+license: Apache-2.0
+repository-code: "https://github.com/stelioszach03/verifiable-labs-envs"
+url: "https://github.com/stelioszach03/verifiable-labs-envs"
+keywords:
+  - reinforcement-learning
+  - inverse-problems
+  - rlvr
+  - evaluation
+  - scientific-ml
+  - conformal-prediction
+authors:
+  - given-names: Stelios
+    family-names: Zacharioudakis
+    affiliation: "National and Kapodistrian University of Athens"
+    orcid: "https://orcid.org/0009-0000-6021-5829"
+preferred-citation:
+  type: article
+  title: "Conformal-Calibrated Rewards for Scientific RLVR: Procedural Regeneration Against Benchmark Contamination"
+  year: 2026
+  url: "https://github.com/stelioszach03/verifiable-labs-envs/blob/main/paper/main.pdf"
+  authors:
+    - given-names: Stelios
+      family-names: Zacharioudakis
+      affiliation: "National and Kapodistrian University of Athens"
+      orcid: "https://orcid.org/0009-0000-6021-5829"
