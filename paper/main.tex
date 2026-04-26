@@ -81,9 +81,9 @@ check. \emph{Scientific} reasoning, in contrast, operates on
 continuous fields under ill-posed forward operators whose inverses
 admit a range of answers that only calibrated uncertainty can
 discriminate. Classical algorithms in this domain---OMP
-\citep{donoho2006compressed, candes2006near}, FBP
-\citep{adler2018learned}, zero-filled inverse FFT
-\citep{fessler2020optimization}, Gerchberg--Saxton
+\citep{tropp2007signal, donoho2006compressed, candes2006near}, FBP,
+zero-filled inverse FFT,
+Gerchberg--Saxton
 \citep{gerchberg1972practical}---achieve calibrated answers via
 mathematical guarantees; whether frontier LLMs can match them is an
 empirical question that existing verified-env frameworks cannot pose.
@@ -162,7 +162,7 @@ where the server returns a forward-model residual between turns. A
 tool-use variant of sparse recovery exposes five primitives
 (\texttt{fft}, \texttt{ifft}, soft-\texttt{threshold},
 \texttt{compute\_residual}, \texttt{sparsity\_norm}) from which the
-solver must compose ISTA. An earlier v0.1 design bundled an
+solver must compose ISTA \citep{daubechies2004iterative}. An earlier v0.1 design bundled an
 \texttt{ista\_tool} oracle; empirical byte-identical rewards
 ($r{=}0.858$) across three distinct models revealed the
 oracle-delegation artefact, and we now regression-test against any
