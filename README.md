@@ -1,5 +1,10 @@
 # Verifiable Labs
 
+[![CI](https://github.com/stelioszach03/verifiable-labs-envs/actions/workflows/ci.yml/badge.svg)](https://github.com/stelioszach03/verifiable-labs-envs/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](pyproject.toml)
+[![Version](https://img.shields.io/badge/version-0.1.0--alpha-orange.svg)](https://github.com/stelioszach03/verifiable-labs-envs/releases)
+
 **Verifiable Labs is the API, SDK, and CLI layer for evaluating and training scientific AI agents on verifiable RL environments.**
 
 Most AI eval tools test chatbots and apps. Verifiable Labs generates scientific environments with **objective rewards**, **calibrated uncertainty**, **procedural regeneration**, **classical baselines**, and **training-signal potential** — tasks that are continuous, uncertainty-sensitive, and impossible to solve by memorising static benchmark answers.
