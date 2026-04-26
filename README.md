@@ -14,7 +14,6 @@ Most AI eval tools test chatbots and apps. Verifiable Labs generates scientific 
 - 🔗 Hugging Face leaderboard — https://huggingface.co/spaces/stelioszach03/scientific-rl-benchmark
 - 🔗 Prime Intellect Hub envs — [`sparse-fourier-recovery`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-multiturn), [`-tools`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-tools), [`mri-knee-reconstruction`](https://app.primeintellect.ai/dashboard/environments/stelioszach/mri-knee-reconstruction), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/mri-knee-reconstruction-multiturn), [`phase-retrieval`](https://app.primeintellect.ai/dashboard/environments/stelioszach/phase-retrieval), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/phase-retrieval-multiturn), [`super-resolution-div2k-x4`](https://app.primeintellect.ai/dashboard/environments/stelioszach/super-resolution-div2k-x4), [`lodopab-ct-simplified`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified-multiturn).
 - 🔗 Paper (preprint, OpenReview submission pending) — [`paper/main.pdf`](paper/main.pdf)
-- 🔗 YC + Neo Residency one-pager — [`docs/yc_neo/ONE_PAGER.md`](docs/yc_neo/ONE_PAGER.md)
 
 ## 90-second quickstart
 
@@ -107,7 +106,7 @@ Examples: [`examples/agents/`](examples/agents).
 | **training signal** | prompt-search proof in [`notebooks/training_proof.ipynb`](notebooks/training_proof.ipynb), heuristic search in [`examples/training_signal_demo.py`](examples/training_signal_demo.py) | TRL / vLLM bindings — v0.2 |
 | **compliance** | aggregate report template + PDF generator | real attestation system — v0.3 speculative |
 
-Full roadmap: [`docs/company/roadmap.md`](docs/company/roadmap.md). YC + Neo Residency context: [`docs/yc_neo/ONE_PAGER.md`](docs/yc_neo/ONE_PAGER.md).
+Full roadmap: [`docs/company/roadmap.md`](docs/company/roadmap.md).
 
 ---
 
