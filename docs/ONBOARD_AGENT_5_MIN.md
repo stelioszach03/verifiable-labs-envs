@@ -185,5 +185,3 @@ jq 'select(.parse_success == false) | {seed, metadata}' runs/me.jsonl
 
 - [`docs/api-reference/cli.md`](api-reference/cli.md) — full CLI surface
 - [`docs/CUSTOM_ENVIRONMENTS.md`](CUSTOM_ENVIRONMENTS.md) — write your own env
-- [`docs/yc_neo/DEMO_COMMANDS.md`](yc_neo/DEMO_COMMANDS.md) — the 90-second
-  recording script
