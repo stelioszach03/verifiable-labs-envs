@@ -53,15 +53,7 @@ from verifiable_labs.models import (
 )
 from verifiable_labs.session import AsyncSession, Session
 
-# Convenience re-exports from the heavy env package, so users who
-# `pip install verifiable-labs` get the same imports the docs show:
-#
-#     from verifiable_labs import load_environment, list_environments
-#
-# Wrapped in try/except for the rare slim install where the env package
-# is absent. ``__all__`` is built dynamically so static type-checkers and
-# IDEs see exactly what's actually exported.
-_BASE_EXPORTS = [
+__all__ = [
     "__version__",
     # clients
     "Client",
@@ -87,15 +79,18 @@ _BASE_EXPORTS = [
     "NotFoundError",
     "RateLimitError",
     "ServerError",
+    # convenience re-exports — added by the try-block below when the heavy
+    # envs package is installed (which is the default `pip install
+    # verifiable-labs` path). Listed here so static analysers see them.
+    "load_environment",
+    "list_environments",
 ]
 
+# Re-export the env helpers so users who `pip install verifiable-labs` can
+# do `from verifiable_labs import load_environment` like the docs show.
+# Wrapped in try/except so a slim install (envs absent) still imports;
+# the names are then dropped from __all__ to keep the surface honest.
 try:
-    from verifiable_labs_envs import (  # noqa: F401
-        list_environments,
-        load_environment,
-    )
-
-    __all__ = [*_BASE_EXPORTS, "load_environment", "list_environments"]
+    from verifiable_labs_envs import list_environments, load_environment
 except ImportError:
-    # Slim install (no envs package) — clients still work, env helpers absent.
-    __all__ = list(_BASE_EXPORTS)
+    __all__ = [n for n in __all__ if n not in ("load_environment", "list_environments")]
