@@ -67,10 +67,10 @@ def _parse_response(text: str, instance: Instance) -> Prediction:
 
     lr_rows, lr_cols = instance.y.shape
 
-    rows = require_list_of_length(image_raw, lr_rows, "image")
+    rows = require_list_of_length(image_raw, lr_rows, "image", lenient=True)
     grid = np.empty((lr_rows, lr_cols), dtype=np.float64)
     for r, row_raw in enumerate(rows):
-        row = require_list_of_length(row_raw, lr_cols, f"image[{r}]")
+        row = require_list_of_length(row_raw, lr_cols, f"image[{r}]", lenient=True)
         for c, value in enumerate(row):
             pixel = coerce_int(value, f"image[{r}][{c}]")
             if not 0 <= pixel <= 255:

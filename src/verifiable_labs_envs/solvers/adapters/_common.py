@@ -64,12 +64,34 @@ def require_key(obj: dict[str, Any], key: str) -> Any:
     return obj[key]
 
 
-def require_list_of_length(obj: Any, expected_len: int, name: str) -> list[Any]:
+def require_list_of_length(
+    obj: Any,
+    expected_len: int,
+    name: str,
+    *,
+    lenient: bool = False,
+    pad_value: Any = 0,
+) -> list[Any]:
+    """Validate that ``obj`` is a list of length ``expected_len``.
+
+    With ``lenient=True``, rows that are off by a small amount (≤ 4 entries
+    or 12.5% of expected) are repaired in place — short rows padded with
+    ``pad_value``, long rows truncated. Wider mismatches still raise.
+    Image-grid adapters opt into this so a single dropped pixel from a
+    weak LLM doesn't kill the whole episode.
+    """
     if not isinstance(obj, list):
         raise LLMSolverError(f"'{name}' must be a list, got {type(obj).__name__}")
-    if len(obj) != expected_len:
-        raise LLMSolverError(f"expected {expected_len} entries in '{name}', got {len(obj)}")
-    return obj
+    if len(obj) == expected_len:
+        return obj
+    if lenient:
+        slack = max(4, expected_len // 8)
+        diff = len(obj) - expected_len
+        if abs(diff) <= slack:
+            if diff > 0:
+                return obj[:expected_len]
+            return obj + [pad_value] * (-diff)
+    raise LLMSolverError(f"expected {expected_len} entries in '{name}', got {len(obj)}")
 
 
 def coerce_int(value: Any, name: str) -> int:

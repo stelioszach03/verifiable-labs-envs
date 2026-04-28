@@ -207,15 +207,33 @@ class OpenAICompatibleAgent:
                 "the OpenAICompatibleAgent with a live API key"
             ) from e
         client = OpenAI(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout_s)
-        t0 = time.perf_counter()
-        resp = client.chat.completions.create(
-            model=self.model,
-            messages=[
+        # Force JSON when the env's system prompt asks for it, and give the
+        # model enough output budget to emit large structured payloads (e.g.
+        # 32×32 image arrays). Falls back to plain text if the provider
+        # rejects either parameter.
+        wants_json = "json" in system.lower() or "json" in user.lower()
+        kwargs: dict[str, Any] = {
+            "model": self.model,
+            "messages": [
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},
             ],
-            temperature=self.temperature,
-        )
+            "temperature": self.temperature,
+            "max_tokens": 8192,
+        }
+        if wants_json:
+            kwargs["response_format"] = {"type": "json_object"}
+        t0 = time.perf_counter()
+        try:
+            resp = client.chat.completions.create(**kwargs)
+        except Exception as e:  # noqa: BLE001
+            # Retry without the optional knobs if the provider rejected them.
+            kwargs.pop("response_format", None)
+            kwargs.pop("max_tokens", None)
+            if "max_tokens" in str(e) or "response_format" in str(e):
+                resp = client.chat.completions.create(**kwargs)
+            else:
+                raise
         latency_ms = (time.perf_counter() - t0) * 1000.0
         text = resp.choices[0].message.content or ""
         # The agent returns a parsed dict; the env's adapter does the

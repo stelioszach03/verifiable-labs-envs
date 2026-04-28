@@ -84,10 +84,13 @@ def _parse_response(text: str, instance: Instance) -> Prediction:
     parsed = extract_json_block(text)
     image_raw = require_key(parsed, "image")
 
-    rows = require_list_of_length(image_raw, COARSE_SIZE, "image")
+    # Image envs are lenient on row/col count: a small model occasionally
+    # drops one entry from a 32×32 grid. Pad the missing pixel with 0 so the
+    # episode scores instead of failing entirely.
+    rows = require_list_of_length(image_raw, COARSE_SIZE, "image", lenient=True)
     grid = np.empty((COARSE_SIZE, COARSE_SIZE), dtype=np.float64)
     for r, row_raw in enumerate(rows):
-        row = require_list_of_length(row_raw, COARSE_SIZE, f"image[{r}]")
+        row = require_list_of_length(row_raw, COARSE_SIZE, f"image[{r}]", lenient=True)
         for c, value in enumerate(row):
             pixel = coerce_int(value, f"image[{r}][{c}]")
             if not 0 <= pixel <= 255:
