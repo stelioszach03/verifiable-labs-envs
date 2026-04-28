@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "verifiable-labs"
-version = "0.1.0a1"
-description = "Python SDK for the Verifiable Labs Hosted Evaluation API — evaluate frontier LLMs on conformal-calibrated scientific RL environments."
+version = "0.1.0a3"
+description = "Python SDK + CLI for Verifiable Labs — evaluate frontier LLMs on conformal-calibrated scientific RL environments."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Apache-2.0" }
@@ -38,6 +38,13 @@ dependencies = [
     "httpx>=0.27",
     "pydantic>=2.7",
     "typing-extensions>=4.8",
+    # CLI surface — pulls in env code so `verifiable run --env X --model Y`
+    # actually executes locally. Heavy (numpy / scipy / jax) but unavoidable
+    # without a hosted API.
+    "verifiable-labs-envs>=0.1.0a1",
+    # Provider client used by --model (Anthropic / OpenAI / Google all expose
+    # OpenAI-compatible endpoints).
+    "openai>=1.50",
 ]
 
 [project.optional-dependencies]
@@ -48,12 +55,20 @@ dev = [
     "ruff>=0.5",
 ]
 
+[project.scripts]
+# User-facing CLI: `verifiable list`, `verifiable run --env X --model Y`,
+# `verifiable info --env X`, `verifiable login`. For dev/legacy commands
+# (envs / compare / report / init-env / validate-env, or
+# `run --agent FILE --out F.jsonl`) this CLI delegates to
+# verifiable_labs_envs.cli.main, so the underlying developer surface keeps
+# working unchanged.
+verifiable = "verifiable_labs.cli:main"
+
 [project.urls]
-Homepage = "https://github.com/stelioszach03/verifiable-labs-envs"
+Homepage = "https://verifiable-labs.com"
 Source = "https://github.com/stelioszach03/verifiable-labs-envs/tree/main/packages/verifiable-labs"
 Issues = "https://github.com/stelioszach03/verifiable-labs-envs/issues"
-Documentation = "https://github.com/stelioszach03/verifiable-labs-envs/blob/main/packages/verifiable-labs/README.md"
-"API reference" = "https://github.com/stelioszach03/verifiable-labs-envs/blob/main/deploy/api/README.md"
+Documentation = "https://verifiable-labs.com/docs/"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/verifiable_labs"]

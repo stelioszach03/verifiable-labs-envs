@@ -224,6 +224,13 @@ class OpenAICompatibleAgent:
         parsed = _try_parse_json(text)
         out: dict[str, Any] = parsed if isinstance(parsed, dict) else {"answer_text": text}
         out["_latency_ms"] = latency_ms
+        # Token usage — surfaced for cost computation in the friendly CLI.
+        # Underscore-prefixed so existing consumers (which strip private fields
+        # via _strip_internals) keep ignoring it.
+        usage = getattr(resp, "usage", None)
+        if usage is not None:
+            out["_prompt_tokens"] = int(getattr(usage, "prompt_tokens", 0) or 0)
+            out["_completion_tokens"] = int(getattr(usage, "completion_tokens", 0) or 0)
         return out
 
     @staticmethod
