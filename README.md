@@ -3,7 +3,9 @@
 [![CI](https://github.com/stelioszach03/verifiable-labs-envs/actions/workflows/ci.yml/badge.svg)](https://github.com/stelioszach03/verifiable-labs-envs/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](pyproject.toml)
-[![Version](https://img.shields.io/badge/version-0.1.0--alpha-orange.svg)](https://github.com/stelioszach03/verifiable-labs-envs/releases)
+[![PyPI](https://img.shields.io/pypi/v/verifiable-labs?label=pypi%3Averifiable-labs&color=4c1)](https://pypi.org/project/verifiable-labs/)
+
+> Verifiable Labs is the contamination-proof RL evaluation substrate for AI labs training scientific agents. Procedurally generated environments, classical-solver ground truth, conformal-calibrated rewards.
 
 **Verifiable Labs is the API, SDK, and CLI layer for evaluating and training scientific AI agents on verifiable RL environments.**
 
@@ -14,6 +16,23 @@ Most AI eval tools test chatbots and apps. Verifiable Labs generates scientific 
 - 🔗 Hugging Face leaderboard — https://huggingface.co/spaces/stelioszach03/scientific-rl-benchmark
 - 🔗 Prime Intellect Hub envs — [`sparse-fourier-recovery`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-multiturn), [`-tools`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-tools), [`mri-knee-reconstruction`](https://app.primeintellect.ai/dashboard/environments/stelioszach/mri-knee-reconstruction), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/mri-knee-reconstruction-multiturn), [`phase-retrieval`](https://app.primeintellect.ai/dashboard/environments/stelioszach/phase-retrieval), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/phase-retrieval-multiturn), [`super-resolution-div2k-x4`](https://app.primeintellect.ai/dashboard/environments/stelioszach/super-resolution-div2k-x4), [`lodopab-ct-simplified`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified-multiturn).
 - 🔗 Paper (preprint, OpenReview submission pending) — [`paper/main.pdf`](paper/main.pdf)
+
+## Install
+
+```bash
+pip install verifiable-labs
+
+# Verify
+verifiable --version          # → verifiable-labs 0.1.0a4
+verifiable list               # → 10 environments
+
+# Run a benchmark
+export OPENROUTER_API_KEY=sk-or-...
+verifiable run --env sparse-fourier-recovery \
+    --model openai/gpt-4o-mini --episodes 3 --seed 42
+```
+
+The `verifiable-labs` PyPI package pulls in the heavy `verifiable-labs-envs` automatically, so the CLI runs every environment locally — no hosted API needed for `pip install verifiable-labs`. For the lightweight HTTP-client surface only, see the [Python SDK](#sdk-quickstart) section below.
 
 ## 90-second quickstart
 
@@ -63,7 +82,16 @@ with Client(base_url="https://api.verifiable-labs.com") as c:
     print(result.reward, result.components, result.coverage)
 ```
 
-`AsyncClient` mirrors the sync API one-to-one. The SDK is currently `0.1.0a1` on TestPyPI; PyPI publication is the last step of the funding-sprint polish queue.
+`AsyncClient` mirrors the sync API one-to-one. The SDK is on PyPI as [`verifiable-labs`](https://pypi.org/project/verifiable-labs/) (current: `0.1.0a4`). The same package also re-exports `load_environment` and `list_environments` so you can drive envs locally without going through the hosted API:
+
+```python
+from verifiable_labs import load_environment, list_environments
+
+print(list_environments())              # ['lodopab-ct-simplified', ...]
+env = load_environment("sparse-fourier-recovery")
+result = env.run_baseline(seed=42)
+print(result["reward"])
+```
 
 ### Hosted API quickstart
 
@@ -101,7 +129,7 @@ Examples: [`examples/agents/`](examples/agents).
 |---|---|---|
 | **environments** | 10 envs across 5 domains | 5 new envs (holographic 3D, EM tomography, seismic FWI, inverse rendering, protein distogram) — v0.2 |
 | **API** | `/v1/{health, environments, sessions, leaderboard}` (open, rate-limited) | per-user auth, Redis-backed sessions — v0.2 |
-| **SDK** | sync + async clients on TestPyPI | PyPI publish + `[envs]` extras for local mode — Tier-1 polish |
+| **SDK** | sync + async clients on PyPI as `verifiable-labs` (re-exports `load_environment` for local mode) | optional slim install — Tier-1 polish |
 | **CLI** | `envs · run · compare · report · init-env · validate-env` | static viewer / dashboard — v0.3 stretch |
 | **training signal** | prompt-search proof in [`notebooks/training_proof.ipynb`](notebooks/training_proof.ipynb), heuristic search in [`examples/training_signal_demo.py`](examples/training_signal_demo.py) | TRL / vLLM bindings — v0.2 |
 | **compliance** | aggregate report template + PDF generator | real attestation system — v0.3 speculative |

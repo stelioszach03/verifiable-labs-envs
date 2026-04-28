@@ -26,7 +26,7 @@ The Hosted Evaluation API v0.1.0-alpha is **unauthenticated**; the
 """
 from __future__ import annotations
 
-__version__ = "0.1.0a3"
+__version__ = "0.1.0a4"
 
 from verifiable_labs.client import (
     DEFAULT_BASE_URL,
@@ -53,7 +53,15 @@ from verifiable_labs.models import (
 )
 from verifiable_labs.session import AsyncSession, Session
 
-__all__ = [
+# Convenience re-exports from the heavy env package, so users who
+# `pip install verifiable-labs` get the same imports the docs show:
+#
+#     from verifiable_labs import load_environment, list_environments
+#
+# Wrapped in try/except for the rare slim install where the env package
+# is absent. ``__all__`` is built dynamically so static type-checkers and
+# IDEs see exactly what's actually exported.
+_BASE_EXPORTS = [
     "__version__",
     # clients
     "Client",
@@ -80,3 +88,14 @@ __all__ = [
     "RateLimitError",
     "ServerError",
 ]
+
+try:
+    from verifiable_labs_envs import (  # noqa: F401
+        list_environments,
+        load_environment,
+    )
+
+    __all__ = [*_BASE_EXPORTS, "load_environment", "list_environments"]
+except ImportError:
+    # Slim install (no envs package) — clients still work, env helpers absent.
+    __all__ = list(_BASE_EXPORTS)
