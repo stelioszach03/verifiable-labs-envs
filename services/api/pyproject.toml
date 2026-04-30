@@ -1,0 +1,80 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "vlabs-api"
+version = "0.0.1"
+description = "Verifiable Labs Hosted Calibration API — Phase 16 paid SaaS layer."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Stelios Zacharioudakis", email = "sdi2200243@di.uoa.gr" },
+]
+keywords = [
+    "conformal-prediction",
+    "calibration",
+    "rlvr",
+    "fastapi",
+    "verifiable-labs",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+    "Typing :: Typed",
+]
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "sqlalchemy[asyncio]>=2.0",
+    "asyncpg>=0.29",
+    "alembic>=1.13",
+    "slowapi>=0.1.9",
+    "pydantic[email]>=2.7",
+    "pydantic-settings>=2.4",
+    "python-ulid>=2.7",
+    "structlog>=24.1",
+    "vlabs-calibrate==0.1.0a1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "httpx>=0.27",
+    "pgserver>=0.1.4",
+    "ruff>=0.5",
+    "mypy>=1.10",
+]
+
+[project.scripts]
+vlabs-api = "vlabs_api.main:run_dev"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/vlabs_api"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers --import-mode=importlib"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+markers = [
+    "integration: tests that need a real Postgres",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = [
+    "E501",  # line length, handled by formatter
+    "B008",  # FastAPI's Depends() in argument defaults is the documented pattern
+]
