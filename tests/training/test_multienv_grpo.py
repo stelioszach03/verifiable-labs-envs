@@ -15,6 +15,9 @@ from pathlib import Path
 
 import pytest
 
+# Skip entire module if trl/torch not available (CI runners).
+pytest.importorskip("trl", reason="trl/torch required")
+
 _SCRIPT_PATH = Path(__file__).resolve().parents[2] / "examples" / "training" / "train_multienv_grpo.py"
 _spec = _il.spec_from_file_location("train_multienv_grpo", _SCRIPT_PATH)
 _mod = _il.module_from_spec(_spec)
