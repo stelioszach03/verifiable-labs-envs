@@ -116,3 +116,38 @@ Icon
 *[0-9].md
 *[0-9].py
 LICENSE [0-9]
+
+# Secrets — extended (added phase14 commit)
+.env.*
+*.env
+**/secrets/
+**/credentials/
+*.pem
+*.p12
+
+# ML experiment tracking
+**/wandb/
+**/mlruns/
+
+# Model weights and checkpoints (Drive-backed, never commit)
+**/checkpoints/
+*.safetensors
+*.bin
+*.pt
+optimizer.pt
+
+# Colab Drive paths (defensive — should not appear in repo locally)
+/content/drive/
+
+# Repo-local Drive symlinks / output dirs
+/checkpoints
+/runs_remote
+/runs_local
+/results_remote
+/training_outputs
+/cloudflared
+/cloudflared.log
+/leaderboard
+
+# Node (defensive)
+node_modules/
