@@ -91,6 +91,45 @@ print(result.reward, result.interval, result.target_coverage)
 > Mondrian / class-conditional conformal (Vovk & Gammerman) — planned for
 > 0.2.0.
 
+## Coverage validation
+
+`tests/test_coverage_validation.py` calibrates on `n_train = 500` traces
+(`α = 0.1`) and evaluates on a held-out `n_test = 2000` set across five
+synthetic distributions chosen to stress the wrapper. Empirical coverages
+on a fixed seed (reproducible by running the test):
+
+| distribution | n_train | n_test | target | empirical | quantile | width (median) | tolerance | pass |
+|---|---:|---:|---:|---:|---:|---:|---:|:-:|
+| `gaussian` | 500 | 2000 | 0.90 | 0.9150 | 1.6717 | 1.6717 | ±0.05 | yes |
+| `heavy_tail_t3` | 500 | 2000 | 0.90 | 0.9035 | 2.2679 | 2.2679 | ±0.05 | yes |
+| `bimodal` | 500 | 2000 | 0.90 | 0.8960 | 2.3959 | 2.3959 | ±0.05 | yes |
+| `sparse` | 500 | 2000 | 0.90 | 0.9015 | 4.5035 | 4.5035 | ±0.05 | yes |
+| `structured_misspecified` | 500 | 2000 | 0.90 | 0.9120 | 2.6346 | 2.6346 | ±0.07 | yes |
+
+The structured-misspecified case uses a 7pp tolerance because the true σ
+is 2× the reported σ on half the traces — split-conformal still gives
+marginal coverage under exchangeability, but finite-sample variance is
+slightly larger than the well-specified cases.
+
+## Demos
+
+Three self-contained example scripts under [`examples/calibrate/`](./examples/calibrate/):
+
+1. [`01_humaneval_passfail.py`](./examples/calibrate/01_humaneval_passfail.py)
+   — binary 0/1 reward (HumanEval-style cheap proxy vs gold tests).
+   Shows both regimes: the proxy is "verified" against gold (interval
+   collapses to a point) and the degenerate `[0, 1]` regime when the
+   proxy disagrees too often.
+2. [`02_math_exact_match.py`](./examples/calibrate/02_math_exact_match.py)
+   — judge-graded exact match with per-trace confidence as σ.
+3. [`03_gsm8k_step_validity.py`](./examples/calibrate/03_gsm8k_step_validity.py)
+   — continuous step-validity reward in `[0, 1]` with ensemble
+   disagreement as σ. Best illustration of how interval width tracks σ
+   smoothly across a test set.
+
+Each demo synthesises its data inline (no external dataset downloads) so
+you can copy a snippet straight into your own pipeline.
+
 ## Tests
 
 ```bash
