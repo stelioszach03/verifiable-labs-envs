@@ -158,6 +158,117 @@ def gauss_traces():
     return _gauss_traces
 
 
+@pytest.fixture(autouse=True)
+def reset_rate_limiter():
+    """Clear the in-memory rate limiter buckets between tests."""
+    from vlabs_api.ratelimit import reset_for_tests
+
+    reset_for_tests()
+    yield
+    reset_for_tests()
+
+
+@pytest.fixture
+async def clerk_user(session: AsyncSession) -> tuple[str, User]:  # noqa: F821
+    """Create a User linked to a fake Clerk id; return ``(fake_jwt, User)``.
+
+    The JWT is just a sentinel string — tests monkeypatch
+    :func:`vlabs_api.clerk_auth._verify_jwt` to return claims without
+    actually verifying it.
+    """
+    from vlabs_api.db import User
+
+    user = User(
+        email=f"clerk-{uuid.uuid4().hex[:8]}@example.com",
+        name="Clerk User",
+        clerk_user_id=f"user_{uuid.uuid4().hex[:16]}",
+    )
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
+    return f"fake-jwt-for-{user.clerk_user_id}", user
+
+
+@pytest.fixture
+def stub_clerk_verify(monkeypatch):
+    """Patch ``_verify_jwt`` to return claims based on the bearer token.
+
+    Tests that need different claims call ``stub_clerk_verify(claims)``.
+    """
+    from vlabs_api import clerk_auth
+
+    def _factory(claims: dict | None = None):
+        def _stub(token: str):
+            if claims is not None:
+                return claims
+            # Default: pull clerk_user_id from the fake-jwt-for-... token.
+            if token.startswith("fake-jwt-for-"):
+                return {
+                    "sub": token.removeprefix("fake-jwt-for-"),
+                    "exp": 9999999999,
+                    "iat": 0,
+                    "email": "stub@example.com",
+                }
+            return {"sub": "user_stub", "exp": 9999999999, "iat": 0}
+
+        monkeypatch.setattr(clerk_auth, "_verify_jwt", _stub)
+
+    return _factory
+
+
+@pytest.fixture
+def stub_stripe(monkeypatch):
+    """Replace Stripe SDK calls used by billing.py with deterministic stubs."""
+    import stripe
+
+    state = {"customers": {}, "checkouts": [], "portals": [], "next_id": 1}
+
+    def _next(prefix: str) -> str:
+        state["next_id"] += 1
+        return f"{prefix}_test_{state['next_id']:06d}"
+
+    class _Customer:
+        @staticmethod
+        def create(**kwargs):
+            cid = _next("cus")
+            state["customers"][cid] = kwargs
+            return {"id": cid, **kwargs}
+
+    class _CheckoutSession:
+        @staticmethod
+        def create(**kwargs):
+            sid = _next("cs")
+            state["checkouts"].append({"id": sid, **kwargs})
+            return {"id": sid, "url": f"https://stripe.test/checkout/{sid}"}
+
+    class _Checkout:
+        Session = _CheckoutSession
+
+    class _PortalSession:
+        @staticmethod
+        def create(**kwargs):
+            pid = _next("ps")
+            state["portals"].append({"id": pid, **kwargs})
+            return {"id": pid, "url": f"https://stripe.test/portal/{pid}"}
+
+    class _BillingPortal:
+        Session = _PortalSession
+
+    monkeypatch.setattr(stripe, "Customer", _Customer)
+    monkeypatch.setattr(stripe, "checkout", _Checkout)
+    monkeypatch.setattr(stripe, "billing_portal", _BillingPortal)
+
+    # Also pre-populate config with sane test values.
+    monkeypatch.setenv("STRIPE_SECRET_KEY", "sk_test_dummy")
+    monkeypatch.setenv("STRIPE_WEBHOOK_SECRET", "whsec_dummy")
+    monkeypatch.setenv("STRIPE_PRICE_ID_PRO", "price_test_pro")
+    monkeypatch.setenv("STRIPE_PRICE_ID_TEAM", "price_test_team")
+    from vlabs_api.config import get_settings
+
+    get_settings.cache_clear()
+    return state
+
+
 @pytest.fixture
 async def calibrated(client: AsyncClient, api_key) -> dict:
     """Calibrate on 50 Gaussian traces and return the response body."""

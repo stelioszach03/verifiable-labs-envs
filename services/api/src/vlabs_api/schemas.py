@@ -137,6 +137,52 @@ class HealthResponse(BaseModel):
     environment: Literal["dev", "staging", "prod"]
 
 
+# ── Stage B: billing + key management schemas ────────────────────────
+
+
+PaidTier = Literal["pro", "team"]
+
+
+class CheckoutRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    tier: PaidTier
+
+
+class CheckoutResponse(BaseModel):
+    url: str
+    tier: PaidTier
+
+
+class PortalResponse(BaseModel):
+    url: str
+
+
+class CreateAPIKeyRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=64)
+
+
+class APIKeyInfo(BaseModel):
+    id: str
+    prefix: str
+    name: str
+    created_at: datetime
+    last_used_at: datetime | None = None
+    revoked_at: datetime | None = None
+
+
+class APIKeyCreated(APIKeyInfo):
+    plaintext_key: str = Field(
+        description="Returned ONCE on creation; never persisted in plaintext."
+    )
+
+
+class APIKeyList(BaseModel):
+    items: list[APIKeyInfo]
+
+
 __all__ = [
     "NonconformityName",
     "CalibrationTrace",
@@ -154,4 +200,12 @@ __all__ = [
     "UsageRemaining",
     "UsageResponse",
     "HealthResponse",
+    "PaidTier",
+    "CheckoutRequest",
+    "CheckoutResponse",
+    "PortalResponse",
+    "CreateAPIKeyRequest",
+    "APIKeyInfo",
+    "APIKeyCreated",
+    "APIKeyList",
 ]

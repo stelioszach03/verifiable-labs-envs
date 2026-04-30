@@ -4,6 +4,81 @@ Append-only timestamped log. Newest entry on top.
 
 ---
 
+## 2026-04-30 — Phase 16, Stage B (Stripe + Next.js dashboard)
+
+**Goal**: ship Stripe (TEST MODE), tier-aware rate limit, Clerk JWT
+acceptance for the management plane, and a Next.js landing/dashboard.
+
+### Done — services/api
+- Replaced slowapi with a 30-LOC sliding-window in-memory rate limiter
+  in `ratelimit.py`. Routes `calibrate`, `predict`, `evaluate`, `audit`,
+  `usage` now use the `enforce_rate_limit` FastAPI dependency. Single-
+  instance only; Stage C adds Redis backend.
+- Added `clerk_auth.py` (PyJWKClient, JIT user creation from `sub` claim)
+  and `billing.py` (Stripe wrapper: ensure_stripe_customer, create_checkout_session,
+  create_billing_portal_session, verify_webhook_signature, sync_subscription_from_event).
+- New routes: `/v1/billing/checkout`, `/v1/billing/portal` (Clerk-authed),
+  `/v1/billing/webhook` (Stripe signature + idempotency via stripe_events
+  table), `/v1/keys` GET/POST, `/v1/keys/{id}` DELETE (Clerk-authed).
+- New schemas in `schemas.py`: CheckoutRequest/Response, PortalResponse,
+  CreateAPIKeyRequest, APIKeyInfo/Created/List.
+- New errors: InvalidClerkToken, WebhookSignatureInvalid,
+  WebhookEventUnsupported, StripeNotConfigured, ClerkNotConfigured,
+  APIKeyNotFoundForUser.
+- New Alembic revision `0002_stripe_events.py` + same SQL applied to
+  Supabase via MCP `apply_migration`.
+- Helper `scripts/create_stripe_products.py` — idempotent test-mode
+  product/price bootstrapper (run once with sk_test_).
+
+### Done — services/landing
+- Next.js 15 + Tailwind + Clerk skeleton, no shadcn install (design
+  language only). 21 files total.
+- Marketing landing (`/`), pricing (`/pricing`), Clerk-hosted sign-in
+  and sign-up routes.
+- Dashboard with 4 sub-pages: overview, api-keys, usage, billing.
+- Server actions in `app/dashboard/actions.ts` for all mutations
+  (`actCreateKey`, `actRevokeKey`, `actUpgradeTo`, `actOpenPortal`).
+- Typed `lib/api.ts` wraps the vlabs-api endpoints used by the dashboard
+  and forwards the Clerk session token.
+
+### Tests
+- 18 new tests in `services/api/tests/`:
+  test_billing (5), test_webhook (5), test_keys (5), test_ratelimit (3).
+  All use stub fixtures (`stub_clerk_verify`, `stub_stripe`,
+  `stub_webhook_verify`) so they don't require live Stripe/Clerk.
+- Total `services/api/tests/`: 48 passing in 7s.
+- Repo-root `pytest --ignore=tests/training ...`: 519 + 6 (unchanged).
+
+### Stripe products created
+- Created via the helper script using `STRIPE_SECRET_KEY=sk_test_...`.
+  Stelios's task to actually run the script and paste the resulting
+  `STRIPE_PRICE_ID_*` values into `services/api/.env.local`.
+
+### Webhook signature verification approach
+- `stripe.Webhook.construct_event(payload, sig_header, whsec)` —
+  Stripe's official helper; verifies HMAC-SHA256 over `<timestamp>.<payload>`
+  with the endpoint secret. Implementation in `vlabs_api.billing.verify_webhook_signature`.
+- Idempotency via `stripe_events` table: `INSERT` first (PK on `event_id`),
+  process only if INSERT succeeded; replays return `{"deduped": true}`.
+
+### Decisions logged
+- **Tier-aware rate limit is per-key**, not per-user. A user with 3 keys
+  gets 3× the tier RPM if traffic is spread across them. This is the
+  standard SaaS behaviour and matches Stripe / OpenAI.
+- **Webhook handler always returns 2xx** even on internal errors. Errors
+  are persisted in `stripe_events.error` for debugging. 5xx triggers
+  Stripe retry storms — bad practice.
+- **No live Stripe products** in this commit. The script is committed,
+  the user runs it locally to create test products. Production
+  activation is gated on the Delaware C-corp registration.
+
+### Open / next stage
+- Stage C: Fly.io deploy, custom domain (`api.`/`app.`), DNS,
+  monitoring (Sentry/BetterStack), Redis-backed rate limiter,
+  CI deploy workflow (gated on explicit user approval).
+
+---
+
 ## 2026-04-30 — Phase 16, Stage A (core API + auth + DB)
 
 **Goal**: code-complete the four `/v1/*` endpoints + `/v1/predict`

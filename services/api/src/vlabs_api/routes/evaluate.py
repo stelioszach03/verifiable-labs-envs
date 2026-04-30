@@ -5,12 +5,12 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from vlabs_api.auth import AuthContext, require_api_key
+from vlabs_api.auth import AuthContext
 from vlabs_api.calibration import evaluate_against_calibration
 from vlabs_api.db import CalibrationRun, Evaluation, get_db
 from vlabs_api.errors import CalibrationNotFound, QuotaExceeded
 from vlabs_api.ids import encode_calibration_id, parse_calibration_id
-from vlabs_api.ratelimit import DEFAULT_LIMIT, limiter
+from vlabs_api.ratelimit import enforce_rate_limit
 from vlabs_api.schemas import EvaluateRequest, EvaluateResponse
 from vlabs_api.usage import (
     get_current_counter,
@@ -22,11 +22,10 @@ router = APIRouter(tags=["calibration"])
 
 
 @router.post("/evaluate", response_model=EvaluateResponse)
-@limiter.limit(DEFAULT_LIMIT)
 async def evaluate_endpoint(
     request: Request,
     payload: EvaluateRequest,
-    auth: AuthContext = Depends(require_api_key),
+    auth: AuthContext = Depends(enforce_rate_limit),
     session: AsyncSession = Depends(get_db),
 ) -> EvaluateResponse:
     calib_uuid = parse_calibration_id(payload.calibration_id)

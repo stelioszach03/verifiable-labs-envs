@@ -46,14 +46,22 @@ class Settings(BaseSettings):
     vlabs_log_level: str = "INFO"
     vlabs_environment: Literal["dev", "staging", "prod"] = "dev"
 
-    # ── Stage B placeholders (unused in Stage A) ──────────────────
-    stripe_secret_key: str | None = None
-    stripe_webhook_secret: str | None = None
+    # ── Stage B: Stripe (TEST MODE ONLY until C-corp registered) ──
+    stripe_secret_key: str | None = None  # sk_test_... only in dev
+    stripe_webhook_secret: str | None = None  # whsec_... from Stripe Dashboard
     stripe_price_id_pro: str | None = None
     stripe_price_id_team: str | None = None
+    stripe_price_id_pro_overage: str | None = None
+    stripe_price_id_team_overage: str | None = None
+    stripe_billing_portal_return_url: str = "http://localhost:3000/dashboard/billing"
+    stripe_checkout_success_url: str = "http://localhost:3000/dashboard/billing?status=success"
+    stripe_checkout_cancel_url: str = "http://localhost:3000/dashboard/billing?status=cancel"
+
+    # ── Stage B: Clerk (dashboard auth only) ──────────────────────
     clerk_secret_key: str | None = None
     clerk_publishable_key: str | None = None
-    clerk_jwt_key: str | None = None
+    clerk_jwt_issuer: str | None = None  # e.g. https://something.clerk.accounts.dev
+    clerk_jwks_url: str | None = None  # auto-derived from issuer if not set
 
     # ── Tier limits (composed in) ─────────────────────────────────
     @property

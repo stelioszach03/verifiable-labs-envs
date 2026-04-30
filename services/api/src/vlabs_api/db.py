@@ -176,6 +176,18 @@ class UsageCounter(Base):
     predictions_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
 
+class StripeEvent(Base):
+    __tablename__ = "stripe_events"
+
+    event_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    event_type: Mapped[str] = mapped_column(Text, nullable=False)
+    received_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=_now_utc
+    )
+    processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    error: Mapped[str | None] = mapped_column(Text)
+
+
 class Subscription(Base):
     __tablename__ = "subscriptions"
 
@@ -265,6 +277,7 @@ __all__ = [
     "CalibrationRun",
     "Evaluation",
     "UsageCounter",
+    "StripeEvent",
     "Subscription",
     "init_engine",
     "override_engine",
