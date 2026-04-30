@@ -24,7 +24,6 @@ import json
 import os
 import random
 import subprocess
-import sys
 import time
 from pathlib import Path
 from typing import Any
@@ -35,7 +34,7 @@ os.environ.setdefault("HF_HOME", DEFAULT_CACHE)
 os.environ.setdefault("HF_HUB_CACHE", str(Path(DEFAULT_CACHE) / "hub"))
 os.environ.setdefault("TRANSFORMERS_CACHE", str(Path(DEFAULT_CACHE) / "transformers"))
 
-import torch
+import torch  # noqa: E402
 
 # torch.load weights_only patch (PyTorch 2.6+ default change; same as
 # train_grpo_qwen.py — see M6 writeup).
@@ -49,20 +48,19 @@ def _torch_load_full_pickle(*args, **kwargs):
 
 torch.load = _torch_load_full_pickle  # type: ignore[assignment]
 
-from datasets import Dataset
-from transformers import AutoTokenizer, TrainerCallback
+from datasets import Dataset  # noqa: E402
+from transformers import AutoTokenizer  # noqa: E402
 
-from verifiable_labs_envs import __version__, load_environment
-from verifiable_labs_envs.repro import config_hash
-from verifiable_labs_envs.solvers.llm_solver import get_adapter
-from verifiable_labs_envs.training import (
+from verifiable_labs_envs import __version__, load_environment  # noqa: E402
+from verifiable_labs_envs.repro import config_hash  # noqa: E402
+from verifiable_labs_envs.solvers.llm_solver import get_adapter  # noqa: E402
+from verifiable_labs_envs.training import (  # noqa: E402
     OUTCOME_THRESHOLDS_REGISTRY,
     AdaptiveDifficultyTracker,
     difficulty_to_kwargs,
     make_reward_fn_multienv,
     validate_env_schema,
 )
-
 
 # ── Constants ──────────────────────────────────────────────────────────
 

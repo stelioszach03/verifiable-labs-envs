@@ -13,7 +13,6 @@ from verifiable_labs_envs.training.adaptive_difficulty import (
     max_difficulty,
 )
 
-
 # ── tracker init ─────────────────────────────────────────────────────
 
 

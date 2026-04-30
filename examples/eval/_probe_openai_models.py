@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import os
-import sys
 from pathlib import Path
 
 ENV_PATH = Path(__file__).resolve().parents[2] / ".env"
@@ -11,7 +10,7 @@ for line in ENV_PATH.read_text().splitlines():
         k, v = line.strip().split("=", 1)
         os.environ.setdefault(k, v)
 
-import openai
+import openai  # noqa: E402
 
 client = openai.OpenAI(
     api_key=os.environ["OPENROUTER_API_KEY"],

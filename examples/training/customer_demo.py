@@ -24,12 +24,9 @@ Usage
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import sys
-import time
 from pathlib import Path
-from typing import Any
 
 DEFAULT_CACHE = "/content/drive/MyDrive/verifiable-labs/hf_cache"
 os.environ.setdefault("HF_HOME", DEFAULT_CACHE)
@@ -37,12 +34,11 @@ os.environ.setdefault("HF_HUB_CACHE", str(Path(DEFAULT_CACHE) / "hub"))
 
 # Import the model registry from the universal trainer.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from train_grpo_universal import (  # type: ignore[import-not-found]
+from train_grpo_universal import (  # type: ignore[import-not-found]  # noqa: E402
     MODEL_REGISTRY,
-    dry_run_check,
     _print_report,
+    dry_run_check,
 )
-
 
 # Demo configuration: 50 steps, 20 eval episodes per side. Anything more
 # is a real research run, not a demo. Each customer demo lands at
@@ -97,13 +93,18 @@ def write_demo_pdf(
         print(f"⚠️  reportlab missing; wrote Markdown fallback → {md}")
         return
 
+    from reportlab.lib import colors
     from reportlab.lib.pagesizes import letter
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
     from reportlab.lib.units import inch
     from reportlab.platypus import (
-        SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle,
+        Image,
+        Paragraph,
+        SimpleDocTemplate,
+        Spacer,
+        Table,
+        TableStyle,
     )
-    from reportlab.lib import colors
 
     doc = SimpleDocTemplate(
         str(pdf_path), pagesize=letter,

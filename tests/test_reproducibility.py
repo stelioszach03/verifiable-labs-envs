@@ -20,7 +20,6 @@ from verifiable_labs_envs.repro import (
     reward_hash,
 )
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -71,9 +70,9 @@ def test_config_hash_excludes_runtime_only_fields() -> None:
     }
     assert config_hash(base) == config_hash(decorated)
     # Sanity: the EXCLUDED set is exactly what the decorated dict added.
-    assert EXCLUDED_FROM_CONFIG_HASH == frozenset(
+    assert frozenset(
         {"timestamp", "wandb_run_id", "host"}
-    )
+    ) == EXCLUDED_FROM_CONFIG_HASH
 
 
 def test_config_hash_distinguishes_distinct_configs() -> None:
@@ -245,7 +244,7 @@ def test_e2e_cli_run_two_invocations_share_config_and_instance_hashes(
             "--quiet",
         ])
         assert rc == 0
-        return [json.loads(l) for l in out_path.read_text().splitlines()]
+        return [json.loads(line) for line in out_path.read_text().splitlines()]
 
     a = _run(tmp_path / "a.jsonl")
     b = _run(tmp_path / "b.jsonl")

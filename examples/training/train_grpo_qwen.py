@@ -27,7 +27,6 @@ import csv
 import json
 import os
 import subprocess
-import sys
 import time
 from pathlib import Path
 from typing import Any
@@ -38,7 +37,7 @@ os.environ.setdefault("HF_HOME", DEFAULT_CACHE)
 os.environ.setdefault("HF_HUB_CACHE", str(Path(DEFAULT_CACHE) / "hub"))
 os.environ.setdefault("TRANSFORMERS_CACHE", str(Path(DEFAULT_CACHE) / "transformers"))
 
-import torch
+import torch  # noqa: E402
 
 # PyTorch 2.6+ defaults torch.load(..., weights_only=True), which rejects
 # the numpy globals embedded in HF Trainer's rng_state.pth. Our checkpoints
@@ -55,15 +54,14 @@ def _torch_load_full_pickle(*args, **kwargs):
 
 torch.load = _torch_load_full_pickle  # type: ignore[assignment]
 
-from datasets import Dataset
-from transformers import AutoTokenizer, TrainerCallback
-from trl import GRPOConfig, GRPOTrainer
+from datasets import Dataset  # noqa: E402
+from transformers import AutoTokenizer, TrainerCallback  # noqa: E402
+from trl import GRPOConfig, GRPOTrainer  # noqa: E402
 
-from verifiable_labs_envs import __version__, load_environment
-from verifiable_labs_envs.repro import config_hash
-from verifiable_labs_envs.solvers.llm_solver import get_adapter
-from verifiable_labs_envs.training import make_reward_fn
-
+from verifiable_labs_envs import __version__, load_environment  # noqa: E402
+from verifiable_labs_envs.repro import config_hash  # noqa: E402
+from verifiable_labs_envs.solvers.llm_solver import get_adapter  # noqa: E402
+from verifiable_labs_envs.training import make_reward_fn  # noqa: E402
 
 # ── Constants (M6 spec) ───────────────────────────────────────────────
 

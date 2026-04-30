@@ -7,27 +7,24 @@ non-NaN reward smoke test (no gradient update).
 """
 from __future__ import annotations
 
+# Import the C.4 script as a module to test its public surface.
+import importlib.util as _il
 import json
 import random
 from pathlib import Path
 
 import pytest
 
-# Import the C.4 script as a module to test its public surface.
-import importlib.util as _il
 _SCRIPT_PATH = Path(__file__).resolve().parents[2] / "examples" / "training" / "train_multienv_grpo.py"
 _spec = _il.spec_from_file_location("train_multienv_grpo", _SCRIPT_PATH)
 _mod = _il.module_from_spec(_spec)
 assert _spec.loader is not None
 _spec.loader.exec_module(_mod)
 
-from verifiable_labs_envs.training import (
-    OUTCOME_THRESHOLDS_REGISTRY,
-    AdaptiveDifficultyTracker,
+from verifiable_labs_envs.training import (  # noqa: E402
     make_reward_fn_multienv,
     validate_env_schema,
 )
-
 
 TRAIN_ENVS = _mod.TRAIN_ENVS
 HELDOUT_ENV = _mod.HELDOUT_ENV

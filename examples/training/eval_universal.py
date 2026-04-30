@@ -26,7 +26,6 @@ Usage
 from __future__ import annotations
 
 import argparse
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -35,8 +34,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from train_grpo_universal import (  # type: ignore[import-not-found]
     MODEL_REGISTRY,
-    dry_run_check,
     _print_report,
+    dry_run_check,
     vram_budget_warning,
 )
 
@@ -107,7 +106,7 @@ def main() -> int:
     if args.use_tags:
         cmd.append("--use-tags")
 
-    print(f"=== Launching downstream eval ===")
+    print("=== Launching downstream eval ===")
     print(f"$ {' '.join(cmd)}")
     return subprocess.run(cmd, check=False).returncode
 

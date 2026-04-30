@@ -41,14 +41,14 @@ os.environ.setdefault("HF_HOME", DEFAULT_CACHE)
 os.environ.setdefault("HF_HUB_CACHE", str(Path(DEFAULT_CACHE) / "hub"))
 os.environ.setdefault("TRANSFORMERS_CACHE", str(Path(DEFAULT_CACHE) / "transformers"))
 
-import numpy as np
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
+import numpy as np  # noqa: E402
+import torch  # noqa: E402
+from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed  # noqa: E402
 
-from verifiable_labs_envs import __version__, load_environment
-from verifiable_labs_envs.repro import config_hash, instance_hash, reward_hash
-from verifiable_labs_envs.solvers.llm_solver import get_adapter
-from verifiable_labs_envs.training import make_reward_fn
+from verifiable_labs_envs import __version__, load_environment  # noqa: E402
+from verifiable_labs_envs.repro import config_hash, instance_hash, reward_hash  # noqa: E402
+from verifiable_labs_envs.solvers.llm_solver import get_adapter  # noqa: E402
+from verifiable_labs_envs.training import make_reward_fn  # noqa: E402
 
 DEFAULT_OUT = Path(
     "/content/drive/MyDrive/verifiable-labs/training_outputs/qwen15b_base_eval.jsonl"

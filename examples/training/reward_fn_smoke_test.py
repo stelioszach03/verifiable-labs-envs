@@ -113,7 +113,7 @@ def main() -> None:
     rows = _build_completions_grid()
     completions = [c for _, c, _ in rows]
     seeds = [s for _, _, s in rows]
-    labels = [l for l, _, _ in rows]
+    labels = [line for line, _, _ in rows]
 
     reward_fn = make_reward_fn(ENV_ID)
     rewards = reward_fn(
@@ -144,8 +144,8 @@ def main() -> None:
     for label in dict.fromkeys(labels):
         per = [
             (rec["reward"], rec["components"]["parse_valid"], rec["components"]["format_valid"])
-            for rec, l in zip(reward_fn.stats.per_call, labels, strict=True)
-            if l == label
+            for rec, line in zip(reward_fn.stats.per_call, labels, strict=True)
+            if line == label
         ]
         n = len(per)
         mean_r = sum(p[0] for p in per) / n

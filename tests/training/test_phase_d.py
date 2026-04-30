@@ -2,12 +2,8 @@
 from __future__ import annotations
 
 import importlib.util as _il
-import json
 import sys
 from pathlib import Path
-
-import pytest
-
 
 # Import the universal trainer + report generator as modules.
 _REPO = Path(__file__).resolve().parents[2]
@@ -42,7 +38,7 @@ def test_model_registry_has_four_models() -> None:
         "google/gemma-2-2b-it",
     }
     assert set(_uni.MODEL_REGISTRY) == expected
-    for mid, cfg in _uni.MODEL_REGISTRY.items():
+    for _mid, cfg in _uni.MODEL_REGISTRY.items():
         assert {"size_b", "vram_peak_gb", "needs_hf_token",
                 "trust_remote_code", "use_fast_tokenizer",
                 "chat_template_family", "notes"} <= set(cfg)

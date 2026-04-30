@@ -34,6 +34,5 @@ for eid in ENVS:
             print(f"  score.meta: {list(score['meta'].keys())}")
         print(f"  baseline reward: {score.get('reward', 'N/A')}")
     except Exception as e:
-        import traceback
         print(f"  ERROR: {type(e).__name__}: {str(e)[:300]}")
     print()

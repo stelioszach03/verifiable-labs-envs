@@ -57,7 +57,7 @@ rewards = fn(prompts=prompts, completions=completions, instance_seed=seeds)
 W = 38
 print(f"{'case':<{W}} {'reward':>7} {'parse':>6} {'fmt':>4} {'failure_type':<16}")
 print("-" * (W + 7 + 6 + 4 + 17 + 4))
-for (name, _), r, rec in zip(cases, rewards, fn.stats.per_call):
+for (name, _), r, rec in zip(cases, rewards, fn.stats.per_call, strict=False):
     pv = int(rec["components"]["parse_valid"])
     fv = int(rec["components"]["format_valid"])
     ft = rec["failure_type"] or "-"

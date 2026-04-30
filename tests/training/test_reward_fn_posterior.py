@@ -11,17 +11,14 @@ import json
 import math
 import time
 
-import numpy as np
 import pytest
 
 from verifiable_labs_envs import load_environment
 from verifiable_labs_envs.training import (
     PosteriorRewardStats,
-    make_reward_fn,
     make_reward_fn_posterior,
     posterior_reward,
 )
-
 
 ENV_ID = "sparse-fourier-recovery"
 
@@ -298,8 +295,12 @@ def test_end_to_end_50_calls_under_30s(reward_fn) -> None:
 
 def test_posterior_reward_stats_aggregate_keys() -> None:
     s = PosteriorRewardStats()
-    s.n_calls = 3; s.n_parse_valid = 3; s.n_format_valid = 2; s.n_outcome_correct = 1
-    s.sum_reward = 1.0; s.sum_quality_when_outcome = 0.8
+    s.n_calls = 3
+    s.n_parse_valid = 3
+    s.n_format_valid = 2
+    s.n_outcome_correct = 1
+    s.sum_reward = 1.0
+    s.sum_quality_when_outcome = 0.8
     agg = s.aggregate()
     expected = {"n_calls", "mean_reward", "parse_valid_rate", "format_valid_rate",
                 "outcome_correct_rate", "score_exception_rate",

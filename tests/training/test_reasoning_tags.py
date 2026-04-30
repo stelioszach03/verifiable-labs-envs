@@ -24,7 +24,6 @@ from verifiable_labs_envs.training import (
     parse_with_tags,
 )
 
-
 ENV_ID = "sparse-fourier-recovery"
 
 

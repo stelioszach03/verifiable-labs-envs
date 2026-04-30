@@ -26,15 +26,13 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-import numpy as np
-
 # Headless plotting on the remote.
 import matplotlib
+import numpy as np
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy import stats as scipy_stats
-
 
 DEFAULT_OUTDIR = Path("/content/drive/MyDrive/verifiable-labs/training_outputs")
 DEFAULT_PLOTS_DIR = Path("/content/drive/MyDrive/verifiable-labs/results_remote")
@@ -284,7 +282,7 @@ def plot_trajectory(comparison: dict[str, dict[str, Any]], baseline_mean: float,
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.errorbar(x, means, yerr=[los, his], fmt="o-", capsize=5, color="#1f77b4",
                 ecolor="gray", linewidth=1.6, markersize=8)
-    for xi, mi in zip(x, means):
+    for xi, mi in zip(x, means, strict=False):
         ax.text(xi, mi + 0.012, f"{mi:.3f}", ha="center", fontsize=9)
     ax.set_xticks(x)
     ax.set_xticklabels(labels)

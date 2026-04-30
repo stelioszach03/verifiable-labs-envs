@@ -10,7 +10,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tests/training"))
 
-from test_reward_fn_posterior import _oracle_completion, _zero_completion  # type: ignore[import-not-found]
+from test_reward_fn_posterior import (  # type: ignore[import-not-found]
+    _oracle_completion,
+    _zero_completion,
+)
 
 from verifiable_labs_envs.training import make_reward_fn, make_reward_fn_posterior
 

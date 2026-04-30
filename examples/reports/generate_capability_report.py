@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import statistics
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -30,7 +29,6 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-
 
 # ── Input schema ──────────────────────────────────────────────────────
 
@@ -237,7 +235,7 @@ def render_capability_report(
             f"{r.cohen_d:+.3f}",
         ]))
     lines.append("")
-    lines.append(f"![Δ per model](delta_per_model.png)")
+    lines.append("![Δ per model](delta_per_model.png)")
     lines.append("")
 
     lines.append("## 3. Best-performing base model")
@@ -278,7 +276,7 @@ def render_capability_report(
             f"${r.cost_per_point_usd:.2f}",
         ]))
     lines.append("")
-    lines.append(f"![cost per pp](cost_per_point.png)")
+    lines.append("![cost per pp](cost_per_point.png)")
     lines.append("")
     lines.append(
         f"Cheapest improvement: **{cheapest.model_id}** at "
