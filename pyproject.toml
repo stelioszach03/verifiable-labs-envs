@@ -81,8 +81,15 @@ verifiable = "verifiable_labs_envs.cli:main"
 packages = ["src/verifiable_labs_envs", "src/verifiable_labs_api"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests", "packages/verifiable-labs/tests"]
-addopts = "-q --strict-markers"
+testpaths = [
+    "tests",
+    "packages/verifiable-labs/tests",
+    "packages/vlabs-calibrate/tests",
+]
+# --import-mode=importlib: required so multiple `tests/__init__.py` packages
+# (one per packages/* sub-package) don't collide on pytest's prepend importer.
+# See https://docs.pytest.org/en/stable/explanation/pythonpath.html#import-modes
+addopts = "-q --strict-markers --import-mode=importlib"
 asyncio_mode = "auto"
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
