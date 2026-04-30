@@ -1,0 +1,15 @@
+# Service-local additions on top of repo root .gitignore.
+
+# Local pgserver state (large)
+.pgserver/
+pgserver_data/
+
+# uvicorn dev artefacts
+*.pid
+.uvicorn.log
+
+# alembic SQL exports
+migrations/dev_dump.sql
+
+# IDE
+.vscode/launch.json

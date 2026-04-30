@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vlabs
+      POSTGRES_PASSWORD: vlabs
+      POSTGRES_DB: vlabs
+    ports:
+      - "5433:5432"
+    volumes:
+      - vlabs_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vlabs -d vlabs"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  vlabs_pgdata:
