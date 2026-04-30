@@ -5,10 +5,11 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from vlabs_api.auth import AuthContext, require_api_key
+from vlabs_api.auth import AuthContext
 from vlabs_api.db import CalibrationRun, Evaluation, get_db
 from vlabs_api.errors import CalibrationNotFound
 from vlabs_api.ids import encode_calibration_id, parse_calibration_id
+from vlabs_api.ratelimit import enforce_rate_limit
 from vlabs_api.schemas import AuditEvaluation, AuditResponse
 
 router = APIRouter(tags=["audit"])
@@ -17,7 +18,7 @@ router = APIRouter(tags=["audit"])
 @router.get("/audit/{calibration_id}", response_model=AuditResponse)
 async def audit_endpoint(
     calibration_id: str,
-    auth: AuthContext = Depends(require_api_key),
+    auth: AuthContext = Depends(enforce_rate_limit),
     session: AsyncSession = Depends(get_db),
 ) -> AuditResponse:
     calib_uuid = parse_calibration_id(calibration_id)

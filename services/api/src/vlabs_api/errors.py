@@ -103,6 +103,45 @@ class RateLimited(APIError):
     title = "per-tier rate limit exceeded"
 
 
+# ── 4xx — billing / auth (Stage B) ────────────────────────────────
+
+
+class InvalidClerkToken(APIError):
+    status_code = 401
+    code = "invalid_clerk_token"
+    title = "missing or invalid Clerk session token"
+
+
+class WebhookSignatureInvalid(APIError):
+    status_code = 400
+    code = "webhook_signature_invalid"
+    title = "Stripe webhook signature did not verify"
+
+
+class WebhookEventUnsupported(APIError):
+    status_code = 400
+    code = "webhook_event_unsupported"
+    title = "Stripe event type is not handled by this endpoint"
+
+
+class StripeNotConfigured(APIError):
+    status_code = 503
+    code = "stripe_not_configured"
+    title = "Stripe integration is not configured (test-mode only)"
+
+
+class ClerkNotConfigured(APIError):
+    status_code = 503
+    code = "clerk_not_configured"
+    title = "Clerk integration is not configured"
+
+
+class APIKeyNotFoundForUser(APIError):
+    status_code = 404
+    code = "api_key_not_found"
+    title = "no API key with this id is owned by the authenticated user"
+
+
 # ── Handler ───────────────────────────────────────────────────────
 
 
@@ -135,5 +174,11 @@ __all__ = [
     "QuotaExceeded",
     "CalibrationNotFound",
     "RateLimited",
+    "InvalidClerkToken",
+    "WebhookSignatureInvalid",
+    "WebhookEventUnsupported",
+    "StripeNotConfigured",
+    "ClerkNotConfigured",
+    "APIKeyNotFoundForUser",
     "to_problem_json",
 ]

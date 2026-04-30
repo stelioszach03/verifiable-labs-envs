@@ -6,8 +6,9 @@ from datetime import UTC, date, datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from vlabs_api.auth import AuthContext, require_api_key
+from vlabs_api.auth import AuthContext
 from vlabs_api.db import get_db
+from vlabs_api.ratelimit import enforce_rate_limit
 from vlabs_api.schemas import (
     TierQuota,
     UsageCounts,
@@ -32,7 +33,7 @@ def _month_bounds() -> UsagePeriod:
 
 @router.get("/usage", response_model=UsageResponse)
 async def usage_endpoint(
-    auth: AuthContext = Depends(require_api_key),
+    auth: AuthContext = Depends(enforce_rate_limit),
     session: AsyncSession = Depends(get_db),
 ) -> UsageResponse:
     counter = await get_current_counter(session, auth.api_key_id)

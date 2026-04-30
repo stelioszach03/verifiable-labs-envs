@@ -10,14 +10,22 @@ from contextlib import asynccontextmanager
 
 import structlog
 from fastapi import FastAPI
-from slowapi.errors import RateLimitExceeded
 
 from vlabs_api import __version__
 from vlabs_api.config import get_settings
 from vlabs_api.db import dispose_engine, init_engine
 from vlabs_api.errors import APIError, to_problem_json
-from vlabs_api.ratelimit import limiter, rate_limit_handler
-from vlabs_api.routes import audit, calibrate, evaluate, health, predict, usage
+from vlabs_api.routes import (
+    audit,
+    billing,
+    calibrate,
+    evaluate,
+    health,
+    keys,
+    predict,
+    usage,
+    webhook,
+)
 
 log = structlog.get_logger(__name__)
 
@@ -52,16 +60,20 @@ def create_app() -> FastAPI:
         redoc_url="/redoc",
         openapi_url="/openapi.json",
     )
-    app.state.limiter = limiter
     app.add_exception_handler(APIError, to_problem_json)
-    app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
 
     app.include_router(health.router)
+    # Data plane — X-Vlabs-Key auth, tier-aware rate limit
     app.include_router(calibrate.router, prefix="/v1")
     app.include_router(predict.router, prefix="/v1")
     app.include_router(evaluate.router, prefix="/v1")
     app.include_router(audit.router, prefix="/v1")
     app.include_router(usage.router, prefix="/v1")
+    # Management plane — Clerk JWT auth, billing + key issuance
+    app.include_router(keys.router, prefix="/v1")
+    app.include_router(billing.router, prefix="/v1")
+    # Stripe webhook — signature-verified, no auth header
+    app.include_router(webhook.router, prefix="/v1")
     return app
 
 

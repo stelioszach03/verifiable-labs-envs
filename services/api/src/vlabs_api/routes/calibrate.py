@@ -4,12 +4,12 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from vlabs_api.auth import AuthContext, require_api_key
+from vlabs_api.auth import AuthContext
 from vlabs_api.calibration import calibrate_from_triples
 from vlabs_api.db import CalibrationRun, get_db
 from vlabs_api.errors import QuotaExceeded
 from vlabs_api.ids import encode_calibration_id
-from vlabs_api.ratelimit import DEFAULT_LIMIT, limiter
+from vlabs_api.ratelimit import enforce_rate_limit
 from vlabs_api.schemas import CalibrateRequest, CalibrateResponse
 from vlabs_api.usage import (
     get_current_counter,
@@ -21,11 +21,10 @@ router = APIRouter(tags=["calibration"])
 
 
 @router.post("/calibrate", response_model=CalibrateResponse)
-@limiter.limit(DEFAULT_LIMIT)
 async def calibrate_endpoint(
     request: Request,
     payload: CalibrateRequest,
-    auth: AuthContext = Depends(require_api_key),
+    auth: AuthContext = Depends(enforce_rate_limit),
     session: AsyncSession = Depends(get_db),
 ) -> CalibrateResponse:
     counter = await get_current_counter(session, auth.api_key_id)
