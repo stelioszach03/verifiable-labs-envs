@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -281,7 +282,7 @@ def test_no_timeout_when_seconds_zero(
 def test_help_shows_all_four_new_flags() -> None:
     """`verifiable run --help` text mentions all four M4 flags."""
     res = subprocess.run(
-        ["verifiable", "run", "--help"],
+        [sys.executable, "-m", "verifiable_labs_envs.cli", "run", "--help"],
         capture_output=True,
         text=True,
         check=True,
@@ -297,7 +298,7 @@ def test_help_flags_are_mutually_exclusive() -> None:
     """--continue-on-error and --fail-fast are mutually exclusive."""
     res = subprocess.run(
         [
-            "verifiable", "run",
+            sys.executable, "-m", "verifiable_labs_envs.cli", "run",
             "--env", "sparse-fourier-recovery",
             "--agent", "examples/agents/zero_agent.py",
             "--n", "1",
