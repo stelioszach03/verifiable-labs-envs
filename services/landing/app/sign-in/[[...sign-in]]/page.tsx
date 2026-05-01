@@ -1,5 +1,7 @@
 import { SignIn } from "@clerk/nextjs";
 
+export const runtime = "edge";
+
 export default function SignInPage() {
   return (
     <section className="container-tight flex justify-center py-20">

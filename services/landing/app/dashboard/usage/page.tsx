@@ -1,6 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { getUsage } from "@/lib/api";
 
+export const runtime = "edge";
+
 export default async function UsagePage() {
   const { getToken } = await auth();
   const token = await getToken();
