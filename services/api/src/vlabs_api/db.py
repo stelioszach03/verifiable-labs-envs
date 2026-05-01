@@ -236,11 +236,22 @@ def init_engine(database_url: str) -> AsyncEngine:
 
     Idempotent: re-calling with the same URL returns the existing
     engine. Test fixtures use :func:`override_engine` instead.
+
+    ``statement_cache_size=0`` is required when ``database_url`` points
+    at a pgbouncer-style pooler in *transaction* mode (Supabase
+    Transaction Pooler is one): asyncpg's default prepared-statement
+    cache collides on pooled connections that get reused across
+    statements. On direct connections (pgserver in tests, Postgres
+    on localhost) this is a small perf hit and behaviour-equivalent.
     """
     global _engine, _SessionFactory
     if _engine is not None and str(_engine.url) == database_url:
         return _engine
-    _engine = create_async_engine(database_url, pool_pre_ping=True)
+    _engine = create_async_engine(
+        database_url,
+        pool_pre_ping=True,
+        connect_args={"statement_cache_size": 0},
+    )
     _SessionFactory = async_sessionmaker(_engine, expire_on_commit=False)
     return _engine
 

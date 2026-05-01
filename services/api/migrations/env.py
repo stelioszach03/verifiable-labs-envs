@@ -6,7 +6,7 @@ from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import pool
-from sqlalchemy.ext.asyncio import async_engine_from_config
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from vlabs_api.config import get_settings
 from vlabs_api.db import Base
@@ -38,9 +38,16 @@ def do_run_migrations(connection) -> None:
 
 
 async def run_migrations_online() -> None:
-    cfg = config.get_section(config.config_ini_section, {})
-    cfg["sqlalchemy.url"] = get_settings().database_url
-    connectable = async_engine_from_config(cfg, prefix="sqlalchemy.", poolclass=pool.NullPool)
+    settings = get_settings()
+    # statement_cache_size=0 is required when DATABASE_URL points at a
+    # pgbouncer-style pooler in "transaction" mode (Supabase Transaction
+    # Pooler is one). Without it asyncpg's prepared-statement cache
+    # collides on reused pooled connections.
+    connectable = create_async_engine(
+        settings.database_url,
+        poolclass=pool.NullPool,
+        connect_args={"statement_cache_size": 0},
+    )
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
     await connectable.dispose()
