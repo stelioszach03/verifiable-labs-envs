@@ -46,6 +46,29 @@ class Settings(BaseSettings):
     vlabs_log_level: str = "INFO"
     vlabs_environment: Literal["dev", "staging", "prod"] = "dev"
 
+    # ── Stage C: deploy + observability ───────────────────────────
+    sentry_dsn: str | None = None
+    sentry_traces_sample_rate: float = 0.1
+
+    # Upstash Redis REST — used by ratelimit.py when both vars are set,
+    # otherwise the in-memory backend (single-instance only) is used.
+    upstash_redis_rest_url: str | None = None
+    upstash_redis_rest_token: str | None = None
+
+    # BetterStack uptime monitoring (post-deploy)
+    betterstack_api_token: str | None = None
+
+    # Cloudflare DNS automation (Stage C deploy script reads it)
+    cloudflare_api_token: str | None = None
+
+    # Comma-separated list of Clerk user IDs allowed to hit /v1/admin/*
+    vlabs_admin_clerk_ids: str = ""
+
+    # Stage B Stripe is deferred until Delaware C-corp registration
+    # completes. While disabled, /v1/billing/* return 503 with
+    # "billing_not_activated" and the webhook handler short-circuits.
+    vlabs_billing_enabled: bool = False
+
     # ── Stage B: Stripe (TEST MODE ONLY until C-corp registered) ──
     stripe_secret_key: str | None = None  # sk_test_... only in dev
     stripe_webhook_secret: str | None = None  # whsec_... from Stripe Dashboard

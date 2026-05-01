@@ -1,0 +1,49 @@
+# Keep the build context tiny — only the API package + migrations + alembic
+# config + the entrypoint are needed at build time.
+
+.git
+.github
+.idea
+.vscode
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+htmlcov
+
+# Local env (never bake into image)
+.env
+.env.local
+.env.*.local
+
+# Local Postgres data
+.pgserver
+pgserver_data
+
+# docs / dist
+README.md
+DEPLOYMENT.md
+RUNBOOK.md
+SESSION_LOG.md
+PHASE_16_PLAN.md
+dist/
+build/
+
+# Tests don't ship in the container
+tests/
+
+# Local docker setup
+docker-compose.yml
+
+# Don't include parent repo's other services in the build context
+../landing
+../../packages
+../../src
+../../tests
+../../examples

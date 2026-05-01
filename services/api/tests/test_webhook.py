@@ -151,6 +151,24 @@ async def test_webhook_unhandled_event_type_is_200(
     assert r.json() == {"ignored": True}
 
 
+async def test_webhook_deferred_mode_short_circuits(
+    client, monkeypatch
+) -> None:
+    """VLABS_BILLING_ENABLED=false: webhook returns 200 deferred, never instantiates Stripe."""
+    monkeypatch.setenv("VLABS_BILLING_ENABLED", "false")
+    from vlabs_api.config import get_settings
+
+    get_settings.cache_clear()
+
+    r = await client.post(
+        "/v1/billing/webhook",
+        content=b'{"id":"evt_test_deferred"}',
+        headers={"Stripe-Signature": "would-not-even-be-checked"},
+    )
+    assert r.status_code == 200
+    assert r.json() == {"deferred": True}
+
+
 async def test_webhook_subscription_for_unknown_customer_is_noop(
     client, stub_stripe, stub_webhook_verify, session
 ) -> None:

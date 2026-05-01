@@ -31,6 +31,17 @@ os.environ["DATABASE_URL"] = _uri
 os.environ.setdefault("VLABS_API_KEY_HASH_PEPPER", "test-pepper-not-for-prod")
 os.environ.setdefault("VLABS_ENVIRONMENT", "dev")
 os.environ.setdefault("VLABS_LOG_LEVEL", "WARNING")
+# Stage C: Stripe is deferred by default. Tests that exercise live billing
+# paths set VLABS_BILLING_ENABLED=true via stub_stripe; tests that target
+# the deferred-mode 503 short-circuit explicitly override to false.
+os.environ.setdefault("VLABS_BILLING_ENABLED", "true")
+# Sentry must stay un-initialised in tests — leaving SENTRY_DSN unset.
+os.environ.setdefault("SENTRY_DSN", "")
+# Force memory rate-limit backend in tests — production .env.local may have
+# real Upstash creds, but routing every test request through real Redis adds
+# ~50ms × hundreds of calls (the rate-limit tests alone make 350+ requests).
+os.environ["UPSTASH_REDIS_REST_URL"] = ""
+os.environ["UPSTASH_REDIS_REST_TOKEN"] = ""
 
 # ── Step 2: now safe to import vlabs_api ─────────────────────────────
 from sqlalchemy import text  # noqa: E402

@@ -183,6 +183,31 @@ class APIKeyList(BaseModel):
     items: list[APIKeyInfo]
 
 
+class AdminDashboardCounts(BaseModel):
+    users: int
+    api_keys_active: int
+    api_keys_revoked: int
+    calibrations_total: int
+    evaluations_total: int
+    subscriptions_active: int
+
+
+class AdminDashboardLastRun(BaseModel):
+    calibration_id: str
+    api_key_prefix: str
+    n_calibration: int
+    quantile: float
+    created_at: datetime
+
+
+class AdminDashboardResponse(BaseModel):
+    """Aggregate stats served by GET /v1/admin/dashboard."""
+
+    counts: AdminDashboardCounts
+    most_recent_calibrations: list[AdminDashboardLastRun]
+    billing_enabled: bool
+
+
 __all__ = [
     "NonconformityName",
     "CalibrationTrace",
@@ -208,4 +233,7 @@ __all__ = [
     "APIKeyInfo",
     "APIKeyCreated",
     "APIKeyList",
+    "AdminDashboardCounts",
+    "AdminDashboardLastRun",
+    "AdminDashboardResponse",
 ]

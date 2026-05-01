@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, Header, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from vlabs_api.billing import sync_subscription_from_event, verify_webhook_signature
+from vlabs_api.config import get_settings
 from vlabs_api.db import StripeEvent, get_db
 from vlabs_api.errors import WebhookSignatureInvalid
 
@@ -31,6 +32,16 @@ async def stripe_webhook(
     stripe_signature: str | None = Header(default=None, alias="Stripe-Signature"),
     session: AsyncSession = Depends(get_db),
 ) -> Response:
+    # Stage C deferred-billing short-circuit: accept the request, log, return
+    # 200 — Stripe expects 2xx so it doesn't retry. We never instantiate the
+    # SDK while billing is disabled, so signature verification is also skipped.
+    if not get_settings().vlabs_billing_enabled:
+        log.info(
+            "webhook.deferred_mode",
+            note="billing not activated; ignoring event",
+        )
+        return Response(status_code=200, content=b'{"deferred": true}')
+
     payload = await request.body()
     if not stripe_signature:
         raise WebhookSignatureInvalid(detail="Stripe-Signature header missing")

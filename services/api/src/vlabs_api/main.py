@@ -15,7 +15,9 @@ from vlabs_api import __version__
 from vlabs_api.config import get_settings
 from vlabs_api.db import dispose_engine, init_engine
 from vlabs_api.errors import APIError, to_problem_json
+from vlabs_api.redis_client import aclose as redis_aclose
 from vlabs_api.routes import (
+    admin,
     audit,
     billing,
     calibrate,
@@ -26,6 +28,23 @@ from vlabs_api.routes import (
     usage,
     webhook,
 )
+
+
+def _init_sentry() -> None:
+    """Initialise Sentry only when DSN is configured (skipped in tests)."""
+    settings = get_settings()
+    if not settings.sentry_dsn:
+        return
+    import sentry_sdk
+
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        environment=settings.vlabs_environment,
+        traces_sample_rate=settings.sentry_traces_sample_rate,
+        # FastAPI integration is auto-loaded via the [fastapi] extra.
+        send_default_pii=False,
+        release=__version__,
+    )
 
 log = structlog.get_logger(__name__)
 
@@ -38,16 +57,20 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         version=__version__,
         environment=settings.vlabs_environment,
         log_level=settings.vlabs_log_level,
+        billing_enabled=settings.vlabs_billing_enabled,
+        ratelimit_backend="redis" if settings.upstash_redis_rest_url else "memory",
     )
     init_engine(settings.database_url)
     try:
         yield
     finally:
         await dispose_engine()
+        await redis_aclose()
         log.info("vlabs_api.shutdown")
 
 
 def create_app() -> FastAPI:
+    _init_sentry()
     app = FastAPI(
         title="vlabs-api",
         version=__version__,
@@ -74,6 +97,8 @@ def create_app() -> FastAPI:
     app.include_router(billing.router, prefix="/v1")
     # Stripe webhook — signature-verified, no auth header
     app.include_router(webhook.router, prefix="/v1")
+    # Admin plane — Clerk auth + allowlist
+    app.include_router(admin.router, prefix="/v1")
     return app
 
 

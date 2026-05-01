@@ -72,3 +72,46 @@ async def test_portal_reuses_existing_customer(
     assert r2.status_code == 200
     # Customer.create called only once across the two portal calls.
     assert len(stub_stripe["customers"]) == 1
+
+
+# ── Stage C: deferred-billing mode ───────────────────────────────────
+
+
+async def test_checkout_deferred_mode_returns_503(
+    client, clerk_user, stub_clerk_verify, monkeypatch
+) -> None:
+    """When VLABS_BILLING_ENABLED=false, /v1/billing/checkout 503s — Stripe SDK never touched."""
+    monkeypatch.setenv("VLABS_BILLING_ENABLED", "false")
+    from vlabs_api.config import get_settings
+
+    get_settings.cache_clear()
+
+    stub_clerk_verify()
+    fake_jwt, _ = clerk_user
+    r = await client.post(
+        "/v1/billing/checkout",
+        json={"tier": "pro"},
+        headers={"Authorization": f"Bearer {fake_jwt}"},
+    )
+    assert r.status_code == 503, r.text
+    body = r.json()
+    assert body["code"] == "billing_not_activated"
+    assert "free tier" in body["title"].lower()
+
+
+async def test_portal_deferred_mode_returns_503(
+    client, clerk_user, stub_clerk_verify, monkeypatch
+) -> None:
+    monkeypatch.setenv("VLABS_BILLING_ENABLED", "false")
+    from vlabs_api.config import get_settings
+
+    get_settings.cache_clear()
+
+    stub_clerk_verify()
+    fake_jwt, _ = clerk_user
+    r = await client.post(
+        "/v1/billing/portal",
+        headers={"Authorization": f"Bearer {fake_jwt}"},
+    )
+    assert r.status_code == 503
+    assert r.json()["code"] == "billing_not_activated"
