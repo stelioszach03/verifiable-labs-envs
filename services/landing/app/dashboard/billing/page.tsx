@@ -26,13 +26,7 @@ export default async function BillingPage() {
           </p>
           <p className="mt-1 text-2xl font-semibold capitalize">{tier}</p>
           {tier !== "free" ? (
-            <form
-              action={async () => {
-                "use server";
-                await actOpenPortal();
-              }}
-              className="mt-4"
-            >
+            <form action={actOpenPortal} className="mt-4">
               <button type="submit" className="btn-ghost">
                 Open Stripe billing portal
               </button>
@@ -80,13 +74,8 @@ function UpgradeCard({
       </p>
       <p className="mt-1 text-2xl font-semibold">{price}</p>
       <p className="mt-2 text-sm text-ink-muted">{desc}</p>
-      <form
-        action={async () => {
-          "use server";
-          await actUpgradeTo(tier);
-        }}
-        className="mt-4"
-      >
+      <form action={actUpgradeTo} className="mt-4">
+        <input type="hidden" name="tier" value={tier} />
         <button
           type="submit"
           className={tier === "pro" ? "btn-accent" : "btn-ghost"}

@@ -34,19 +34,33 @@ export async function actCreateKey(formData: FormData): Promise<void> {
   redirect(`/dashboard/api-keys?new=${encodeURIComponent(created.plaintext_key)}`);
 }
 
-export async function actRevokeKey(id: string): Promise<void> {
+// All server actions take FormData (the standard Next.js 15 / Cloudflare
+// Workers signature). Inline server-action closures inside loops break
+// edge-runtime serialization in next-on-pages — the bound parameters
+// cannot be encrypted/embedded reliably. Pages must use a hidden <input
+// name="..." /> instead of a closure capture.
+
+export async function actRevokeKey(formData: FormData): Promise<void> {
+  const id = String(formData.get("id") ?? "");
+  if (!id) {
+    throw new Error("actRevokeKey: missing 'id' in form payload");
+  }
   const tok = await token();
   await revokeApiKey(tok, id);
   revalidatePath("/dashboard/api-keys");
 }
 
-export async function actUpgradeTo(tier: "pro" | "team"): Promise<void> {
+export async function actUpgradeTo(formData: FormData): Promise<void> {
+  const tier = String(formData.get("tier") ?? "") as "pro" | "team";
+  if (tier !== "pro" && tier !== "team") {
+    throw new Error(`actUpgradeTo: invalid tier ${JSON.stringify(tier)}`);
+  }
   const tok = await token();
   const { url } = await startCheckout(tok, tier);
   redirect(url);
 }
 
-export async function actOpenPortal(): Promise<void> {
+export async function actOpenPortal(_formData?: FormData): Promise<void> {
   const tok = await token();
   const { url } = await startBillingPortal(tok);
   redirect(url);
