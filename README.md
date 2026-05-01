@@ -131,6 +131,7 @@ Examples: [`examples/agents/`](examples/agents).
 | **API** | `/v1/{health, environments, sessions, leaderboard}` (open, rate-limited) | per-user auth, Redis-backed sessions — v0.2 |
 | **SDK** | sync + async clients on PyPI as `verifiable-labs` (re-exports `load_environment` for local mode) | optional slim install — Tier-1 polish |
 | **CLI** | `envs · run · compare · report · init-env · validate-env` | static viewer / dashboard — v0.3 stretch |
+| **audit reports** | [`vlabs-audit`](tools/vlabs-audit/README.md) — single command turns any frontier model into a LaTeX/PDF capability report ([sample](reports/sample_anonymized.pdf)) | multi-model side-by-side — v0.0.2 |
 | **training signal** | prompt-search proof in [`notebooks/training_proof.ipynb`](notebooks/training_proof.ipynb), heuristic search in [`examples/training_signal_demo.py`](examples/training_signal_demo.py) | TRL / vLLM bindings — v0.2 |
 | **compliance** | aggregate report template + PDF generator | real attestation system — v0.3 speculative |
 
