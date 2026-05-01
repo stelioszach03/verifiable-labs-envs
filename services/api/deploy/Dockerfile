@@ -49,13 +49,16 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 COPY --from=builder /wheels /wheels
-COPY pyproject.toml README.md ./
-COPY src ./src
 COPY migrations ./migrations
 COPY alembic.ini ./alembic.ini
 COPY deploy/entrypoint.sh /usr/local/bin/entrypoint.sh
 
-RUN pip install --no-index --find-links=/wheels '.' \
+# Install vlabs-api directly from the pre-built wheel by *name* (not '.').
+# Going through `'.'` would re-trigger pyproject.toml's hatchling build path,
+# but hatchling is in /wheels, not in the runtime env — and --no-index
+# blocks PyPI fetches. `vlabs-api` resolves to the wheel produced by the
+# builder stage, plus all its transitive deps which are also in /wheels.
+RUN pip install --no-index --find-links=/wheels vlabs-api \
     && rm -rf /wheels \
     && chmod +x /usr/local/bin/entrypoint.sh \
     && chown -R vlabs:vlabs /app
