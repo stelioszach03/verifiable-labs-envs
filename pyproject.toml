@@ -85,12 +85,20 @@ testpaths = [
     "tests",
     "packages/verifiable-labs/tests",
     "packages/vlabs-calibrate/tests",
+    "services/api/tests",
 ]
 # --import-mode=importlib: required so multiple `tests/__init__.py` packages
 # (one per packages/* sub-package) don't collide on pytest's prepend importer.
 # See https://docs.pytest.org/en/stable/explanation/pythonpath.html#import-modes
 addopts = "-q --strict-markers --import-mode=importlib"
 asyncio_mode = "auto"
+# services/api uses session-scoped DB + ASGI client fixtures; the
+# asyncio loop scope must match so function-scoped tests can await on
+# session-scoped engine/sessions without "got Future attached to a
+# different loop" errors. The other tests in the repo are predominantly
+# sync; a session loop is harmless for them.
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: SDK tests that spin up a real uvicorn instance",

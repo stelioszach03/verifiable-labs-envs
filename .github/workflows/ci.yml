@@ -28,7 +28,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Install monorepo + API + SDK + vlabs-calibrate
+      - name: Install monorepo + API + SDK + vlabs-calibrate + vlabs-api
         run: |
           python -m pip install --upgrade pip
           # Monorepo with dev + api extras (api required for the SDK
@@ -38,12 +38,17 @@ jobs:
           pip install -e packages/verifiable-labs
           # Editable calibrate so packages/vlabs-calibrate/tests are runnable.
           pip install -e packages/vlabs-calibrate
+          # Editable hosted API so services/api/tests are runnable.
+          # The dev extra brings in pgserver, which downloads its own
+          # self-contained Postgres binary on first run.
+          pip install -e "services/api[dev]"
 
       - name: Lint with ruff
         run: |
           ruff check src tests benchmarks examples scripts \
                      packages/verifiable-labs/src packages/verifiable-labs/tests \
-                     packages/vlabs-calibrate/src packages/vlabs-calibrate/tests
+                     packages/vlabs-calibrate/src packages/vlabs-calibrate/tests \
+                     services/api/src services/api/tests
 
       - name: Run tests
         run: pytest
