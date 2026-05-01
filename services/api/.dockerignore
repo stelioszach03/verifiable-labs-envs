@@ -26,8 +26,10 @@ htmlcov
 .pgserver
 pgserver_data
 
-# docs / dist
-README.md
+# docs / dist — README.md stays IN the context because hatchling reads
+# it during `pip install` metadata validation (pyproject.toml's
+# `readme = "README.md"` field). The other markdown files aren't
+# referenced by the package metadata, so we drop them.
 DEPLOYMENT.md
 RUNBOOK.md
 SESSION_LOG.md
