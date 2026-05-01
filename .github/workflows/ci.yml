@@ -28,7 +28,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Install monorepo + API + SDK + vlabs-calibrate + vlabs-api
+      - name: Install monorepo + API + SDK + vlabs-calibrate + vlabs-api + vlabs-audit
         run: |
           python -m pip install --upgrade pip
           # Monorepo with dev + api extras (api required for the SDK
@@ -42,13 +42,28 @@ jobs:
           # The dev extra brings in pgserver, which downloads its own
           # self-contained Postgres binary on first run.
           pip install -e "services/api[dev]"
+          # Editable audit tool so tools/vlabs-audit/tests are runnable.
+          pip install -e "tools/vlabs-audit[dev]"
+
+      - name: Install tectonic (Linux only — vlabs-audit LaTeX integration)
+        if: runner.os == 'Linux'
+        run: |
+          # Prebuilt static binary, no Rust toolchain or full TeX Live needed.
+          # Tests gracefully skip the real-tectonic path on macOS where the
+          # binary isn't installed; figure + escape unit tests stay covered.
+          TECTONIC_VERSION="0.15.0"
+          curl --proto '=https' --tlsv1.2 -fsSL \
+            "https://github.com/tectonic-typesetting/tectonic/releases/download/tectonic@${TECTONIC_VERSION}/tectonic-${TECTONIC_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin/
+          tectonic --version
 
       - name: Lint with ruff
         run: |
           ruff check src tests benchmarks examples scripts \
                      packages/verifiable-labs/src packages/verifiable-labs/tests \
                      packages/vlabs-calibrate/src packages/vlabs-calibrate/tests \
-                     services/api/src services/api/tests
+                     services/api/src services/api/tests \
+                     tools/vlabs-audit/src tools/vlabs-audit/tests
 
       - name: Run tests
         run: pytest

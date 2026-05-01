@@ -86,6 +86,7 @@ testpaths = [
     "packages/verifiable-labs/tests",
     "packages/vlabs-calibrate/tests",
     "services/api/tests",
+    "tools/vlabs-audit/tests",
 ]
 # --import-mode=importlib: required so multiple `tests/__init__.py` packages
 # (one per packages/* sub-package) don't collide on pytest's prepend importer.

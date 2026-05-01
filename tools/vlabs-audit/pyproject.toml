@@ -1,0 +1,79 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "vlabs-audit"
+version = "0.0.1"
+description = "Verifiable Labs capability report generator (LaTeX/PDF)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Stelios Zacharioudakis", email = "sdi2200243@di.uoa.gr" },
+]
+keywords = [
+    "calibration",
+    "conformal-prediction",
+    "evaluation",
+    "frontier-models",
+    "verifiable-labs",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
+dependencies = [
+    "typer>=0.12",
+    "pyyaml>=6.0",
+    "pydantic>=2.7",
+    "jinja2>=3.1",
+    "matplotlib>=3.8",
+    "numpy>=1.26",
+    "httpx>=0.27",
+    # Pinned hard for reproducibility per Phase 17 plan, R5 mitigation.
+    "vlabs-calibrate==0.1.0a1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.5",
+]
+
+[project.scripts]
+vlabs-audit = "vlabs_audit.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/vlabs_audit"]
+
+# Ship the LaTeX templates inside the wheel under
+# ``vlabs_audit/templates/`` so installed copies of the package can
+# render reports without the source tree on disk.
+[tool.hatch.build.targets.wheel.force-include]
+"templates" = "vlabs_audit/templates"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers --import-mode=importlib"
+asyncio_mode = "auto"
+markers = [
+    "integration: tests that need real OpenRouter or tectonic (skipped in CI)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = [
+    "E501",
+    "B008",  # Typer's Annotated[..., Option(...)] pattern uses defaults
+]
