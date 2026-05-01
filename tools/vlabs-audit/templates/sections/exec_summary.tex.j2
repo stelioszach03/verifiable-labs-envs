@@ -1,0 +1,27 @@
+\section{Executive Summary}
+
+This report presents an automated capability audit of {{ model_display_tex }} on
+{{ n_envs }} Verifiable Labs environment{{ "" if n_envs == 1 else "s" }},
+totalling {{ total_episodes }} episode{{ "" if total_episodes == 1 else "s" }}.
+The audit was run with conformal miscoverage $\alpha = {{ alpha_str }}$
+(target empirical coverage {{ target_coverage_pct }}\%).
+
+\subsection{Headline finding}
+
+{{ headline_finding_tex }}
+
+\subsection{Coverage compliance}
+
+\begin{tabular}{l c c c}
+\toprule
+\textbf{Environment} & \textbf{Empirical coverage} & \textbf{Target} & \textbf{Status} \\
+\midrule
+{% for row in coverage_rows -%}
+{{ row.env_tex }} & {{ row.coverage_str }} & {{ row.target_str }} & {{ row.status_tex }} \\
+{% endfor -%}
+\bottomrule
+\end{tabular}
+
+\subsection{Recommendation summary}
+
+{{ recommendation_summary_tex }}

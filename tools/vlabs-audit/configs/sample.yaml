@@ -1,0 +1,42 @@
+# Verifiable Labs audit — sample config.
+#
+# Usage:
+#   vlabs-audit audit --config tools/vlabs-audit/configs/sample.yaml --dry-run
+#
+# CLI flags override any value below — useful for ad-hoc tweaks without
+# editing this file. See `vlabs-audit audit --help` for the full list.
+
+# Model id, routed by prefix (claude-* → Anthropic, gpt-* → OpenAI,
+# gemini-* → Google, <provider>/<slug> → OpenRouter).
+model: claude-haiku-4.5
+
+# Subset of Verifiable Labs environments to run the model against.
+envs:
+  - sparse-fourier-recovery
+  - phase-retrieval
+  - super-resolution-div2k-x4
+
+# Episodes per env. Total cost scales as
+#   episodes × len(envs) × ~$0.03   (Claude Haiku 4.5 baseline)
+# 30 × 3 = 90 episodes, ~$2.50 of OpenRouter credit.
+episodes: 30
+
+# Conformal coverage target: 1 − alpha. 0.1 → 90% target coverage.
+alpha: 0.1
+
+# Where the final PDF lands. Relative to the repo root.
+output: reports/haiku45_audit.pdf
+
+# How many episodes to run in parallel. Keep this small to stay under
+# OpenRouter rate limits; 1 is safest, 4 is a reasonable balance.
+parallel: 4
+
+# Starting seed for env instance generation. Episodes get
+# seed_start, seed_start+1, ..., seed_start + episodes − 1.
+seed_start: 1000
+
+# When true, the rendered report substitutes `model` with the
+# `anonymize_label` so the PDF can be sent without revealing the model
+# being audited (used for the public sales artefact).
+anonymize: false
+anonymize_label: "Frontier Model A"

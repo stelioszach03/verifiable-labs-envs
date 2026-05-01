@@ -1,0 +1,28 @@
+\section{Recommendations}
+
+The list below is generated mechanically from the per-environment statistics
+on the preceding pages. Recommendations are intentionally framed in
+conservative language: they describe what the numbers \emph{warrant}, not
+what is hypothetically possible.
+
+\begin{itemize}
+{% for rec in recommendations -%}
+  \item {{ rec.text_tex }}
+{% endfor -%}
+\end{itemize}
+
+\subsection{What this report cannot tell you}
+
+A single audit at fixed $\alpha$ and fixed sample size cannot establish:
+\begin{itemize}
+  \item that fixing the issues above will improve downstream task
+        performance (only a follow-up audit can verify);
+  \item that the model is or is not safe to deploy in any specific
+        production setting (deployment risk is a function of cost-of-error,
+        which the audit does not see);
+  \item that performance generalises to environments outside this audit
+        (each Verifiable Labs environment has a narrow scientific domain).
+\end{itemize}
+
+Use the per-environment numbers as a calibrated starting point for
+follow-up engineering decisions, not as a final verdict.

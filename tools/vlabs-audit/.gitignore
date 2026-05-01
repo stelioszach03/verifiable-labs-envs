@@ -1,0 +1,22 @@
+# Local audit DB cache (per-user, never committed)
+audits.db
+.vlabs-audit/
+
+# Build artefacts
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+build/
+dist/
+*.egg-info/
+
+# LaTeX intermediates (only the final PDF is committed)
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
