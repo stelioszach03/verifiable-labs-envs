@@ -85,12 +85,8 @@ export default async function APIKeysPage({
                   </td>
                   <td className="py-3 text-right">
                     {!k.revoked_at ? (
-                      <form
-                        action={async () => {
-                          "use server";
-                          await actRevokeKey(k.id);
-                        }}
-                      >
+                      <form action={actRevokeKey}>
+                        <input type="hidden" name="id" value={k.id} />
                         <button
                           type="submit"
                           className="text-xs text-ink-muted hover:text-red-600"
