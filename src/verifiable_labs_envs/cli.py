@@ -26,15 +26,20 @@ from __future__ import annotations
 import argparse
 import contextlib
 import json
+import os
+import re
+import signal
 import statistics
 import subprocess
 import sys
 import time
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 from pathlib import Path
 from typing import Any
 
+from verifiable_labs_envs import __version__
 from verifiable_labs_envs.agents import Agent, load_agent
+from verifiable_labs_envs.repro import config_hash, instance_hash, reward_hash
 from verifiable_labs_envs.traces import (
     FailureType,
     Trace,
@@ -126,6 +131,80 @@ def _serialise_components(components: Any) -> dict[str, float]:
             except (TypeError, ValueError):
                 continue
     return out
+
+
+# ── timeout + retry + redaction helpers (M4) ───────────────────
+
+
+class _AgentTimeout(Exception):
+    """Raised when an agent's solve() exceeds the per-episode wall-clock budget."""
+
+
+@contextlib.contextmanager
+def _alarm_timeout(seconds: int) -> Iterator[None]:
+    """Wrap a block in a SIGALRM-based wall-clock timeout.
+
+    NOTE: signal.SIGALRM-based timeout. Single-threaded only.
+    If verifiable run is parallelized in the future (e.g. --workers N),
+    switch to subprocess-based timeout or threading.Timer + check pattern.
+    """
+    if seconds is None or seconds <= 0:
+        yield
+        return
+
+    def _handler(signum, frame):  # noqa: ARG001
+        raise _AgentTimeout(f"agent exceeded {seconds}s")
+
+    old = signal.signal(signal.SIGALRM, _handler)
+    signal.alarm(int(seconds))
+    try:
+        yield
+    finally:
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, old)
+
+
+_REDACT_KEY_RE = re.compile(r"(API_KEY|TOKEN|SECRET|PASSWORD|AUTH)", re.IGNORECASE)
+_REDACT_INLINE_RE = re.compile(
+    r"(\b\w*(?:API_KEY|TOKEN|SECRET|PASSWORD|AUTH)\w*\s*[:=]\s*)"
+    r"([^\s\"',]+)",
+    re.IGNORECASE,
+)
+
+
+def _redact_secrets(text: str) -> str:
+    """Strip secret-shaped values from a single-line message.
+
+    1. Replace any value of an env var whose key matches
+       ``API_KEY|TOKEN|SECRET|PASSWORD|AUTH`` (case-insensitive) and
+       has length >= 8 with ``[REDACTED]``.
+    2. Replace inline ``API_KEY=xxx`` / ``token: xxx`` patterns.
+
+    The function never raises; on any unexpected input it returns the
+    original text unchanged.
+    """
+    if not text:
+        return text
+    try:
+        result = text
+        for key, val in os.environ.items():
+            if not val or len(val) < 8:
+                continue
+            if _REDACT_KEY_RE.search(key):
+                result = result.replace(val, "[REDACTED]")
+        result = _REDACT_INLINE_RE.sub(r"\1[REDACTED]", result)
+        return result
+    except Exception:  # noqa: BLE001 — redaction must never break the run
+        return text
+
+
+def _summarise_error(exc: BaseException) -> str:
+    """Single-line, redacted, length-capped error message for trace metadata.
+
+    Stack traces NEVER end up in JSONL — they belong on stderr only.
+    """
+    msg = f"{type(exc).__name__}: {exc}".replace("\n", " ").replace("\r", " ")
+    return _redact_secrets(msg)[:200]
 
 
 # ── subcommand: envs ────────────────────────────────────────────
@@ -235,6 +314,17 @@ def cmd_run(args: argparse.Namespace) -> int:
     env_kwargs = _parse_env_kwargs(args.env_kwarg)
     out_path = Path(args.out)
 
+    # M3 reproducibility metadata: config_hash is per-run; instance_hash is per-episode.
+    _env_version = __version__
+    _cfg_hash = config_hash({
+        "env_id": args.env,
+        "agent_id": args.agent,
+        "n_episodes": int(args.n),
+        "start_seed": int(args.start_seed),
+        "env_kwargs": env_kwargs,
+        "with_baseline": bool(args.with_baseline),
+    })
+
     try:
         env = _load_env(args.env, env_kwargs)
     except KeyError:
@@ -267,84 +357,131 @@ def cmd_run(args: argparse.Namespace) -> int:
         instance = env.generate_instance(seed=seed)
         observation = _build_observation(args.env, seed, env_kwargs, adapter, instance)
         obs_hash = hash_payload(observation.get("inputs", {}))
+        _inst_hash = instance_hash(args.env, _env_version, seed, env_kwargs)
 
+        # Retry loop wraps agent.solve only — timeouts/exceptions are
+        # non-deterministic and worth retrying. parse_error / invalid_schema
+        # come AFTER solve and are deterministic; they don't retry.
+        prediction: Any = None
+        last_exc: BaseException | None = None
+        last_ftype = FailureType.NONE
+        retries_done = 0
         t0 = time.perf_counter()
-        try:
-            prediction = agent.solve(observation)
-        except TimeoutError as e:
-            traces.append(_failure_trace(
-                env_id=args.env, agent_name=agent.name, seed=seed,
-                latency_ms=(time.perf_counter() - t0) * 1000.0,
-                obs_hash=obs_hash, ftype=FailureType.TIMEOUT, msg=str(e)[:300],
-            ))
-            if not args.quiet:
-                print(f"  seed={seed:>5d} TIMEOUT", flush=True)
-            continue
-        except Exception as e:  # noqa: BLE001 — agent boundary
-            traces.append(_failure_trace(
-                env_id=args.env, agent_name=agent.name, seed=seed,
-                latency_ms=(time.perf_counter() - t0) * 1000.0,
-                obs_hash=obs_hash, ftype=FailureType.UNKNOWN, msg=str(e)[:300],
-            ))
-            if not args.quiet:
-                print(f"  seed={seed:>5d} ERROR {type(e).__name__}: {str(e)[:80]}",
-                      flush=True)
-            continue
-
+        for attempt in range(int(args.max_retries) + 1):
+            retries_done = attempt
+            try:
+                with _alarm_timeout(int(args.timeout_seconds)):
+                    prediction = agent.solve(observation)
+                break
+            except _AgentTimeout as e:
+                last_exc = e
+                last_ftype = FailureType.TIMEOUT
+            except Exception as e:  # noqa: BLE001 — agent boundary
+                last_exc = e
+                last_ftype = FailureType.UNKNOWN
         latency_ms = (time.perf_counter() - t0) * 1000.0
-        if not isinstance(prediction, dict):
-            traces.append(_failure_trace(
+
+        if prediction is None:
+            trace = _failure_trace(
+                env_id=args.env, agent_name=agent.name, seed=seed,
+                latency_ms=latency_ms, obs_hash=obs_hash,
+                ftype=last_ftype,
+                msg=_summarise_error(last_exc) if last_exc else last_ftype.value,
+                retries=retries_done,
+                cfg_hash=_cfg_hash, inst_hash=_inst_hash,
+            )
+        elif not isinstance(prediction, dict):
+            trace = _failure_trace(
                 env_id=args.env, agent_name=agent.name, seed=seed,
                 latency_ms=latency_ms, obs_hash=obs_hash,
                 ftype=FailureType.INVALID_SHAPE,
                 msg=f"agent returned {type(prediction).__name__}, expected dict",
-            ))
-            continue
+                retries=retries_done,
+                cfg_hash=_cfg_hash, inst_hash=_inst_hash,
+            )
+        else:
+            baseline_reward = None
+            if args.with_baseline:
+                try:
+                    base_score = (
+                        env.run_baseline(seed=seed, **env_kwargs)
+                        if env_kwargs else env.run_baseline(seed=seed)
+                    )
+                    baseline_reward = float(base_score.get("reward", 0.0))
+                except Exception:  # noqa: BLE001
+                    baseline_reward = None
 
-        baseline_reward = None
-        if args.with_baseline:
-            try:
-                base_score = (
-                    env.run_baseline(seed=seed, **env_kwargs)
-                    if env_kwargs else env.run_baseline(seed=seed)
-                )
-                baseline_reward = float(base_score.get("reward", 0.0))
-            except Exception:  # noqa: BLE001
-                baseline_reward = None
+            reward, components, coverage, ftype, extras = _score_episode(
+                env=env, adapter=adapter, instance=instance, prediction=prediction,
+                seed=seed, env_kwargs=env_kwargs,
+            )
 
-        reward, components, coverage, ftype, extras = _score_episode(
-            env=env, adapter=adapter, instance=instance, prediction=prediction,
-            seed=seed, env_kwargs=env_kwargs,
-        )
+            # Pull agent-side latency override if present (e.g. OpenAICompatibleAgent).
+            if "_latency_ms" in prediction:
+                with contextlib.suppress(TypeError, ValueError):
+                    latency_ms = float(prediction["_latency_ms"])
 
-        # Pull agent-side latency override if present (e.g. OpenAICompatibleAgent).
-        if "_latency_ms" in prediction:
-            with contextlib.suppress(TypeError, ValueError):
-                latency_ms = float(prediction["_latency_ms"])
+            gap = (reward - baseline_reward) if baseline_reward is not None else None
+            success = ftype == FailureType.NONE
+            metadata: dict[str, Any] = {
+                "status": "ok" if success else "failed",
+                "retries": int(retries_done),
+                "config_hash": _cfg_hash,
+                "instance_hash": _inst_hash,
+                "reward_hash": reward_hash(reward),
+            }
+            if not success:
+                err = (extras or {}).get("parse_error") or (extras or {}).get("error") or ""
+                metadata["error_message"] = _redact_secrets(str(err))[:200]
+            if env_kwargs:
+                metadata["env_kwargs"] = env_kwargs
+            for k, v in (extras or {}).items():
+                if k not in metadata:
+                    metadata[k] = v
 
-        gap = (reward - baseline_reward) if baseline_reward is not None else None
-        trace = Trace.new(
-            env_name=args.env,
-            agent_name=agent.name,
-            reward=reward,
-            parse_success=ftype == FailureType.NONE,
-            seed=seed,
-            model_name=getattr(agent, "model", None),
-            observation_hash=obs_hash,
-            prediction_hash=hash_payload(_strip_internals(prediction)),
-            reward_components=components,
-            classical_baseline_reward=baseline_reward,
-            gap_to_classical=gap,
-            coverage=coverage,
-            latency_ms=latency_ms,
-            failure_type=ftype,
-            metadata={**extras, "env_kwargs": env_kwargs} if extras or env_kwargs else {},
-        )
+            trace = Trace.new(
+                env_name=args.env,
+                agent_name=agent.name,
+                reward=reward,
+                parse_success=success,
+                seed=seed,
+                model_name=getattr(agent, "model", None),
+                observation_hash=obs_hash,
+                prediction_hash=hash_payload(_strip_internals(prediction)),
+                reward_components=components,
+                classical_baseline_reward=baseline_reward,
+                gap_to_classical=gap,
+                coverage=coverage,
+                latency_ms=latency_ms,
+                failure_type=ftype,
+                metadata=metadata,
+            )
+
         traces.append(trace)
         if not args.quiet:
-            tag = "ok" if ftype == FailureType.NONE else ftype.value
-            gap_s = f" Δ={gap:+.3f}" if gap is not None else ""
-            print(f"  seed={seed:>5d} reward={reward:.3f} {tag}{gap_s}", flush=True)
+            if trace.failure_type == FailureType.NONE:
+                gap_s = (
+                    f" Δ={trace.gap_to_classical:+.3f}"
+                    if trace.gap_to_classical is not None else ""
+                )
+                print(
+                    f"  seed={seed:>5d} reward={trace.reward:.3f} ok{gap_s}",
+                    flush=True,
+                )
+            else:
+                tag = trace.failure_type.value.upper()
+                rs = f" retries={retries_done}" if retries_done else ""
+                print(f"  seed={seed:>5d} {tag}{rs}", flush=True)
+
+        if args.fail_fast and trace.failure_type != FailureType.NONE:
+            n_written = write_jsonl(traces, out_path)
+            if not args.quiet:
+                print(
+                    f"\n[--fail-fast] aborted after seed={seed} "
+                    f"({trace.failure_type.value}); wrote {n_written} traces",
+                    file=sys.stderr,
+                )
+            return 1
 
     n_written = write_jsonl(traces, out_path)
     if not args.quiet:
@@ -365,7 +502,28 @@ def _failure_trace(
     obs_hash: str,
     ftype: FailureType,
     msg: str,
+    retries: int = 0,
+    cfg_hash: str | None = None,
+    inst_hash: str | None = None,
 ) -> Trace:
+    """Build a failure-shaped Trace with uniform M3+M4 metadata.
+
+    Schema parity with the success path: every trace carries
+    ``status``, ``retries``, ``config_hash``, ``instance_hash``,
+    ``reward_hash`` in its ``metadata`` dict. ``error_message`` is
+    redacted (env-var-shaped secrets stripped) and capped at 200 chars.
+    Stack traces never appear here — they belong on stderr only.
+    """
+    metadata: dict[str, Any] = {
+        "status": "failed",
+        "retries": int(retries),
+        "error_message": _redact_secrets(msg or "")[:200],
+        "reward_hash": reward_hash(0.0),
+    }
+    if cfg_hash is not None:
+        metadata["config_hash"] = cfg_hash
+    if inst_hash is not None:
+        metadata["instance_hash"] = inst_hash
     return Trace.new(
         env_name=env_id,
         agent_name=agent_name,
@@ -375,7 +533,7 @@ def _failure_trace(
         observation_hash=obs_hash,
         latency_ms=latency_ms,
         failure_type=ftype,
-        metadata={"error": msg},
+        metadata=metadata,
     )
 
 
@@ -482,6 +640,7 @@ def _build_parser() -> argparse.ArgumentParser:
         prog="verifiable",
         description="Developer CLI for evaluating scientific AI agents on verifiable RL environments.",
     )
+    p.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = p.add_subparsers(dest="command", required=True)
 
     # envs
@@ -512,6 +671,25 @@ def _build_parser() -> argparse.ArgumentParser:
     p_run.add_argument(
         "--with-baseline", action="store_true",
         help="also run env.run_baseline(seed) per episode to record gap_to_classical",
+    )
+    p_run.add_argument(
+        "--timeout-seconds", type=int, default=60,
+        help="kill the agent after N seconds; failed episode is recorded as "
+             "failure_type=timeout. Set 0 to disable. (default: 60)",
+    )
+    p_run.add_argument(
+        "--max-retries", type=int, default=0,
+        help="retry timeouts and exceptions up to N times before giving up. "
+             "parse_error / invalid_schema do NOT retry (deterministic). (default: 0)",
+    )
+    p_run_fail = p_run.add_mutually_exclusive_group()
+    p_run_fail.add_argument(
+        "--continue-on-error", action="store_true",
+        help="continue to the next episode after a failure (default behavior)",
+    )
+    p_run_fail.add_argument(
+        "--fail-fast", action="store_true",
+        help="abort the entire run on the first unrecoverable failure (exit code 1)",
     )
     p_run.add_argument("--quiet", action="store_true", help="suppress per-episode log lines")
     p_run.set_defaults(func=cmd_run)
