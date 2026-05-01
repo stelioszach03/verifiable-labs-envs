@@ -19,11 +19,15 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
-COPY pyproject.toml ./
+# README.md is required by hatchling for metadata validation
+# (pyproject.toml: readme = "README.md").
+COPY pyproject.toml README.md ./
 COPY src ./src
 
+# Production image only needs runtime deps; the [dev] extra ships
+# pgserver + ruff + mypy which are tens of MB of wheels we never use.
 RUN pip install --upgrade pip wheel build \
-    && pip wheel --wheel-dir /wheels '.[dev]'
+    && pip wheel --wheel-dir /wheels '.'
 
 # ── Runtime ────────────────────────────────────────────────────────────
 FROM python:${PYTHON_VERSION}-slim AS runtime
@@ -45,7 +49,7 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 COPY --from=builder /wheels /wheels
-COPY pyproject.toml ./
+COPY pyproject.toml README.md ./
 COPY src ./src
 COPY migrations ./migrations
 COPY alembic.ini ./alembic.ini
