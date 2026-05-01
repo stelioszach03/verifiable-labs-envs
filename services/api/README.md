@@ -101,6 +101,25 @@ The full suite runs in ~2–4 s once `pgserver` has cached its binary.
 Tests are NOT yet wired into the repo-root `pytest` (Phase 16 Stage C
 will add `services/api/tests/` to root `testpaths` + the CI workflow).
 
+## Production deploy
+
+See [`DEPLOYMENT.md`](./DEPLOYMENT.md) for the full Stage C playbook
+(Fly.io app, secrets, DNS, certs, rollback). Tldr:
+
+```bash
+cd services/api
+./deploy/first-deploy.sh         # one-time
+flyctl deploy --remote-only      # subsequent deploys
+```
+
+[`RUNBOOK.md`](./RUNBOOK.md) covers incident response — DB outage,
+rate-limit spikes, OOM, SSL renewal, webhook errors.
+
+> **Stripe is deferred** in Stage C: `VLABS_BILLING_ENABLED=false`
+> ships in production. `/v1/billing/*` routes return `503 billing_not_activated`,
+> the webhook short-circuits. Flip to `true` after the Delaware C-corp
+> registration via Stripe Atlas completes.
+
 ## License
 
 Apache-2.0 — see repo root [LICENSE](../../LICENSE).

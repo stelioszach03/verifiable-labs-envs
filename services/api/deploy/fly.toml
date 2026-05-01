@@ -1,0 +1,47 @@
+# Fly.io config for the vlabs-api FastAPI service.
+# Region: iad (Ashburn, VA) — closest to most US-based ML labs.
+# Provision: shared-cpu 1GB, auto-scale 1..3 machines.
+
+app = "vlabs-api"
+primary_region = "iad"
+
+[build]
+  dockerfile = "deploy/Dockerfile"
+
+[env]
+  VLABS_ENVIRONMENT = "prod"
+  VLABS_LOG_LEVEL = "INFO"
+  # All secrets injected via `fly secrets set ...` — see deploy/first-deploy.sh
+  # NEVER add Stripe / Clerk / DB / Sentry values here.
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = "suspend"   # cheap idle cost
+  auto_start_machines = true
+  min_machines_running = 1
+  max_machines_running = 3
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "15s"
+    method = "GET"
+    path = "/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb"
+
+# Scheduled overage reconciliation — kept commented while billing is deferred.
+# Once the Delaware C-corp + Stripe live mode lands, uncomment and run:
+#   fly machine clone --select  (or `fly machine run` with the schedule)
+#
+# [[machines]]
+#   name = "reconcile-overage"
+#   schedule = "monthly"     # 1st of each month
+#   command = ["python", "-m", "vlabs_api.jobs.reconcile_overage"]
+#   [[machines.vm]]
+#     size = "shared-cpu-1x"
+#     memory = "256mb"

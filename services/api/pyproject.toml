@@ -41,6 +41,7 @@ dependencies = [
     "stripe>=11.0",
     "pyjwt[crypto]>=2.8",
     "httpx>=0.27",
+    "sentry-sdk[fastapi]>=2.10",
     "vlabs-calibrate==0.1.0a1",
 ]
 

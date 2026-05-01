@@ -142,6 +142,23 @@ class APIKeyNotFoundForUser(APIError):
     title = "no API key with this id is owned by the authenticated user"
 
 
+# ── 4xx — Stage C ─────────────────────────────────────────────────
+
+
+class BillingNotActivated(APIError):
+    """Returned when VLABS_BILLING_ENABLED=false (default until C-corp lands)."""
+
+    status_code = 503
+    code = "billing_not_activated"
+    title = "Billing activation pending. Free tier fully functional."
+
+
+class NotAdmin(APIError):
+    status_code = 403
+    code = "not_admin"
+    title = "this Clerk user is not in the admin allowlist"
+
+
 # ── Handler ───────────────────────────────────────────────────────
 
 
@@ -180,5 +197,7 @@ __all__ = [
     "StripeNotConfigured",
     "ClerkNotConfigured",
     "APIKeyNotFoundForUser",
+    "BillingNotActivated",
+    "NotAdmin",
     "to_problem_json",
 ]

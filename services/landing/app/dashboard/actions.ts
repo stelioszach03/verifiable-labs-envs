@@ -16,7 +16,9 @@ async function token(): Promise<string> {
   if (!userId) {
     throw new Error("Not authenticated");
   }
-  const tok = await getToken();
+  // Use the "vlabs-api" JWT template so the token carries the user's
+  // email claim — vlabs_api/clerk_auth.py reads it for JIT user creation.
+  const tok = await getToken({ template: "vlabs-api" });
   if (!tok) {
     throw new Error("Clerk did not return a session token");
   }

@@ -4,6 +4,98 @@ Append-only timestamped log. Newest entry on top.
 
 ---
 
+## 2026-05-01 — Phase 16, Stage C (deploy + monitoring + Stripe deferred)
+
+**Goal**: production deploy infrastructure + observability + admin
+plane, with Stripe **deferred** (kill-switch flag, all billing routes
+short-circuit) until Delaware C-corp registration completes.
+
+### Done — services/api
+- **Stripe deferred mode**: new `VLABS_BILLING_ENABLED` flag (default
+  `false`). `/v1/billing/checkout` and `/v1/billing/portal` raise
+  `BillingNotActivated` (503) when disabled. `/v1/billing/webhook`
+  short-circuits with `200 {"deferred": true}` and never instantiates
+  the Stripe SDK.
+- **Redis-backed rate limit** (`ratelimit.py` rewrite): Upstash REST
+  sliding window via `ZADD` / `ZCARD` / `ZREMRANGEBYSCORE`. Backend
+  auto-detected — falls back to in-memory `deque` when Upstash creds
+  are unset (so tests + local dev keep working). Same
+  `enforce_rate_limit` dependency contract; routes don't change.
+- **Sentry SDK init** in `main.create_app`: gated on `SENTRY_DSN`
+  presence so tests stay quiet. FastAPI integration is auto-loaded
+  via `sentry-sdk[fastapi]` extra.
+- **Admin plane**: `routes/admin.py` exposes `GET /v1/admin/dashboard`
+  (Clerk-authed, allowlist via `VLABS_ADMIN_CLERK_IDS`). Returns row
+  counts + 10 most recent calibrations + `billing_enabled` status.
+- **Scheduled jobs scaffold**: `jobs/reconcile_overage.py` stub —
+  logs `skipped: billing deferred` + exits 0. Fly scheduled-machine
+  config commented in `deploy/fly.toml`, ready to enable post-C-corp.
+- **Deploy infra**: `deploy/Dockerfile` (multi-stage Python 3.11,
+  non-root vlabs user, libpq runtime), `deploy/fly.toml`
+  (region `iad`, shared-cpu-1x 1GB, scale 1..3, `/health` checks),
+  `deploy/entrypoint.sh` (alembic upgrade head → uvicorn),
+  `deploy/.dockerignore`, `deploy/first-deploy.sh` (idempotent
+  flyctl launch + secrets parse from `.env.local` without sourcing).
+
+### Done — services/landing
+- `/admin` page (server component, Clerk-protected via middleware
+  matcher). Calls `/v1/admin/dashboard` with the `vlabs-api` JWT
+  template. Renders 6-stat grid + recent-calibrations table.
+- `app/dashboard/actions.ts` already updated in a prior step to use
+  `getToken({ template: "vlabs-api" })`.
+- `deploy/cloudflare-deploy.sh` — idempotent `npm ci` →
+  `next-on-pages` → `wrangler pages deploy`.
+
+### Tests
+- 7 new tests added (4 admin, 2 deferred-billing, 1 deferred-webhook).
+- Total `services/api/tests/`: **55 passing** in ~8s on local pgserver.
+- Existing 519 + 6-skipped repo-root baseline unchanged.
+- Conftest forces memory rate-limit backend (`UPSTASH_REDIS_REST_URL=""`)
+  to keep tests fast — production .env.local has real creds, but
+  routing every test request through real Redis added ~100s of network
+  latency to a previously 8s suite.
+
+### CI integration
+- Root `pyproject.toml`: `services/api/tests` added to `testpaths`.
+- `.github/workflows/ci.yml`: install step `pip install -e
+  "services/api[dev]"`, ruff lint extends to `services/api/{src,tests}`,
+  pytest discovers and runs the new tests automatically.
+
+### Decisions logged
+- **Webhook always returns 2xx**, even in deferred mode — Stripe's
+  retry policy is aggressive on 5xx and we don't want retry storms
+  during the C-corp transition window.
+- **Admin allowlist is env-driven** (`VLABS_ADMIN_CLERK_IDS=user_a,user_b`)
+  rather than a DB role table. Keeps the source of truth in Fly secrets,
+  rotatable without a deploy.
+- **Redis ratelimit opens the gate on transient errors** (logs warning,
+  returns `True`). Better to over-serve briefly than to drop all traffic
+  when Upstash blips — Sentry alerts on the warning class.
+- **Pepper rotation invalidates all keys** — documented in DEPLOYMENT.md;
+  no automation. Stage C ships the warning, not the rotation flow.
+
+### Pending operational steps for Stelios
+1. Run `services/api/deploy/first-deploy.sh` (Fly launch + secrets +
+   deploy + cert request).
+2. Add Cloudflare DNS records for `api.` (A/AAAA, DNS-only) and `app.`
+   (CNAME, proxied).
+3. Run `services/landing/deploy/cloudflare-deploy.sh` (Pages project
+   + deploy).
+4. Create BetterStack monitor on `https://api.verifiable-labs.com/health`
+   (1-minute interval, alerts to email).
+5. Add an admin Clerk user ID to `VLABS_ADMIN_CLERK_IDS` (Stelios's own
+   Clerk ID is the obvious first entry).
+
+### Open / next phase
+- **Phase 17** (Capability Report automation): write nightly job that
+  pulls fresh test traces, computes coverage, stores under
+  `services/api/reports/`, emails summary to admins.
+- **Stripe activation** (independent track): Delaware C-corp via Stripe
+  Atlas; once approved, run `scripts/create_stripe_products.py`,
+  flip `VLABS_BILLING_ENABLED=true`, uncomment the cron in fly.toml.
+
+---
+
 ## 2026-04-30 — Phase 16, Stage B (Stripe + Next.js dashboard)
 
 **Goal**: ship Stripe (TEST MODE), tier-aware rate limit, Clerk JWT
