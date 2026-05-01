@@ -1,6 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 
+export const runtime = "edge";
+
 const API_URL =
   process.env.NEXT_PUBLIC_VLABS_API_URL ?? "http://localhost:8000";
 

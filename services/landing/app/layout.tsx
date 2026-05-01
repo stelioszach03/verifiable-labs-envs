@@ -3,6 +3,13 @@ import { ClerkProvider, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import "./globals.css";
 
+// Cloudflare Pages requires every dynamic route to run on the edge runtime
+// (Workers / V8 isolates) rather than Node serverless. Setting it on the
+// root layout propagates to all child segments under Next.js semantics; we
+// also set it explicitly per page for `@cloudflare/next-on-pages` which
+// validates each route file individually.
+export const runtime = "edge";
+
 export const metadata: Metadata = {
   title: "Verifiable Labs",
   description:

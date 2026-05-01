@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+export const runtime = "edge";
+
 const TABS = [
   { href: "/dashboard", label: "Overview" },
   { href: "/dashboard/api-keys", label: "API keys" },

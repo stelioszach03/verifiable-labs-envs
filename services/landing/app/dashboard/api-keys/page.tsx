@@ -2,6 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { listApiKeys } from "@/lib/api";
 import { actCreateKey, actRevokeKey } from "../actions";
 
+export const runtime = "edge";
+
 type SearchParams = { new?: string };
 
 export default async function APIKeysPage({

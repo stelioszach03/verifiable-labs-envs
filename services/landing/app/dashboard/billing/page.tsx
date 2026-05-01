@@ -2,6 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { getUsage } from "@/lib/api";
 import { actOpenPortal, actUpgradeTo } from "../actions";
 
+export const runtime = "edge";
+
 export default async function BillingPage() {
   const { getToken } = await auth();
   const token = await getToken();

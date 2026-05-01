@@ -3,6 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 
 import { getUsage, listApiKeys } from "@/lib/api";
 
+export const runtime = "edge";
+
 async function fetchOverview() {
   const { getToken } = await auth();
   const token = await getToken();
