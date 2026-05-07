@@ -3,6 +3,7 @@ from verifiable_labs_envs.solvers.adapters.lodopab_ct import LodopabCtLLMAdapter
 from verifiable_labs_envs.solvers.adapters.lodopab_ct_multiturn import (
     LodopabCtMultiturnAdapter,
 )
+from verifiable_labs_envs.solvers.adapters.math_algebra import MathAlgebraLLMAdapter
 from verifiable_labs_envs.solvers.adapters.mri_knee import MRIKneeLLMAdapter
 from verifiable_labs_envs.solvers.adapters.mri_knee_multiturn import (
     MRIKneeMultiturnAdapter,
@@ -33,6 +34,7 @@ register_adapter(PhaseRetrievalLLMAdapter())
 register_adapter(PhaseRetrievalMultiturnAdapter())
 register_adapter(MRIKneeLLMAdapter())
 register_adapter(MRIKneeMultiturnAdapter())
+register_adapter(MathAlgebraLLMAdapter())
 
 __all__ = [
     "SparseFourierLLMAdapter",
@@ -45,4 +47,5 @@ __all__ = [
     "PhaseRetrievalMultiturnAdapter",
     "MRIKneeLLMAdapter",
     "MRIKneeMultiturnAdapter",
+    "MathAlgebraLLMAdapter",
 ]

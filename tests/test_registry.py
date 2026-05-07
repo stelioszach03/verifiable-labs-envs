@@ -14,6 +14,7 @@ def test_registry_lists_expected_envs() -> None:
     assert envs == [
         "lodopab-ct-simplified",
         "lodopab-ct-simplified-multiturn",
+        "math-algebra",
         "mri-knee-reconstruction",
         "mri-knee-reconstruction-multiturn",
         "phase-retrieval",
