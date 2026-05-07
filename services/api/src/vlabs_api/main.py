@@ -5,6 +5,8 @@ the ``vlabs-api`` CLI script (``pip install -e .`` registers it).
 """
 from __future__ import annotations
 
+import asyncio
+import contextlib
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -63,11 +65,22 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         log_level=settings.vlabs_log_level,
         billing_enabled=settings.vlabs_billing_enabled,
         ratelimit_backend="redis" if settings.upstash_redis_rest_url else "memory",
+        vlabs_data_worker_pool_size=settings.vlabs_data_worker_pool_size,
     )
     init_engine(settings.database_url)
+    # Phase 23.C — spawn the in-app vlabs-data worker pool. Workers
+    # drain Redis-queued dataset jobs; cancelled gracefully on shutdown.
+    from vlabs_api.dataset_worker import spawn_worker_pool
+
+    worker_tasks = await spawn_worker_pool()
     try:
         yield
     finally:
+        for t in worker_tasks:
+            t.cancel()
+        for t in worker_tasks:
+            with contextlib.suppress(asyncio.CancelledError, Exception):
+                await t
         await dispose_engine()
         await redis_aclose()
         log.info("vlabs_api.shutdown")
