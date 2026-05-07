@@ -81,6 +81,7 @@ nav:
       - MRI knee: environments/mri-knee.md
       - Phase retrieval: environments/phase-retrieval.md
       - Super-resolution: environments/super-resolution.md
+      - Math algebra: environments/math-algebra.md
   - Tutorials:
       - First evaluation: tutorials/first-evaluation.md
       - Creating a custom env: tutorials/creating-custom-env.md

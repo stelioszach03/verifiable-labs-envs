@@ -44,6 +44,10 @@ ENV_ORDER = [
     "phase-retrieval-multiturn",
     "mri-knee-reconstruction",
     "mri-knee-reconstruction-multiturn",
+    # Added Phase 21 (symbolic-math family):
+    "math-algebra",
+    "math-algebra-multiturn",
+    "math-algebra-tools",
 ]
 ENV_LABEL = {
     "sparse-fourier-recovery": "SparseF",
@@ -56,6 +60,9 @@ ENV_LABEL = {
     "phase-retrieval-multiturn": "PhaseRet-MT",
     "mri-knee-reconstruction": "MRI",
     "mri-knee-reconstruction-multiturn": "MRI-MT",
+    "math-algebra": "MathAlg",
+    "math-algebra-multiturn": "MathAlg-MT",
+    "math-algebra-tools": "MathAlg-Tools",
 }
 
 

@@ -1,7 +1,8 @@
 # Environments
 
-The v0.1 platform ships **10 environments** spanning compressed
-sensing, computational imaging, physics inversion, and rendering.
+The v0.1 platform ships **13 environments** spanning compressed
+sensing, computational imaging, physics inversion, rendering, and
+symbolic algebra.
 
 | env id | domain | turns | tools | status |
 |---|---|---|---|---|
@@ -15,12 +16,19 @@ sensing, computational imaging, physics inversion, and rendering.
 | [`phase-retrieval`](phase-retrieval.md) | physics-inverse | 1 | no | ✅ stable |
 | `phase-retrieval-tools` | physics-inverse | 3 | yes | ✅ stable |
 | [`super-resolution`](super-resolution.md) | imaging-SR | 1 | no | ✅ stable |
+| `math-algebra` | symbolic-algebra | 1 | no | 🆕 alpha (Phase 21) |
+| `math-algebra-multiturn` | symbolic-algebra | 3 | no | 🆕 alpha (Phase 21) |
+| `math-algebra-tools` | symbolic-algebra | 3 | yes | 🆕 alpha (Phase 21) |
 
-Five env families are documented in detail in this section; the
+Six env families are documented in detail in this section; the
 multi-turn and tool-use variants share the underlying problem and
 reward and only differ in the dispatch shape (see
 [Multi-turn](../concepts/multi-turn.md) and
-[Tool use](../concepts/tool-use.md)).
+[Tool use](../concepts/tool-use.md)). The Phase 21 `math-algebra`
+family is the first non-inverse-problem domain — it ships under the
+new `templates/symbolic-math/` family and uses SymPy-verified
+equivalence (`simplify(answer − gold) == 0`) instead of a numeric
+NMSE / σ̂ scoring kernel.
 
 ## Common interface
 

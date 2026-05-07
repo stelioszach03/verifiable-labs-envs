@@ -11,7 +11,7 @@
 
 Most AI eval tools test chatbots and apps. Verifiable Labs generates scientific environments with **objective rewards**, **calibrated uncertainty**, **procedural regeneration**, **classical baselines**, and **training-signal potential** — tasks that are continuous, uncertainty-sensitive, and impossible to solve by memorising static benchmark answers.
 
-> **Status:** v0.1.0-alpha (developer preview). 10 live environments across compressed sensing, super-resolution, medical CT/MRI, and phase retrieval. Hosted REST API + Python SDK + `verifiable` CLI shipped. The platform is open and rate-limited; treat the public endpoint as a developer playground until v0.2 (auth + Redis sessions). Full roadmap: [`docs/company/roadmap.md`](docs/company/roadmap.md).
+> **Status:** v0.1.0-alpha (developer preview). 13 live environments across compressed sensing, super-resolution, medical CT/MRI, phase retrieval, and symbolic algebra. Hosted REST API + Python SDK + `verifiable` CLI shipped. The platform is open and rate-limited; treat the public endpoint as a developer playground until v0.2 (auth + Redis sessions). Full roadmap: [`docs/company/roadmap.md`](docs/company/roadmap.md).
 
 - 🔗 Hugging Face leaderboard — https://huggingface.co/spaces/stelioszach03/scientific-rl-benchmark
 - 🔗 Prime Intellect Hub envs — [`sparse-fourier-recovery`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-multiturn), [`-tools`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-tools), [`mri-knee-reconstruction`](https://app.primeintellect.ai/dashboard/environments/stelioszach/mri-knee-reconstruction), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/mri-knee-reconstruction-multiturn), [`phase-retrieval`](https://app.primeintellect.ai/dashboard/environments/stelioszach/phase-retrieval), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/phase-retrieval-multiturn), [`super-resolution-div2k-x4`](https://app.primeintellect.ai/dashboard/environments/stelioszach/super-resolution-div2k-x4), [`lodopab-ct-simplified`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified-multiturn).
@@ -24,7 +24,7 @@ pip install verifiable-labs
 
 # Verify
 verifiable --version          # → verifiable-labs 0.1.0a4
-verifiable list               # → 10 environments
+verifiable list               # → 13 environments
 
 # Run a benchmark
 export OPENROUTER_API_KEY=sk-or-...
@@ -43,7 +43,7 @@ git clone https://github.com/stelioszach03/verifiable-labs-envs.git
 cd verifiable-labs-envs
 pip install -e ".[dev]"
 
-# 1. List the 10 envs.
+# 1. List the 13 envs.
 verifiable envs
 
 # 2. Run a zero-amplitude agent on sparse-Fourier (3 episodes, no API key needed).
@@ -127,7 +127,7 @@ Examples: [`examples/agents/`](examples/agents).
 
 | | shipped | planned |
 |---|---|---|
-| **environments** | 10 envs across 5 domains | 5 new envs (holographic 3D, EM tomography, seismic FWI, inverse rendering, protein distogram) — v0.2 |
+| **environments** | 13 envs across 6 domains | 5 new envs (holographic 3D, EM tomography, seismic FWI, inverse rendering, protein distogram) — v0.2 |
 | **API** | `/v1/{health, environments, sessions, leaderboard}` (open, rate-limited) | per-user auth, Redis-backed sessions — v0.2 |
 | **SDK** | sync + async clients on PyPI as `verifiable-labs` (re-exports `load_environment` for local mode) | optional slim install — Tier-1 polish |
 | **CLI** | `envs · run · compare · report · init-env · validate-env` | static viewer / dashboard — v0.3 stretch |
@@ -155,9 +155,9 @@ Frontier reasoning models are trained with verifiable rewards (RLVR). Today's RL
 2. The **reward** is a weighted sum of reconstruction quality (PSNR, SSIM, or task-appropriate metric) and **conformal-prediction coverage** — models are rewarded for honest posterior width, not overconfident point estimates.
 3. Measurements are **procedurally regenerated per evaluation call**, so fixed-string memorization is structurally impossible.
 
-## Environments (10 live on Prime Intellect Hub)
+## Environments (13 live)
 
-| # | Environment | Domain | Forward operator | Classical baseline |
+| # | Environment | Domain | Forward operator / problem | Classical baseline / verifier |
 |---|---|---|---|---|
 | 1 | `sparse-fourier-recovery` | compressed sensing | subsampled orthonormal 1D DFT | OMP with LS-covariance σ̂ |
 | 2 | `sparse-fourier-recovery-multiturn` | compressed sensing | same, 3-turn dialogue | residual-feedback refinement |
@@ -165,10 +165,13 @@ Frontier reasoning models are trained with verifiable rewards (RLVR). Today's RL
 | 4 | `super-resolution-div2k-x4` | image | Gaussian blur + 4× decimation | bicubic with edge-weighted σ̂ |
 | 5 | `lodopab-ct-simplified` | medical imaging (CT) | 2D parallel-beam Radon | FBP with edge-weighted σ̂ (phantom default; real-patient LoDoPaB-CT via `use_real_data=True`) |
 | 6 | `lodopab-ct-simplified-multiturn` | medical imaging (CT) | same, 3-turn dialogue | FBP-residual feedback |
-| 7 | **`phase-retrieval`** (new sprint-giga) | crystallography / CDI | magnitude-only subsampled DFT | Gerchberg-Saxton (alternating projection) |
-| 8 | **`phase-retrieval-multiturn`** (new) | crystallography / CDI | same, 3-turn dialogue | magnitude-residual feedback |
-| 9 | **`mri-knee-reconstruction`** (new sprint-giga) | medical imaging (MRI) | 2D DFT + 4× Cartesian undersampling | zero-filled inverse FFT |
-|10 | **`mri-knee-reconstruction-multiturn`** (new) | medical imaging (MRI) | same, 3-turn dialogue | k-space residual feedback |
+| 7 | `phase-retrieval` | crystallography / CDI | magnitude-only subsampled DFT | Gerchberg-Saxton (alternating projection) |
+| 8 | `phase-retrieval-multiturn` | crystallography / CDI | same, 3-turn dialogue | magnitude-residual feedback |
+| 9 | `mri-knee-reconstruction` | medical imaging (MRI) | 2D DFT + 4× Cartesian undersampling | zero-filled inverse FFT |
+|10 | `mri-knee-reconstruction-multiturn` | medical imaging (MRI) | same, 3-turn dialogue | k-space residual feedback |
+|11 | **`math-algebra`** (Phase 21) | symbolic algebra | expand / factor / collect-like-terms problems | `simplify(answer − gold) == 0`, threaded timeout |
+|12 | **`math-algebra-multiturn`** (Phase 21) | symbolic algebra | same, 3-turn dialogue with verifier feedback | per-component feedback (format / parse / equivalence) |
+|13 | **`math-algebra-tools`** (Phase 21) | symbolic algebra | same, primitive-composition tool-use | `sympy_simplify` / `expand` / `solve` / `substitute` primitives |
 
 ## Classical-baseline benchmark (5 seeds each, default hyperparameters)
 
