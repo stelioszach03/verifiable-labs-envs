@@ -89,8 +89,27 @@ curl -X POST https://api.verifiable-labs.com/v1/score \
 - **It does not span users.** Same key from two different API keys
   belonging to different users → two distinct audit rows.
 
+## `/v1/datasets` { #datasets }
+
+`POST /v1/datasets` supports the same dedup contract via a JSON-body
+`idempotency_key` field (rather than the `X-Idempotency-Key` header).
+The 24 h window covers an asynchronous lifecycle that may run for
+hours, so the rules differ slightly:
+
+- **In-window re-issue:** the original `dataset_id` + current `state`
+  are returned. The customer's LLM API key is NOT re-validated and
+  the worker queue is NOT re-enqueued — your earlier job (or its
+  result) stands.
+- **Out-of-window re-issue:** the stale row is deleted before the
+  fresh insert (the partial unique index on `(idempotency_key,
+  user_id)` enforces a single active row per key).
+- **Quota:** in-window re-issues do **not** debit the
+  `tuples_per_month` counter. The original job's per-tuple debits
+  remain.
+
 ## See also
 
 - [`score.md`](score.md) — full `/v1/score` request/response reference.
+- [`datasets.md`](datasets.md) — `/v1/datasets` job lifecycle.
 - [`env-versioning.md`](env-versioning.md) — when env_version changes
   break idempotency assumptions.
