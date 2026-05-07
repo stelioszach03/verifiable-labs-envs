@@ -7,6 +7,9 @@ from verifiable_labs_envs.solvers.adapters.math_algebra import MathAlgebraLLMAda
 from verifiable_labs_envs.solvers.adapters.math_algebra_multiturn import (
     MathAlgebraMultiturnAdapter,
 )
+from verifiable_labs_envs.solvers.adapters.math_algebra_tools import (
+    MathAlgebraToolsAdapter,
+)
 from verifiable_labs_envs.solvers.adapters.mri_knee import MRIKneeLLMAdapter
 from verifiable_labs_envs.solvers.adapters.mri_knee_multiturn import (
     MRIKneeMultiturnAdapter,
@@ -39,6 +42,7 @@ register_adapter(MRIKneeLLMAdapter())
 register_adapter(MRIKneeMultiturnAdapter())
 register_adapter(MathAlgebraLLMAdapter())
 register_adapter(MathAlgebraMultiturnAdapter())
+register_adapter(MathAlgebraToolsAdapter())
 
 __all__ = [
     "SparseFourierLLMAdapter",
@@ -53,4 +57,5 @@ __all__ = [
     "MRIKneeMultiturnAdapter",
     "MathAlgebraLLMAdapter",
     "MathAlgebraMultiturnAdapter",
+    "MathAlgebraToolsAdapter",
 ]
