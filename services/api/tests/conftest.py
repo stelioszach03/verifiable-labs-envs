@@ -42,6 +42,16 @@ os.environ.setdefault("SENTRY_DSN", "")
 # ~50ms × hundreds of calls (the rate-limit tests alone make 350+ requests).
 os.environ["UPSTASH_REDIS_REST_URL"] = ""
 os.environ["UPSTASH_REDIS_REST_TOKEN"] = ""
+# Phase 23: storage layer writes to /tmp/r2-fake/<bucket>/<key> instead
+# of hitting Cloudflare R2. Encryption runs through real Fernet so the
+# real code path is exercised; ``VLABS_DATA_LLM_KEY_ENCRYPTION`` is set
+# to a fixed test secret. Production deploys MUST override both via
+# Fly secrets (R2 creds + a real Fernet key).
+os.environ.setdefault("VLABS_LOCAL_FAKE_R2", "true")
+os.environ.setdefault(
+    "VLABS_DATA_LLM_KEY_ENCRYPTION",
+    "test-fernet-secret-not-for-prod-32-bytes-long",
+)
 
 # ── Step 2: now safe to import vlabs_api ─────────────────────────────
 from sqlalchemy import text  # noqa: E402
@@ -90,9 +100,9 @@ async def truncate_data(setup_db) -> AsyncIterator[None]:
     async with db._SessionFactory() as s:  # type: ignore[misc]
         await s.execute(
             text(
-                "TRUNCATE TABLE audit_calls, subscriptions, usage_counters, "
-                "evaluations, calibration_runs, api_keys, users "
-                "RESTART IDENTITY CASCADE"
+                "TRUNCATE TABLE dataset_jobs, audit_calls, subscriptions, "
+                "usage_counters, evaluations, calibration_runs, api_keys, "
+                "users RESTART IDENTITY CASCADE"
             )
         )
         await s.commit()

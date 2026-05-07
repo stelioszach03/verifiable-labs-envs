@@ -121,6 +121,41 @@ class AuditCallNotFound(APIError):
     title = "no audit call with this id is owned by this API key"
 
 
+class DatasetJobNotFound(APIError):
+    """Phase 23.B — dataset_id not found or not owned by the caller."""
+
+    status_code = 404
+    code = "dataset_job_not_found"
+    title = "no dataset job with this id is owned by this API key"
+
+
+class BudgetExceeded(APIError):
+    """Phase 23.B — per-job ``budget_usd_cap`` exhausted mid-generation."""
+
+    status_code = 402
+    code = "budget_exceeded"
+    title = "per-job spend cap reached; remaining tuples not generated"
+
+
+class R2StorageError(APIError):
+    """Phase 23.C — R2 upload / signed-URL generation failure."""
+
+    status_code = 503
+    code = "r2_storage_error"
+    title = "object storage backend unavailable"
+
+
+class DatasetJobInvalidState(APIError):
+    """Phase 23.D — operation not valid for the job's current state.
+
+    e.g. download requested while job is still ``running``.
+    """
+
+    status_code = 409
+    code = "dataset_job_invalid_state"
+    title = "operation not valid for job state"
+
+
 class RateLimited(APIError):
     status_code = 429
     code = "rate_limited"
@@ -217,6 +252,10 @@ __all__ = [
     "UnknownEnvironment",
     "CompletionTooLarge",
     "AuditCallNotFound",
+    "DatasetJobNotFound",
+    "BudgetExceeded",
+    "R2StorageError",
+    "DatasetJobInvalidState",
     "RateLimited",
     "InvalidClerkToken",
     "WebhookSignatureInvalid",

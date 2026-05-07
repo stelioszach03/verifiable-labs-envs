@@ -32,6 +32,12 @@ class TierLimits(BaseSettings):
     free_scores_per_month: int = 1_000
     pro_scores_per_month: int = 100_000
     team_scores_per_month: int = 1_000_000
+    # Phase 23.B — vlabs-data tuple quota (PHASE_23_PLAN.md §5.D8).
+    # Per-tuple debit, post-scoring. Failed tuples (LLM timeout, parse
+    # error, env scoring failure) do NOT count.
+    free_tuples_per_month: int = 1_000
+    pro_tuples_per_month: int = 100_000
+    team_tuples_per_month: int = 1_000_000
 
 
 class Settings(BaseSettings):
@@ -69,6 +75,32 @@ class Settings(BaseSettings):
 
     # Comma-separated list of Clerk user IDs allowed to hit /v1/admin/*
     vlabs_admin_clerk_ids: str = ""
+
+    # ── Phase 23: vlabs-data (R2 + LLM-key encryption + worker pool) ─
+    # Cloudflare R2 (S3-compatible). Production deploy needs all five.
+    # Tests run in LOCAL_FAKE_R2 mode (writes to /tmp/r2-fake/...),
+    # so these can stay empty in dev / pgserver runs.
+    vlabs_r2_account_id: str = ""
+    vlabs_r2_access_key_id: str = ""
+    vlabs_r2_secret_access_key: str = ""
+    vlabs_r2_bucket_name: str = "vlabs-datasets"
+    vlabs_r2_public_url: str = ""  # e.g. https://datasets.verifiable-labs.com
+    vlabs_r2_endpoint_url: str = ""  # auto-derived from account_id if empty
+
+    # Symmetric key for pgp_sym_encrypt of llm_api_key_encrypted.
+    # Treat as a Fly secret in production. Empty in tests means the
+    # encryption helper short-circuits (LOCAL_FAKE_R2 mode).
+    vlabs_data_llm_key_encryption: str = ""
+
+    # Worker-pool sizing (D4-A: in-app worker pool).
+    vlabs_data_worker_pool_size: int = 2
+    vlabs_data_checkpoint_every_n: int = 1_000
+    vlabs_data_max_tuples_per_job: int = 100_000
+
+    # LOCAL_FAKE_R2 toggle — when truthy, storage layer writes to
+    # /tmp/r2-fake/<bucket>/<key> instead of hitting R2. Tests set
+    # this via env; production leaves it empty.
+    vlabs_local_fake_r2: bool = False
 
     # Stage B Stripe is deferred until Delaware C-corp registration
     # completes. While disabled, /v1/billing/* return 503 with

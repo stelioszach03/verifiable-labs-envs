@@ -21,6 +21,7 @@ from vlabs_api.routes import (
     audit,
     billing,
     calibrate,
+    datasets,
     evaluate,
     health,
     instance,
@@ -100,6 +101,10 @@ def create_app() -> FastAPI:
     app.include_router(instance.router, prefix="/v1")
     app.include_router(score.router, prefix="/v1")
     app.include_router(score_audit.router, prefix="/v1")
+    # Phase 23 — vlabs-data (async synthetic dataset generation).
+    # Counts against tuples_per_month tier quota; idempotent re-issues
+    # of POST /v1/datasets do not increment the counter.
+    app.include_router(datasets.router, prefix="/v1")
     # Management plane — Clerk JWT auth, billing + key issuance
     app.include_router(keys.router, prefix="/v1")
     app.include_router(billing.router, prefix="/v1")

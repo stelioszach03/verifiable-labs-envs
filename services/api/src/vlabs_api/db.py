@@ -178,6 +178,10 @@ class UsageCounter(Base):
     # Phase 22.B — counts /v1/instance + /v1/score against the per-tier
     # monthly cap. Idempotent re-issues of /v1/score do NOT increment.
     scores_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # Phase 23.B — counts successfully generated dataset tuples against
+    # the per-tier monthly cap. Failed tuples (LLM timeout, parse error,
+    # env scoring failure) do NOT increment.
+    tuples_generated: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
 
 
 class AuditCall(Base):
@@ -223,6 +227,107 @@ class AuditCall(Base):
         Index("audit_calls_env_idx", "env_id", "created_at"),
         Index(
             "audit_calls_idempotency_idx",
+            "idempotency_key",
+            "user_id",
+            unique=True,
+            postgresql_where=text("idempotency_key IS NOT NULL"),
+        ),
+    )
+
+
+class DatasetJob(Base):
+    """Async synthetic-dataset generation job (Phase 23.B).
+
+    PHASE_23_PLAN.md §6 schema. The customer's LLM API key is encrypted
+    at rest via ``pgp_sym_encrypt`` (pgcrypto extension); the symmetric
+    key comes from the ``VLABS_DATA_LLM_KEY_ENCRYPTION`` env. Dataset
+    payload itself lives in R2 (per D3-B ruling); this row stores
+    aggregate stats only (per D9-C ruling).
+    """
+
+    __tablename__ = "dataset_jobs"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    api_key_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("api_keys.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    env_id: Mapped[str] = mapped_column(Text, nullable=False)
+    env_version: Mapped[str] = mapped_column(Text, nullable=False)
+    requested_tuples: Mapped[int] = mapped_column(Integer, nullable=False)
+    generated_tuples: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0
+    )
+    seed_start: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    seed_end: Mapped[int] = mapped_column(BigInteger, nullable=False)
+
+    # Customer-supplied LLM endpoint config.
+    llm_endpoint_url: Mapped[str] = mapped_column(Text, nullable=False)
+    llm_api_key_encrypted: Mapped[bytes] = mapped_column(
+        LargeBinary, nullable=False
+    )
+    llm_model: Mapped[str] = mapped_column(Text, nullable=False)
+
+    budget_usd_cap: Mapped[float | None] = mapped_column(Float, nullable=True)
+    budget_usd_spent: Mapped[float] = mapped_column(
+        Float, nullable=False, default=0.0
+    )
+
+    # State machine (PHASE_23_PLAN.md §9).
+    state: Mapped[str] = mapped_column(Text, nullable=False, default="created")
+    output_format: Mapped[str] = mapped_column(
+        Text, nullable=False, default="parquet"
+    )
+
+    # Aggregate stats (D9-C). NULL until completion.
+    mean_reward: Mapped[float | None] = mapped_column(Float, nullable=True)
+    std_reward: Mapped[float | None] = mapped_column(Float, nullable=True)
+    p25_reward: Mapped[float | None] = mapped_column(Float, nullable=True)
+    p50_reward: Mapped[float | None] = mapped_column(Float, nullable=True)
+    p75_reward: Mapped[float | None] = mapped_column(Float, nullable=True)
+    completion_success_rate: Mapped[float | None] = mapped_column(
+        Float, nullable=True
+    )
+
+    # Storage pointer (R2 object key + integrity).
+    storage_key: Mapped[str | None] = mapped_column(Text, nullable=True)
+    storage_sha256: Mapped[str | None] = mapped_column(Text, nullable=True)
+    storage_size_bytes: Mapped[int | None] = mapped_column(
+        BigInteger, nullable=True
+    )
+
+    idempotency_key: Mapped[str | None] = mapped_column(Text, nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=_now_utc
+    )
+    started_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    archived_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    hard_deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    __table_args__ = (
+        Index("dataset_jobs_user_idx", "user_id", "created_at"),
+        Index("dataset_jobs_state_idx", "state", "created_at"),
+        Index(
+            "dataset_jobs_idempotency_idx",
             "idempotency_key",
             "user_id",
             unique=True,
@@ -344,6 +449,7 @@ __all__ = [
     "Evaluation",
     "UsageCounter",
     "AuditCall",
+    "DatasetJob",
     "StripeEvent",
     "Subscription",
     "init_engine",

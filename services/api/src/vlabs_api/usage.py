@@ -49,6 +49,16 @@ def tier_scores_limit(tier: Tier) -> int:
     }[tier]
 
 
+def tier_tuples_limit(tier: Tier) -> int:
+    """Return the per-month vlabs-data tuple quota (Phase 23 D8 ruling)."""
+    t: TierLimits = get_settings().tiers
+    return {
+        "free": t.free_tuples_per_month,
+        "pro": t.pro_tuples_per_month,
+        "team": t.team_tuples_per_month,
+    }[tier]
+
+
 async def resolve_tier(session: AsyncSession, user_id: uuid.UUID) -> Tier:
     """Look up the user's effective tier from active subscriptions."""
     stmt = (
@@ -140,6 +150,35 @@ async def increment_scores_counter(
     await session.execute(stmt)
 
 
+async def increment_tuples_counter(
+    session: AsyncSession,
+    api_key_id: uuid.UUID,
+    *,
+    delta: int,
+    month: date | None = None,
+) -> None:
+    """Atomic UPSERT — adds ``delta`` to ``tuples_generated`` for this month.
+
+    Phase 23 D8 ruling: per-tuple debit, post-scoring. Failed tuples
+    (LLM timeout, parse error, env scoring failure) do NOT increment.
+    Idempotent re-issues of ``POST /v1/datasets`` MUST NOT call this.
+    """
+    if delta <= 0:
+        return
+    m = _first_day_of_month(month)
+    stmt = (
+        pg_insert(UsageCounter)
+        .values(api_key_id=api_key_id, month=m, tuples_generated=delta)
+        .on_conflict_do_update(
+            index_elements=[UsageCounter.api_key_id, UsageCounter.month],
+            set_={
+                "tuples_generated": UsageCounter.tuples_generated + delta,
+            },
+        )
+    )
+    await session.execute(stmt)
+
+
 def quota_remaining(tier: Tier, used_traces: int) -> int:
     """Return the number of traces still available this month."""
     cap, _ = tier_limits(tier)
@@ -150,9 +189,11 @@ __all__ = [
     "Tier",
     "tier_limits",
     "tier_scores_limit",
+    "tier_tuples_limit",
     "resolve_tier",
     "get_current_counter",
     "increment_counter",
     "increment_scores_counter",
+    "increment_tuples_counter",
     "quota_remaining",
 ]

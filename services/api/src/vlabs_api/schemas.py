@@ -247,6 +247,143 @@ class AuditCallList(BaseModel):
     offset: int
 
 
+# ── Phase 23 — vlabs-data dataset jobs ────────────────────────────
+
+
+DatasetOutputFormat = Literal["parquet", "jsonl"]
+DatasetJobState = Literal[
+    "created",
+    "queued",
+    "running",
+    "succeeded",
+    "failed",
+    "archived",
+    "hard_deleted",
+]
+
+
+class DatasetCreateRequest(BaseModel):
+    """``POST /v1/datasets`` request body (Phase 23.B).
+
+    PHASE_23_PLAN.md §5.D1: customer brings their own LLM endpoint.
+    The API key is encrypted at rest via ``pgp_sym_encrypt`` (pgcrypto)
+    using the symmetric key from ``VLABS_DATA_LLM_KEY_ENCRYPTION``.
+
+    The optional ``budget_usd_cap`` is a hard stop — the worker stops
+    generation when ``budget_usd_spent >= budget_usd_cap`` and emits a
+    ``state=succeeded`` row with ``generated_tuples < requested_tuples``
+    (PHASE_23_PLAN.md §10).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    env_id: str = Field(min_length=1, max_length=128)
+    requested_tuples: int = Field(ge=1, le=100_000)
+    seed_start: int = Field(ge=0)
+
+    # Customer-supplied LLM endpoint config (D1-B).
+    llm_endpoint_url: str = Field(min_length=1, max_length=2_048)
+    llm_api_key: str = Field(min_length=1, max_length=2_048)
+    llm_model: str = Field(min_length=1, max_length=128)
+
+    output_format: DatasetOutputFormat = "parquet"
+    budget_usd_cap: float | None = Field(default=None, gt=0.0)
+    idempotency_key: str | None = Field(default=None, max_length=200)
+
+
+class DatasetCreateResponse(BaseModel):
+    """``POST /v1/datasets`` response — returned immediately on enqueue.
+
+    The job runs asynchronously; clients poll
+    ``GET /v1/datasets/{dataset_id}`` for status.
+    """
+
+    dataset_id: str
+    state: DatasetJobState
+    requested_tuples: int
+    seed_start: int
+    seed_end: int
+    output_format: DatasetOutputFormat
+    env_version: str
+    created_at: datetime
+
+
+class DatasetJobResponse(BaseModel):
+    """``GET /v1/datasets/{dataset_id}`` response body (Phase 23.D).
+
+    The customer's LLM API key is NEVER returned (only the URL +
+    model). Storage pointer fields populate as the job progresses
+    through the lifecycle.
+    """
+
+    dataset_id: str
+    env_id: str
+    env_version: str
+    requested_tuples: int
+    generated_tuples: int
+    seed_start: int
+    seed_end: int
+    llm_endpoint_url: str
+    llm_model: str
+    output_format: DatasetOutputFormat
+    budget_usd_cap: float | None
+    budget_usd_spent: float
+    state: DatasetJobState
+    # Aggregate stats (D9-C). NULL until completion.
+    mean_reward: float | None
+    std_reward: float | None
+    p25_reward: float | None
+    p50_reward: float | None
+    p75_reward: float | None
+    completion_success_rate: float | None
+    # Storage integrity (populated on succeeded).
+    storage_sha256: str | None
+    storage_size_bytes: int | None
+    error: str | None
+    idempotency_key: str | None
+    created_at: datetime
+    started_at: datetime | None
+    completed_at: datetime | None
+
+
+class DatasetJobSummary(BaseModel):
+    """List-view row for ``GET /v1/datasets`` (Phase 23.D)."""
+
+    dataset_id: str
+    env_id: str
+    env_version: str
+    requested_tuples: int
+    generated_tuples: int
+    state: DatasetJobState
+    created_at: datetime
+    completed_at: datetime | None
+
+
+class DatasetJobList(BaseModel):
+    """``GET /v1/datasets`` response body (Phase 23.D)."""
+
+    items: list[DatasetJobSummary]
+    total: int
+    limit: int
+    offset: int
+
+
+class DatasetDownloadResponse(BaseModel):
+    """``GET /v1/datasets/{dataset_id}/download`` JSON variant (Phase 23.D).
+
+    Default response is a 302 redirect to the signed URL. JSON variant
+    requested via ``Accept: application/json`` returns the signed URL +
+    integrity hash inline.
+    """
+
+    dataset_id: str
+    download_url: str
+    expires_at: datetime
+    sha256: str
+    size_bytes: int
+    output_format: DatasetOutputFormat
+
+
 # ── Stage B: billing + key management schemas ────────────────────────
 
 
@@ -353,4 +490,12 @@ __all__ = [
     "AuditCallResponse",
     "AuditCallSummary",
     "AuditCallList",
+    "DatasetOutputFormat",
+    "DatasetJobState",
+    "DatasetCreateRequest",
+    "DatasetCreateResponse",
+    "DatasetJobResponse",
+    "DatasetJobSummary",
+    "DatasetJobList",
+    "DatasetDownloadResponse",
 ]
