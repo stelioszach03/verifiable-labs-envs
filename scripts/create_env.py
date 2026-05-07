@@ -1,21 +1,30 @@
 #!/usr/bin/env python3
-"""Scaffold a new Verifiable Labs inverse-problem RL environment.
+"""Scaffold a new Verifiable Labs RL environment.
 
-Reads ``templates/inverse-problem/template/`` and writes a rendered
-copy under ``environments/<env_py>/`` (or wherever ``--target``
-points). Replaces literal placeholders (``__ENV_ID__``, ``__ENV_PY__``,
-``__ENV_CLASS__``, ``__DOMAIN__``, ``__DOMAIN_TAG__``) in every
-template file and renames the ``__ENV_PY__/`` template directory to
-the new env's Python module name.
+Reads a template family under ``templates/<template>/template/`` and
+writes a rendered copy under ``environments/<env_py>/`` (or wherever
+``--target`` points). Replaces literal placeholders (``__ENV_ID__``,
+``__ENV_PY__``, ``__ENV_CLASS__``, ``__DOMAIN__``, ``__DOMAIN_TAG__``)
+in every template file and renames the ``__ENV_PY__/`` template
+directory to the new env's Python module name.
+
+Two template families are supported:
+
+- ``inverse-problem`` (default) — forward operator + NMSE +
+  per-entry σ̂ vector. Used by sparse-fourier, mri-knee, lodopab-ct,
+  phase-retrieval, super-resolution.
+- ``symbolic-math`` — SymPy-string instances + threaded `simplify`
+  timeout + 3-component partial-credit reward. Used by math-algebra
+  family (Phase 21).
 
 Usage::
 
     python scripts/create_env.py seismic-fwi --domain "geophysics"
-    python scripts/create_env.py seismic-fwi --domain "geophysics" \\
-        --target /tmp/scratch-env-tree
+    python scripts/create_env.py math-algebra --template symbolic-math \\
+        --domain "algebra"
 
-After scaffolding, edit the four ``NotImplementedError`` stubs and
-run ``python scripts/validate_env.py environments/<env_py>``.
+After scaffolding, edit the ``NotImplementedError`` stubs and run
+``python scripts/validate_env.py environments/<env_py>``.
 """
 from __future__ import annotations
 
@@ -26,8 +35,35 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-TEMPLATE_DIR = REPO_ROOT / "templates" / "inverse-problem" / "template"
+
+# Template family registry. New families add an entry here and ship a
+# matching directory under ``repo/templates/<name>/template/``.
+TEMPLATES: dict[str, Path] = {
+    "inverse-problem": REPO_ROOT / "templates" / "inverse-problem" / "template",
+    "symbolic-math": REPO_ROOT / "templates" / "symbolic-math" / "template",
+}
+
+# Backward-compatible default — existing scaffold tests reach in for
+# ``TEMPLATE_DIR`` at import time and assume the inverse-problem path.
+TEMPLATE_DIR = TEMPLATES["inverse-problem"]
 TEMPLATE_PY_MARKER = "__ENV_PY__"
+
+
+def _resolve_template(name: str) -> Path:
+    """Return the template directory for a registered family name.
+
+    Raises :class:`SystemExit` (caught by argparse-style error flows)
+    when the family is unknown or its directory is missing.
+    """
+    if name not in TEMPLATES:
+        available = ", ".join(sorted(TEMPLATES))
+        raise SystemExit(
+            f"unknown --template {name!r}. Available: {available}"
+        )
+    path = TEMPLATES[name]
+    if not path.is_dir():
+        raise SystemExit(f"template directory not found: {path}")
+    return path
 
 _KEBAB = re.compile(r"^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$")
 # File suffixes whose contents we substitute through. Anything not in
@@ -126,6 +162,11 @@ def main() -> int:
         help="human-readable domain, e.g. 'geophysics' or 'medical-imaging'",
     )
     parser.add_argument(
+        "--template", default="inverse-problem",
+        choices=sorted(TEMPLATES.keys()),
+        help="template family to scaffold from (default: inverse-problem)",
+    )
+    parser.add_argument(
         "--target", default=None,
         help="target directory (default: <repo>/environments/<env_py>)",
     )
@@ -136,8 +177,7 @@ def main() -> int:
     args = parser.parse_args()
 
     _validate_env_id(args.env_id)
-    if not TEMPLATE_DIR.is_dir():
-        raise SystemExit(f"template directory not found: {TEMPLATE_DIR}")
+    template_dir = _resolve_template(args.template)
 
     subs = _build_substitutions(args.env_id, args.domain)
     env_py = subs["__ENV_PY__"]
@@ -155,7 +195,7 @@ def main() -> int:
         shutil.rmtree(target)
     target.mkdir(parents=True)
 
-    written = _render_tree(TEMPLATE_DIR, target, subs)
+    written = _render_tree(template_dir, target, subs)
     rel = target.relative_to(REPO_ROOT) if target.is_relative_to(REPO_ROOT) else target
 
     print(f"scaffolded {len(written)} files into {rel}/")
