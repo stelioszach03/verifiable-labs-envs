@@ -97,6 +97,30 @@ class CalibrationNotFound(APIError):
     title = "no calibration with this id is owned by this API key"
 
 
+class UnknownEnvironment(APIError):
+    """Phase 22.B — env_id not in verifiable_labs_envs._REGISTRY."""
+
+    status_code = 404
+    code = "unknown_environment"
+    title = "no environment with this id is registered"
+
+
+class CompletionTooLarge(APIError):
+    """Phase 22.C — completion exceeded the 1 MB cap."""
+
+    status_code = 413
+    code = "completion_too_large"
+    title = "completion exceeds 1 MB limit"
+
+
+class AuditCallNotFound(APIError):
+    """Phase 22.D — audit_id not found or not owned by the caller."""
+
+    status_code = 404
+    code = "audit_call_not_found"
+    title = "no audit call with this id is owned by this API key"
+
+
 class RateLimited(APIError):
     status_code = 429
     code = "rate_limited"
@@ -190,6 +214,9 @@ __all__ = [
     "InvalidAPIKey",
     "QuotaExceeded",
     "CalibrationNotFound",
+    "UnknownEnvironment",
+    "CompletionTooLarge",
+    "AuditCallNotFound",
     "RateLimited",
     "InvalidClerkToken",
     "WebhookSignatureInvalid",

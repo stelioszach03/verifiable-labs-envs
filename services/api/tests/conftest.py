@@ -90,8 +90,9 @@ async def truncate_data(setup_db) -> AsyncIterator[None]:
     async with db._SessionFactory() as s:  # type: ignore[misc]
         await s.execute(
             text(
-                "TRUNCATE TABLE subscriptions, usage_counters, evaluations, "
-                "calibration_runs, api_keys, users RESTART IDENTITY CASCADE"
+                "TRUNCATE TABLE audit_calls, subscriptions, usage_counters, "
+                "evaluations, calibration_runs, api_keys, users "
+                "RESTART IDENTITY CASCADE"
             )
         )
         await s.commit()

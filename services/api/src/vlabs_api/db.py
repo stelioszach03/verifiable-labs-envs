@@ -29,6 +29,7 @@ from sqlalchemy import (
     LargeBinary,
     String,
     Text,
+    text,
 )
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.asyncio import (
@@ -174,6 +175,60 @@ class UsageCounter(Base):
     calibrations_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     evaluations_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     predictions_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # Phase 22.B — counts /v1/instance + /v1/score against the per-tier
+    # monthly cap. Idempotent re-issues of /v1/score do NOT increment.
+    scores_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+
+class AuditCall(Base):
+    """Per-call audit row written by ``POST /v1/score`` (Phase 22.C).
+
+    The completion text itself is **never** persisted — only its
+    SHA-256 hash. Customers can verify a row matches their completion
+    by re-hashing locally; nobody else can recover the text.
+    """
+
+    __tablename__ = "audit_calls"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    api_key_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("api_keys.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    env_id: Mapped[str] = mapped_column(Text, nullable=False)
+    env_version: Mapped[str] = mapped_column(Text, nullable=False)
+    seed: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    completion_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    reward: Mapped[float] = mapped_column(Float, nullable=False)
+    conformal_low: Mapped[float] = mapped_column(Float, nullable=False)
+    conformal_high: Mapped[float] = mapped_column(Float, nullable=False)
+    coverage: Mapped[float] = mapped_column(Float, nullable=False)
+    components_json: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
+    latency_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+    idempotency_key: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=_now_utc
+    )
+
+    __table_args__ = (
+        Index("audit_calls_user_idx", "user_id", "created_at"),
+        Index("audit_calls_env_idx", "env_id", "created_at"),
+        Index(
+            "audit_calls_idempotency_idx",
+            "idempotency_key",
+            "user_id",
+            unique=True,
+            postgresql_where=text("idempotency_key IS NOT NULL"),
+        ),
+    )
 
 
 class StripeEvent(Base):
@@ -288,6 +343,7 @@ __all__ = [
     "CalibrationRun",
     "Evaluation",
     "UsageCounter",
+    "AuditCall",
     "StripeEvent",
     "Subscription",
     "init_engine",

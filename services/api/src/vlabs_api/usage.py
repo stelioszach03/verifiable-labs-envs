@@ -39,6 +39,16 @@ def tier_limits(tier: Tier) -> tuple[int, int]:
     }[tier]
 
 
+def tier_scores_limit(tier: Tier) -> int:
+    """Return the per-month scoring quota (`/v1/instance` + `/v1/score`)."""
+    t: TierLimits = get_settings().tiers
+    return {
+        "free": t.free_scores_per_month,
+        "pro": t.pro_scores_per_month,
+        "team": t.team_scores_per_month,
+    }[tier]
+
+
 async def resolve_tier(session: AsyncSession, user_id: uuid.UUID) -> Tier:
     """Look up the user's effective tier from active subscriptions."""
     stmt = (
@@ -105,6 +115,31 @@ async def increment_counter(
     await session.execute(stmt)
 
 
+async def increment_scores_counter(
+    session: AsyncSession,
+    api_key_id: uuid.UUID,
+    *,
+    delta: int = 1,
+    month: date | None = None,
+) -> None:
+    """Atomic UPSERT — adds ``delta`` to ``scores_count`` for this month.
+
+    Used by ``POST /v1/instance`` and ``POST /v1/score`` to count
+    against the per-tier scores quota. Idempotent re-issues of
+    ``/v1/score`` (cached on idempotency_key) MUST NOT call this.
+    """
+    m = _first_day_of_month(month)
+    stmt = (
+        pg_insert(UsageCounter)
+        .values(api_key_id=api_key_id, month=m, scores_count=delta)
+        .on_conflict_do_update(
+            index_elements=[UsageCounter.api_key_id, UsageCounter.month],
+            set_={"scores_count": UsageCounter.scores_count + delta},
+        )
+    )
+    await session.execute(stmt)
+
+
 def quota_remaining(tier: Tier, used_traces: int) -> int:
     """Return the number of traces still available this month."""
     cap, _ = tier_limits(tier)
@@ -114,8 +149,10 @@ def quota_remaining(tier: Tier, used_traces: int) -> int:
 __all__ = [
     "Tier",
     "tier_limits",
+    "tier_scores_limit",
     "resolve_tier",
     "get_current_counter",
     "increment_counter",
+    "increment_scores_counter",
     "quota_remaining",
 ]

@@ -137,6 +137,36 @@ class HealthResponse(BaseModel):
     environment: Literal["dev", "staging", "prod"]
 
 
+# ── Phase 22 — Training API endpoints ───────────────────────────────
+
+
+class InstanceRequest(BaseModel):
+    """``POST /v1/instance`` request body."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    env_id: str = Field(min_length=1, max_length=128)
+    seed: int = Field(ge=0)
+    difficulty_kwargs: dict[str, Any] = Field(default_factory=dict)
+
+
+class InstanceResponse(BaseModel):
+    """``POST /v1/instance`` response body.
+
+    ``prompt`` is the LLM-facing problem text rendered through the
+    env's adapter (``adapter.build_user_prompt(instance)``). ``metadata``
+    carries the env's public-input dict (``Instance.as_inputs()``)
+    minus oracle fields. ``env_version`` pins the env catalogue
+    revision used to render this instance — Phase 22.C ``/v1/score``
+    re-checks the version on persistence.
+    """
+
+    instance_seed: int
+    prompt: str
+    metadata: dict[str, Any]
+    env_version: str
+
+
 # ── Stage B: billing + key management schemas ────────────────────────
 
 
@@ -236,4 +266,6 @@ __all__ = [
     "AdminDashboardCounts",
     "AdminDashboardLastRun",
     "AdminDashboardResponse",
+    "InstanceRequest",
+    "InstanceResponse",
 ]

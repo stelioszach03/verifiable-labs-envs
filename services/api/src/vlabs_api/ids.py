@@ -8,9 +8,10 @@ from __future__ import annotations
 
 import uuid
 
-from vlabs_api.errors import CalibrationNotFound
+from vlabs_api.errors import AuditCallNotFound, CalibrationNotFound
 
 CALIBRATION_PREFIX = "cal_"
+AUDIT_PREFIX = "aud_"
 
 
 def encode_calibration_id(uid: uuid.UUID) -> str:
@@ -31,4 +32,30 @@ def parse_calibration_id(s: str) -> uuid.UUID:
         raise CalibrationNotFound(detail=f"invalid calibration_id: {s!r}") from exc
 
 
-__all__ = ["CALIBRATION_PREFIX", "encode_calibration_id", "parse_calibration_id"]
+def encode_audit_id(uid: uuid.UUID) -> str:
+    """Phase 22.D — public ID for ``audit_calls`` rows."""
+    return f"{AUDIT_PREFIX}{uid.hex}"
+
+
+def parse_audit_id(s: str) -> uuid.UUID:
+    """Phase 22.D — inverse of :func:`encode_audit_id`.
+
+    Accepts either ``aud_<hex>`` (preferred) or a bare UUID string.
+    Raises :class:`AuditCallNotFound` on any parse failure (same
+    information-hiding posture as :func:`parse_calibration_id`).
+    """
+    raw = s[len(AUDIT_PREFIX):] if s.startswith(AUDIT_PREFIX) else s
+    try:
+        return uuid.UUID(raw)
+    except (ValueError, AttributeError) as exc:
+        raise AuditCallNotFound(detail=f"invalid audit_id: {s!r}") from exc
+
+
+__all__ = [
+    "CALIBRATION_PREFIX",
+    "AUDIT_PREFIX",
+    "encode_calibration_id",
+    "parse_calibration_id",
+    "encode_audit_id",
+    "parse_audit_id",
+]

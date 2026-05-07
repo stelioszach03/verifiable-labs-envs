@@ -26,6 +26,12 @@ class TierLimits(BaseSettings):
     pro_rpm: int = 1_000
     team_traces_per_month: int = 10_000_000
     team_rpm: int = 10_000
+    # Phase 22.B — separate quota for /v1/instance + /v1/score. Shared
+    # between the two endpoints; idempotent /v1/score re-issues do not
+    # consume from this counter.
+    free_scores_per_month: int = 1_000
+    pro_scores_per_month: int = 100_000
+    team_scores_per_month: int = 1_000_000
 
 
 class Settings(BaseSettings):
