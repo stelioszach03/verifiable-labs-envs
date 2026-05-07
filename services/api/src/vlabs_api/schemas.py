@@ -167,6 +167,39 @@ class InstanceResponse(BaseModel):
     env_version: str
 
 
+class ScoreRequest(BaseModel):
+    """``POST /v1/score`` request body.
+
+    PHASE_22_PLAN.md §5.2: ``completion`` is the LLM's text response;
+    server re-derives the instance from ``(env_id, seed)`` and
+    calls ``adapter.parse_response(completion, instance)``. The
+    completion is hashed (SHA-256) before storage — never persisted in
+    plaintext (§5.3 GDPR guarantee).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    env_id: str = Field(min_length=1, max_length=128)
+    seed: int = Field(ge=0)
+    # 1 MB cap — adversarial completions rejected with 413 at the
+    # FastAPI body-parse stage rather than reaching the env scorer.
+    completion: str = Field(min_length=0, max_length=1_048_576)
+    idempotency_key: str | None = Field(default=None, max_length=200)
+    difficulty_kwargs: dict[str, Any] = Field(default_factory=dict)
+
+
+class ScoreResponse(BaseModel):
+    """``POST /v1/score`` response body."""
+
+    reward: float
+    conformal_interval: tuple[float, float]
+    coverage_guarantee: float
+    audit_id: str
+    components_breakdown: dict[str, float]
+    env_version: str
+    latency_ms: int
+
+
 # ── Stage B: billing + key management schemas ────────────────────────
 
 
@@ -268,4 +301,6 @@ __all__ = [
     "AdminDashboardResponse",
     "InstanceRequest",
     "InstanceResponse",
+    "ScoreRequest",
+    "ScoreResponse",
 ]

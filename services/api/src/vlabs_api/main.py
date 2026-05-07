@@ -26,6 +26,7 @@ from vlabs_api.routes import (
     instance,
     keys,
     predict,
+    score,
     usage,
     webhook,
 )
@@ -96,6 +97,7 @@ def create_app() -> FastAPI:
     # Phase 22 — training API plane (shares X-Vlabs-Key auth + rate limit
     # with the data plane; counts against scores_per_month tier quota).
     app.include_router(instance.router, prefix="/v1")
+    app.include_router(score.router, prefix="/v1")
     # Management plane — Clerk JWT auth, billing + key issuance
     app.include_router(keys.router, prefix="/v1")
     app.include_router(billing.router, prefix="/v1")
