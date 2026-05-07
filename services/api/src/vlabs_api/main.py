@@ -27,6 +27,7 @@ from vlabs_api.routes import (
     keys,
     predict,
     score,
+    score_audit,
     usage,
     webhook,
 )
@@ -98,6 +99,7 @@ def create_app() -> FastAPI:
     # with the data plane; counts against scores_per_month tier quota).
     app.include_router(instance.router, prefix="/v1")
     app.include_router(score.router, prefix="/v1")
+    app.include_router(score_audit.router, prefix="/v1")
     # Management plane — Clerk JWT auth, billing + key issuance
     app.include_router(keys.router, prefix="/v1")
     app.include_router(billing.router, prefix="/v1")

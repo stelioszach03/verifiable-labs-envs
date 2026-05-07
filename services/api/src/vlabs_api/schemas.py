@@ -200,6 +200,53 @@ class ScoreResponse(BaseModel):
     latency_ms: int
 
 
+class AuditCallResponse(BaseModel):
+    """``GET /v1/score/audit/{audit_id}`` response body (Phase 22.D).
+
+    Mirrors the fields on the ``audit_calls`` row. Completion text is
+    NEVER returned — only its SHA-256 hash, per the GDPR guarantee in
+    PHASE_22_PLAN.md §5.3.
+    """
+
+    audit_id: str
+    env_id: str
+    env_version: str
+    seed: int
+    completion_hash: str
+    reward: float
+    conformal_interval: tuple[float, float]
+    coverage_guarantee: float
+    components_breakdown: dict[str, float]
+    latency_ms: int
+    idempotency_key: str | None
+    created_at: datetime
+
+
+class AuditCallSummary(BaseModel):
+    """List-view row — light enough to paginate at 100 per page."""
+
+    audit_id: str
+    env_id: str
+    env_version: str
+    reward: float
+    latency_ms: int
+    created_at: datetime
+
+
+class AuditCallList(BaseModel):
+    """``GET /v1/score/audit`` response body (Phase 22.D).
+
+    Offset-pagination: clients page via ``?limit=N&offset=K``. ``total``
+    is the count of rows owned by this user (cheap COUNT query against
+    the ``audit_calls_user_idx`` index).
+    """
+
+    items: list[AuditCallSummary]
+    total: int
+    limit: int
+    offset: int
+
+
 # ── Stage B: billing + key management schemas ────────────────────────
 
 
@@ -303,4 +350,7 @@ __all__ = [
     "InstanceResponse",
     "ScoreRequest",
     "ScoreResponse",
+    "AuditCallResponse",
+    "AuditCallSummary",
+    "AuditCallList",
 ]
