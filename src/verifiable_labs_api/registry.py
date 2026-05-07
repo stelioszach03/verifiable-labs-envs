@@ -33,6 +33,9 @@ _DOMAIN: dict[str, str] = {
     "phase-retrieval-multiturn": "coherent-diffraction",
     "mri-knee-reconstruction": "medical-imaging-mri",
     "mri-knee-reconstruction-multiturn": "medical-imaging-mri",
+    "math-algebra": "symbolic-algebra",
+    "math-algebra-multiturn": "symbolic-algebra",
+    "math-algebra-tools": "symbolic-algebra",
 }
 
 
@@ -66,6 +69,18 @@ _DESCRIPTIONS: dict[str, str] = {
     "mri-knee-reconstruction-multiturn":
         "Three-turn MRI knee reconstruction with k-space residual "
         "feedback.",
+    "math-algebra":
+        "Single-turn symbolic-algebra simplification (expand, factor, "
+        "collect-like-terms) with SymPy-verified rewards and conformal "
+        "coverage; threaded simplify timeout.",
+    "math-algebra-multiturn":
+        "Three-turn symbolic-algebra dialogue with verifier feedback at "
+        "the format / parse / equivalence layer; gold expression never "
+        "revealed to the solver.",
+    "math-algebra-tools":
+        "Tool-use symbolic-algebra env exposing sympy_simplify, "
+        "sympy_expand, sympy_solve, sympy_substitute primitives; "
+        "model composes them to reach the answer.",
 }
 
 
