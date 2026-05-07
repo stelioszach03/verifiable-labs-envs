@@ -15,6 +15,7 @@ def test_registry_lists_expected_envs() -> None:
         "lodopab-ct-simplified",
         "lodopab-ct-simplified-multiturn",
         "math-algebra",
+        "math-algebra-multiturn",
         "mri-knee-reconstruction",
         "mri-knee-reconstruction-multiturn",
         "phase-retrieval",

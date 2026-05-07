@@ -14,6 +14,7 @@ _REGISTRY: dict[str, str] = {
     "mri-knee-reconstruction": "verifiable_labs_envs.envs.mri_knee",
     "mri-knee-reconstruction-multiturn": "verifiable_labs_envs.envs.mri_knee_multiturn",
     "math-algebra": "verifiable_labs_envs.envs.math_algebra",
+    "math-algebra-multiturn": "verifiable_labs_envs.envs.math_algebra_multiturn",
 }
 
 
