@@ -8,7 +8,7 @@ writes a rendered copy under ``environments/<env_py>/`` (or wherever
 in every template file and renames the ``__ENV_PY__/`` template
 directory to the new env's Python module name.
 
-Five template families are supported:
+Six template families are supported:
 
 - ``inverse-problem`` (default) — forward operator + NMSE +
   per-entry σ̂ vector. Used by sparse-fourier, mri-knee, lodopab-ct,
@@ -25,6 +25,9 @@ Five template families are supported:
 - ``sql-execution`` — natural-language question + schema description,
   scored by SQLite result-set equality against a procedural gold
   query. Used by sql family (Phase 26).
+- ``long-context`` — multi-document corpus with procedural needle
+  injection; scored by substring / token-F1 / numeric match against
+  a gold needle. Used by long-context family (Phase 27).
 
 Usage::
 
@@ -37,6 +40,8 @@ Usage::
         --domain "tool orchestration"
     python scripts/create_env.py sql-single-turn --template sql-execution \\
         --domain "text-to-sql"
+    python scripts/create_env.py long-context-needle --template long-context \\
+        --domain "long-context retrieval"
 
 After scaffolding, edit the ``NotImplementedError`` stubs and run
 ``python scripts/validate_env.py environments/<env_py>``.
@@ -59,6 +64,7 @@ TEMPLATES: dict[str, Path] = {
     "code-execution": REPO_ROOT / "templates" / "code-execution" / "template",
     "tool-calling": REPO_ROOT / "templates" / "tool-calling" / "template",
     "sql-execution": REPO_ROOT / "templates" / "sql-execution" / "template",
+    "long-context": REPO_ROOT / "templates" / "long-context" / "template",
 }
 
 # Backward-compatible default — existing scaffold tests reach in for
