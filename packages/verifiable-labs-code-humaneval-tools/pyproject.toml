@@ -1,0 +1,44 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "verifiable-labs-code-humaneval-tools"
+version = "0.1.0"
+description = "Tool-use procedural code-execution RL environment with read_file/write_file/run_test primitives"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [{ name = "Stelios Zacharioudakis" }]
+keywords = [
+    "reinforcement-learning",
+    "rlvr",
+    "evaluation",
+    "code-execution",
+    "humaneval",
+    "tool-use",
+    "verifiable-labs",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = [
+    "verifiable-labs-envs-core @ git+https://github.com/stelioszach03/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-envs-core",
+    "numpy>=1.26",
+]
+
+[project.urls]
+Homepage = "https://github.com/stelioszach03/verifiable-labs-envs"
+Issues = "https://github.com/stelioszach03/verifiable-labs-envs/issues"
+
+[project.entry-points."verifiers.environments"]
+code-humaneval-tools = "verifiable_labs_code_humaneval_tools:load_environment"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/verifiable_labs_code_humaneval_tools"]
