@@ -36,6 +36,11 @@ _DOMAIN: dict[str, str] = {
     "math-algebra": "symbolic-algebra",
     "math-algebra-multiturn": "symbolic-algebra",
     "math-algebra-tools": "symbolic-algebra",
+    # Phase 24 — code-execution env family.
+    "code-humaneval": "code-execution",
+    "code-humaneval-multiturn": "code-execution",
+    "code-humaneval-tools": "code-execution",
+    "code-mini-repo": "code-execution",
 }
 
 
@@ -81,6 +86,19 @@ _DESCRIPTIONS: dict[str, str] = {
         "Tool-use symbolic-algebra env exposing sympy_simplify, "
         "sympy_expand, sympy_solve, sympy_substitute primitives; "
         "model composes them to reach the answer.",
+    "code-humaneval":
+        "Single-turn procedural code-execution env across 12 templates "
+        "(lists, strings, dicts, ints, trees, graphs); sandboxed pytest "
+        "scoring under D5 rlimits and `unshare -rn` network isolation.",
+    "code-humaneval-multiturn":
+        "Three-turn dialogue variant of code-humaneval; visible-test "
+        "pass counts feed back between turns, hidden tests held out.",
+    "code-humaneval-tools":
+        "Tool-use code-execution env exposing read_file, write_file, "
+        "run_test primitives; model iterates on a per-call workspace.",
+    "code-mini-repo":
+        "Repo-scale synthetic code-execution env: 3-file mini-repos "
+        "(bug-fix, feature-add, refactor-preserve) with multi-file edits.",
 }
 
 

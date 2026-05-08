@@ -1,4 +1,16 @@
 """Per-environment LLM adapters. Importing this package registers all of them."""
+from verifiable_labs_envs.solvers.adapters.code_humaneval import (
+    CodeHumanevalLLMAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.code_humaneval_multiturn import (
+    CodeHumanevalMultiturnAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.code_humaneval_tools import (
+    CodeHumanevalToolsAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.code_mini_repo import (
+    CodeMiniRepoAdapter,
+)
 from verifiable_labs_envs.solvers.adapters.lodopab_ct import LodopabCtLLMAdapter
 from verifiable_labs_envs.solvers.adapters.lodopab_ct_multiturn import (
     LodopabCtMultiturnAdapter,
@@ -43,6 +55,11 @@ register_adapter(MRIKneeMultiturnAdapter())
 register_adapter(MathAlgebraLLMAdapter())
 register_adapter(MathAlgebraMultiturnAdapter())
 register_adapter(MathAlgebraToolsAdapter())
+# Phase 24 — code-execution env family.
+register_adapter(CodeHumanevalLLMAdapter())
+register_adapter(CodeHumanevalMultiturnAdapter())
+register_adapter(CodeHumanevalToolsAdapter())
+register_adapter(CodeMiniRepoAdapter())
 
 __all__ = [
     "SparseFourierLLMAdapter",
@@ -58,4 +75,8 @@ __all__ = [
     "MathAlgebraLLMAdapter",
     "MathAlgebraMultiturnAdapter",
     "MathAlgebraToolsAdapter",
+    "CodeHumanevalLLMAdapter",
+    "CodeHumanevalMultiturnAdapter",
+    "CodeHumanevalToolsAdapter",
+    "CodeMiniRepoAdapter",
 ]

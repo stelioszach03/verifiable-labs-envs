@@ -16,6 +16,11 @@ _REGISTRY: dict[str, str] = {
     "math-algebra": "verifiable_labs_envs.envs.math_algebra",
     "math-algebra-multiturn": "verifiable_labs_envs.envs.math_algebra_multiturn",
     "math-algebra-tools": "verifiable_labs_envs.envs.math_algebra_tools",
+    # Phase 24 — code-execution env family.
+    "code-humaneval": "verifiable_labs_envs.envs.code_humaneval",
+    "code-humaneval-multiturn": "verifiable_labs_envs.envs.code_humaneval_multiturn",
+    "code-humaneval-tools": "verifiable_labs_envs.envs.code_humaneval_tools",
+    "code-mini-repo": "verifiable_labs_envs.envs.code_mini_repo",
 }
 
 
