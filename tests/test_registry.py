@@ -29,12 +29,15 @@ def test_registry_lists_expected_envs() -> None:
         "sparse-fourier-recovery-multiturn",
         "sparse-fourier-recovery-tools",
         "super-resolution-div2k-x4",
+        "tool-calling-debug",
+        "tool-calling-multiturn",
+        "tool-calling-single",
     ]
 
 
-def test_registry_carries_seventeen_envs() -> None:
-    """Phase 24.F — registry grows from 13 → 17 with the code-* family."""
-    assert len(vle.list_environments()) == 17
+def test_registry_carries_twenty_envs() -> None:
+    """Phase 25.E — registry grows from 17 → 20 with the tool-calling family."""
+    assert len(vle.list_environments()) == 20
 
 
 def test_load_code_humaneval_via_registry() -> None:
@@ -55,6 +58,21 @@ def test_load_code_humaneval_tools_via_registry() -> None:
 def test_load_code_mini_repo_via_registry() -> None:
     env = vle.load_environment("code-mini-repo", calibration_quantile=0.5)
     assert env.name == "code-mini-repo"
+
+
+def test_load_tool_calling_single_via_registry() -> None:
+    env = vle.load_environment("tool-calling-single", calibration_quantile=0.5)
+    assert env.name == "tool-calling-single"
+
+
+def test_load_tool_calling_multiturn_via_registry() -> None:
+    env = vle.load_environment("tool-calling-multiturn", calibration_quantile=0.5)
+    assert env.name == "tool-calling-multiturn"
+
+
+def test_load_tool_calling_debug_via_registry() -> None:
+    env = vle.load_environment("tool-calling-debug", calibration_quantile=0.5)
+    assert env.name == "tool-calling-debug"
 
 
 def test_unknown_environment_raises() -> None:

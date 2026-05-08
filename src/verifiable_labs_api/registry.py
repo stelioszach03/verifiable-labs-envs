@@ -41,6 +41,10 @@ _DOMAIN: dict[str, str] = {
     "code-humaneval-multiturn": "code-execution",
     "code-humaneval-tools": "code-execution",
     "code-mini-repo": "code-execution",
+    # Phase 25 — tool-calling env family.
+    "tool-calling-single": "tool-calling",
+    "tool-calling-multiturn": "tool-calling",
+    "tool-calling-debug": "tool-calling",
 }
 
 
@@ -99,6 +103,18 @@ _DESCRIPTIONS: dict[str, str] = {
     "code-mini-repo":
         "Repo-scale synthetic code-execution env: 3-file mini-repos "
         "(bug-fix, feature-add, refactor-preserve) with multi-file edits.",
+    "tool-calling-single":
+        "Single-pass procedural tool-calling env across 10 templates "
+        "(arithmetic, search-and-email, file-concat, multi-search, "
+        "outbox-audit) with mock primitives and D2-C composite reward.",
+    "tool-calling-multiturn":
+        "Multi-turn tool-calling env with verifier-feedback rollouts "
+        "and per-extra-turn penalty (cap 10%); same template lattice "
+        "as tool-calling-single.",
+    "tool-calling-debug":
+        "Trace-debug tool-calling env: each instance ships a partial "
+        "tool-call trajectory plus the workspace snapshot it produced; "
+        "the model continues from that point.",
 }
 
 

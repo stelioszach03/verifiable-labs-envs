@@ -40,6 +40,15 @@ from verifiable_labs_envs.solvers.adapters.sparse_fourier_tools import (
     SparseFourierToolsAdapter,
 )
 from verifiable_labs_envs.solvers.adapters.super_resolution import SuperResolutionLLMAdapter
+from verifiable_labs_envs.solvers.adapters.tool_calling_debug import (
+    ToolCallingDebugAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.tool_calling_multiturn import (
+    ToolCallingMultiturnAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.tool_calling_single import (
+    ToolCallingSingleAdapter,
+)
 from verifiable_labs_envs.solvers.llm_solver import register_adapter
 
 register_adapter(SparseFourierLLMAdapter())
@@ -60,6 +69,10 @@ register_adapter(CodeHumanevalLLMAdapter())
 register_adapter(CodeHumanevalMultiturnAdapter())
 register_adapter(CodeHumanevalToolsAdapter())
 register_adapter(CodeMiniRepoAdapter())
+# Phase 25 — tool-calling env family.
+register_adapter(ToolCallingSingleAdapter())
+register_adapter(ToolCallingMultiturnAdapter())
+register_adapter(ToolCallingDebugAdapter())
 
 __all__ = [
     "SparseFourierLLMAdapter",
@@ -79,4 +92,7 @@ __all__ = [
     "CodeHumanevalMultiturnAdapter",
     "CodeHumanevalToolsAdapter",
     "CodeMiniRepoAdapter",
+    "ToolCallingSingleAdapter",
+    "ToolCallingMultiturnAdapter",
+    "ToolCallingDebugAdapter",
 ]

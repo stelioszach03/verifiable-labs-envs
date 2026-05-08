@@ -26,7 +26,7 @@ pip install verifiable-labs
 
 # Verify
 verifiable --version          # → verifiable-labs 0.1.0a4
-verifiable list               # → 17 environments
+verifiable list               # → 20 environments
 
 # Run a benchmark
 export OPENROUTER_API_KEY=sk-or-...
@@ -45,7 +45,7 @@ git clone https://github.com/stelioszach03/verifiable-labs-envs.git
 cd verifiable-labs-envs
 pip install -e ".[dev]"
 
-# 1. List the 17 envs.
+# 1. List the 20 envs.
 verifiable envs
 
 # 2. Run a zero-amplitude agent on sparse-Fourier (3 episodes, no API key needed).
@@ -129,7 +129,7 @@ Examples: [`examples/agents/`](examples/agents).
 
 | | shipped | planned |
 |---|---|---|
-| **environments** | 17 envs across 7 domains | 5 new envs (holographic 3D, EM tomography, seismic FWI, inverse rendering, protein distogram) — v0.2 |
+| **environments** | 20 envs across 8 domains | 5 new envs (holographic 3D, EM tomography, seismic FWI, inverse rendering, protein distogram) — v0.2 |
 | **API** | `/v1/{health, environments, sessions, leaderboard}` (open, rate-limited) | per-user auth, Redis-backed sessions — v0.2 |
 | **SDK** | sync + async clients on PyPI as `verifiable-labs` (re-exports `load_environment` for local mode) | optional slim install — Tier-1 polish |
 | **CLI** | `envs · run · compare · report · init-env · validate-env` | static viewer / dashboard — v0.3 stretch |
@@ -157,7 +157,7 @@ Frontier reasoning models are trained with verifiable rewards (RLVR). Today's RL
 2. The **reward** is a weighted sum of reconstruction quality (PSNR, SSIM, or task-appropriate metric) and **conformal-prediction coverage** — models are rewarded for honest posterior width, not overconfident point estimates.
 3. Measurements are **procedurally regenerated per evaluation call**, so fixed-string memorization is structurally impossible.
 
-## Environments (17 live)
+## Environments (20 live)
 
 | # | Environment | Domain | Forward operator / problem | Classical baseline / verifier |
 |---|---|---|---|---|
@@ -178,6 +178,9 @@ Frontier reasoning models are trained with verifiable rewards (RLVR). Today's RL
 |15 | **`code-humaneval-multiturn`** (Phase 24) | code execution | same, 3-turn dialogue with visible-test feedback | per-turn pass count, hidden tests held out (R10) |
 |16 | **`code-humaneval-tools`** (Phase 24) | code execution | same, primitive-composition tool-use | `read_file` / `write_file` / `run_test` primitives |
 |17 | **`code-mini-repo`** (Phase 24) | code execution (repo-scale) | synthetic 3-file repo (bug-fix / feature-add / refactor-preserve) | sandboxed pytest pass-rate over multi-file edits |
+|18 | **`tool-calling-single`** (Phase 25) | tool orchestration | 10 procedural tool-composition templates (arithmetic / search-and-email / file-concat / multi-search / outbox-audit) | D2-C composite: action validity + final workspace state |
+|19 | **`tool-calling-multiturn`** (Phase 25) | tool orchestration | same, multi-turn with verifier feedback + per-extra-turn penalty | same composite, capped 10% penalty |
+|20 | **`tool-calling-debug`** (Phase 25) | tool orchestration (trace-debug) | partial trajectory + workspace snapshot; model continues from there | base-template predicate over the rollout's terminal state |
 
 ## Classical-baseline benchmark (5 seeds each, default hyperparameters)
 

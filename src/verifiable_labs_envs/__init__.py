@@ -21,6 +21,10 @@ _REGISTRY: dict[str, str] = {
     "code-humaneval-multiturn": "verifiable_labs_envs.envs.code_humaneval_multiturn",
     "code-humaneval-tools": "verifiable_labs_envs.envs.code_humaneval_tools",
     "code-mini-repo": "verifiable_labs_envs.envs.code_mini_repo",
+    # Phase 25 — tool-calling env family.
+    "tool-calling-single": "verifiable_labs_envs.envs.tool_calling_single",
+    "tool-calling-multiturn": "verifiable_labs_envs.envs.tool_calling_multiturn",
+    "tool-calling-debug": "verifiable_labs_envs.envs.tool_calling_debug",
 }
 
 
