@@ -8,7 +8,7 @@ writes a rendered copy under ``environments/<env_py>/`` (or wherever
 in every template file and renames the ``__ENV_PY__/`` template
 directory to the new env's Python module name.
 
-Four template families are supported:
+Five template families are supported:
 
 - ``inverse-problem`` (default) — forward operator + NMSE +
   per-entry σ̂ vector. Used by sparse-fourier, mri-knee, lodopab-ct,
@@ -22,6 +22,9 @@ Four template families are supported:
 - ``tool-calling`` — OpenAI-style function-calling task with shared
   mock-primitive library; D2-C composite reward over action validity
   + final workspace state. Used by tool-calling family (Phase 25).
+- ``sql-execution`` — natural-language question + schema description,
+  scored by SQLite result-set equality against a procedural gold
+  query. Used by sql family (Phase 26).
 
 Usage::
 
@@ -32,6 +35,8 @@ Usage::
         --domain "general programming"
     python scripts/create_env.py tool-calling-single --template tool-calling \\
         --domain "tool orchestration"
+    python scripts/create_env.py sql-single-turn --template sql-execution \\
+        --domain "text-to-sql"
 
 After scaffolding, edit the ``NotImplementedError`` stubs and run
 ``python scripts/validate_env.py environments/<env_py>``.
@@ -53,6 +58,7 @@ TEMPLATES: dict[str, Path] = {
     "symbolic-math": REPO_ROOT / "templates" / "symbolic-math" / "template",
     "code-execution": REPO_ROOT / "templates" / "code-execution" / "template",
     "tool-calling": REPO_ROOT / "templates" / "tool-calling" / "template",
+    "sql-execution": REPO_ROOT / "templates" / "sql-execution" / "template",
 }
 
 # Backward-compatible default — existing scaffold tests reach in for
