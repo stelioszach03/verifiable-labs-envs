@@ -48,6 +48,10 @@ _DOMAIN: dict[str, str] = {
     # Phase 26 — sql env family.
     "sql-single-turn": "text-to-sql",
     "sql-multiturn": "text-to-sql",
+    # Phase 27 — long-context env family.
+    "long-context-needle": "long-context-retrieval",
+    "long-context-synthesis": "long-context-synthesis",
+    "long-context-reasoning": "long-context-reasoning",
 }
 
 
@@ -126,6 +130,18 @@ _DESCRIPTIONS: dict[str, str] = {
         "Three-turn dialogue variant of sql-single-turn; verifier "
         "feedback echoes parse status + row-count diagnostics, gold "
         "result-set held out (R10).",
+    "long-context-needle":
+        "Single-turn needle-in-haystack env: 10 procedural topic "
+        "templates over 4 K - 128 K token corpora; substring + "
+        "case-insensitive match against the gold needle token (D3-A).",
+    "long-context-synthesis":
+        "Three-turn multi-needle synthesis env (3-5 needles per "
+        "instance, D4-B); SQuAD-style token-F1 scoring with bucketed "
+        "F1 feedback between turns. Gold answer held out (R10).",
+    "long-context-reasoning":
+        "Single-turn multi-hop chain-of-fact reasoning with distractor "
+        "needles (D4-C); 3 templates (chain_two_hop, chain_three_hop, "
+        "arithmetic_over_facts); substring or numeric-tolerance match.",
 }
 
 

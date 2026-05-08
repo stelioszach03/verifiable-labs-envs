@@ -18,6 +18,9 @@ def test_registry_lists_expected_envs() -> None:
         "code-mini-repo",
         "lodopab-ct-simplified",
         "lodopab-ct-simplified-multiturn",
+        "long-context-needle",
+        "long-context-reasoning",
+        "long-context-synthesis",
         "math-algebra",
         "math-algebra-multiturn",
         "math-algebra-tools",
@@ -37,9 +40,11 @@ def test_registry_lists_expected_envs() -> None:
     ]
 
 
-def test_registry_carries_twentytwo_envs() -> None:
-    """Phase 26.D — registry grows from 20 → 22 with the sql family."""
-    assert len(vle.list_environments()) == 22
+def test_registry_carries_twentyfive_envs() -> None:
+    """Phase 27.E — registry grows from 22 → 25 with the long-context family.
+    25 envs across 7 template families closes the env-catalogue track per §19.
+    """
+    assert len(vle.list_environments()) == 25
 
 
 def test_load_code_humaneval_via_registry() -> None:
@@ -85,6 +90,21 @@ def test_load_sql_single_turn_via_registry() -> None:
 def test_load_sql_multiturn_via_registry() -> None:
     env = vle.load_environment("sql-multiturn", calibration_quantile=0.5)
     assert env.name == "sql-multiturn"
+
+
+def test_load_long_context_needle_via_registry() -> None:
+    env = vle.load_environment("long-context-needle", calibration_quantile=0.5)
+    assert env.name == "long-context-needle"
+
+
+def test_load_long_context_synthesis_via_registry() -> None:
+    env = vle.load_environment("long-context-synthesis", calibration_quantile=0.5)
+    assert env.name == "long-context-synthesis"
+
+
+def test_load_long_context_reasoning_via_registry() -> None:
+    env = vle.load_environment("long-context-reasoning", calibration_quantile=0.5)
+    assert env.name == "long-context-reasoning"
 
 
 def test_unknown_environment_raises() -> None:

@@ -1,8 +1,11 @@
 # Environments
 
-The v0.1 platform ships **13 environments** spanning compressed
-sensing, computational imaging, physics inversion, rendering, and
-symbolic algebra.
+The v0.1 platform ships **25 environments** spanning compressed
+sensing, computational imaging, physics inversion, rendering,
+symbolic algebra, code execution, tool orchestration, text-to-SQL,
+and long-context retrieval / synthesis / reasoning. Phase 27 closes
+the env-catalogue track at 25 envs across 7 template families;
+subsequent work prioritises customer-validated demand.
 
 | env id | domain | turns | tools | status |
 |---|---|---|---|---|
@@ -19,6 +22,18 @@ symbolic algebra.
 | `math-algebra` | symbolic-algebra | 1 | no | 🆕 alpha (Phase 21) |
 | `math-algebra-multiturn` | symbolic-algebra | 3 | no | 🆕 alpha (Phase 21) |
 | `math-algebra-tools` | symbolic-algebra | 3 | yes | 🆕 alpha (Phase 21) |
+| [`code-humaneval`](code-humaneval.md) | code-execution | 1 | no | 🆕 alpha (Phase 24) |
+| [`code-humaneval-multiturn`](code-humaneval-multiturn.md) | code-execution | 3 | no | 🆕 alpha (Phase 24) |
+| [`code-humaneval-tools`](code-humaneval-tools.md) | code-execution | 3 | yes | 🆕 alpha (Phase 24) |
+| [`code-mini-repo`](code-mini-repo.md) | code-execution-repo | 1 | no | 🆕 alpha (Phase 24) |
+| [`tool-calling-single`](tool-calling-single.md) | tool-orchestration | 1 | yes | 🆕 alpha (Phase 25) |
+| [`tool-calling-multiturn`](tool-calling-multiturn.md) | tool-orchestration | N | yes | 🆕 alpha (Phase 25) |
+| [`tool-calling-debug`](tool-calling-debug.md) | tool-orchestration-debug | 1 | yes | 🆕 alpha (Phase 25) |
+| [`sql-single-turn`](sql-single-turn.md) | text-to-SQL | 1 | no | 🆕 alpha (Phase 26) |
+| [`sql-multiturn`](sql-multiturn.md) | text-to-SQL | 3 | no | 🆕 alpha (Phase 26) |
+| [`long-context-needle`](long-context-needle.md) | long-context-retrieval | 1 | no | 🆕 alpha (Phase 27) |
+| [`long-context-synthesis`](long-context-synthesis.md) | long-context-synthesis | 3 | no | 🆕 alpha (Phase 27) |
+| [`long-context-reasoning`](long-context-reasoning.md) | long-context-reasoning | 1 | no | 🆕 alpha (Phase 27) |
 
 Six env families are documented in detail in this section; the
 multi-turn and tool-use variants share the underlying problem and

@@ -15,6 +15,15 @@ from verifiable_labs_envs.solvers.adapters.lodopab_ct import LodopabCtLLMAdapter
 from verifiable_labs_envs.solvers.adapters.lodopab_ct_multiturn import (
     LodopabCtMultiturnAdapter,
 )
+from verifiable_labs_envs.solvers.adapters.long_context_needle import (
+    LongContextNeedleAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.long_context_reasoning import (
+    LongContextReasoningAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.long_context_synthesis import (
+    LongContextSynthesisAdapter,
+)
 from verifiable_labs_envs.solvers.adapters.math_algebra import MathAlgebraLLMAdapter
 from verifiable_labs_envs.solvers.adapters.math_algebra_multiturn import (
     MathAlgebraMultiturnAdapter,
@@ -82,6 +91,10 @@ register_adapter(ToolCallingDebugAdapter())
 # Phase 26 — sql env family.
 register_adapter(SqlSingleTurnAdapter())
 register_adapter(SqlMultiturnAdapter())
+# Phase 27 — long-context env family.
+register_adapter(LongContextNeedleAdapter())
+register_adapter(LongContextSynthesisAdapter())
+register_adapter(LongContextReasoningAdapter())
 
 __all__ = [
     "SparseFourierLLMAdapter",
@@ -106,4 +119,7 @@ __all__ = [
     "ToolCallingDebugAdapter",
     "SqlSingleTurnAdapter",
     "SqlMultiturnAdapter",
+    "LongContextNeedleAdapter",
+    "LongContextSynthesisAdapter",
+    "LongContextReasoningAdapter",
 ]

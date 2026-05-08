@@ -28,6 +28,10 @@ _REGISTRY: dict[str, str] = {
     # Phase 26 — sql env family.
     "sql-single-turn": "verifiable_labs_envs.envs.sql_single_turn",
     "sql-multiturn": "verifiable_labs_envs.envs.sql_multiturn",
+    # Phase 27 — long-context env family.
+    "long-context-needle": "verifiable_labs_envs.envs.long_context_needle",
+    "long-context-synthesis": "verifiable_labs_envs.envs.long_context_synthesis",
+    "long-context-reasoning": "verifiable_labs_envs.envs.long_context_reasoning",
 }
 
 

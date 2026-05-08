@@ -26,7 +26,7 @@ pip install verifiable-labs
 
 # Verify
 verifiable --version          # → verifiable-labs 0.1.0a4
-verifiable list               # → 22 environments
+verifiable list               # → 25 environments
 
 # Run a benchmark
 export OPENROUTER_API_KEY=sk-or-...
@@ -45,7 +45,7 @@ git clone https://github.com/stelioszach03/verifiable-labs-envs.git
 cd verifiable-labs-envs
 pip install -e ".[dev]"
 
-# 1. List the 22 envs.
+# 1. List the 25 envs.
 verifiable envs
 
 # 2. Run a zero-amplitude agent on sparse-Fourier (3 episodes, no API key needed).
@@ -129,7 +129,7 @@ Examples: [`examples/agents/`](examples/agents).
 
 | | shipped | planned |
 |---|---|---|
-| **environments** | 22 envs across 9 domains | 5 new envs (holographic 3D, EM tomography, seismic FWI, inverse rendering, protein distogram) — v0.2 |
+| **environments** | 25 envs across 10 domains (env-catalogue track closed at 27.E; subsequent work prioritises customer-validated demand) | demand-driven additions only — v0.2 |
 | **API** | `/v1/{health, environments, sessions, leaderboard}` (open, rate-limited) | per-user auth, Redis-backed sessions — v0.2 |
 | **SDK** | sync + async clients on PyPI as `verifiable-labs` (re-exports `load_environment` for local mode) | optional slim install — Tier-1 polish |
 | **CLI** | `envs · run · compare · report · init-env · validate-env` | static viewer / dashboard — v0.3 stretch |
@@ -157,7 +157,7 @@ Frontier reasoning models are trained with verifiable rewards (RLVR). Today's RL
 2. The **reward** is a weighted sum of reconstruction quality (PSNR, SSIM, or task-appropriate metric) and **conformal-prediction coverage** — models are rewarded for honest posterior width, not overconfident point estimates.
 3. Measurements are **procedurally regenerated per evaluation call**, so fixed-string memorization is structurally impossible.
 
-## Environments (22 live)
+## Environments (25 live)
 
 | # | Environment | Domain | Forward operator / problem | Classical baseline / verifier |
 |---|---|---|---|---|
@@ -183,6 +183,11 @@ Frontier reasoning models are trained with verifiable rewards (RLVR). Today's RL
 |20 | **`tool-calling-debug`** (Phase 25) | tool orchestration (trace-debug) | partial trajectory + workspace snapshot; model continues from there | base-template predicate over the rollout's terminal state |
 |21 | **`sql-single-turn`** (Phase 26) | text-to-SQL | 8 procedural schema templates (filter / aggregate / join / groupby / subquery / CTE / date arithmetic) | SQLite result-set equality (ordered if gold has ORDER BY) |
 |22 | **`sql-multiturn`** (Phase 26) | text-to-SQL | same templates, 3-turn dialogue with verifier feedback | parse status + row-count diagnostics, gold rows held out (R10) |
+|23 | **`long-context-needle`** (Phase 27) | long-context retrieval | 10 procedural topic templates × 4 needle positions (start/middle/end/random) over 4 K – 128 K token corpora | substring + case-insensitive match against the gold needle |
+|24 | **`long-context-synthesis`** (Phase 27) | long-context synthesis | same corpora with 3-5 needles per instance (D4-B), 3-turn dialogue with F1-bucketed feedback | SQuAD-style token-F1 against the gold concatenation |
+|25 | **`long-context-reasoning`** (Phase 27) | long-context reasoning | 3 multi-hop chain templates (2-hop / 3-hop / arithmetic-over-facts) with distractor needles (D4-C) | substring (string) or numeric tolerance ≤ 1e-6 (float) match |
+
+> **Phase 27 closes the env-catalogue track.** 25 envs across 7 template families (inverse-problem, symbolic-math, code-execution, tool-calling, sql-execution, long-context, plus the multi-domain compliance scaffolding). Subsequent phases prioritise customer-validated demand signal over net-new envs.
 
 ## Classical-baseline benchmark (5 seeds each, default hyperparameters)
 
