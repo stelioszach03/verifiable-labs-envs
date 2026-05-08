@@ -8,7 +8,7 @@ writes a rendered copy under ``environments/<env_py>/`` (or wherever
 in every template file and renames the ``__ENV_PY__/`` template
 directory to the new env's Python module name.
 
-Two template families are supported:
+Three template families are supported:
 
 - ``inverse-problem`` (default) — forward operator + NMSE +
   per-entry σ̂ vector. Used by sparse-fourier, mri-knee, lodopab-ct,
@@ -16,12 +16,17 @@ Two template families are supported:
 - ``symbolic-math`` — SymPy-string instances + threaded `simplify`
   timeout + 3-component partial-credit reward. Used by math-algebra
   family (Phase 21).
+- ``code-execution`` — function-signature + docstring + hidden test
+  suite, scored by a sandboxed pytest invocation. Used by code-humaneval
+  family (Phase 24).
 
 Usage::
 
     python scripts/create_env.py seismic-fwi --domain "geophysics"
     python scripts/create_env.py math-algebra --template symbolic-math \\
         --domain "algebra"
+    python scripts/create_env.py code-humaneval --template code-execution \\
+        --domain "general programming"
 
 After scaffolding, edit the ``NotImplementedError`` stubs and run
 ``python scripts/validate_env.py environments/<env_py>``.
@@ -41,6 +46,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES: dict[str, Path] = {
     "inverse-problem": REPO_ROOT / "templates" / "inverse-problem" / "template",
     "symbolic-math": REPO_ROOT / "templates" / "symbolic-math" / "template",
+    "code-execution": REPO_ROOT / "templates" / "code-execution" / "template",
 }
 
 # Backward-compatible default — existing scaffold tests reach in for
