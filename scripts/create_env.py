@@ -8,7 +8,7 @@ writes a rendered copy under ``environments/<env_py>/`` (or wherever
 in every template file and renames the ``__ENV_PY__/`` template
 directory to the new env's Python module name.
 
-Three template families are supported:
+Four template families are supported:
 
 - ``inverse-problem`` (default) — forward operator + NMSE +
   per-entry σ̂ vector. Used by sparse-fourier, mri-knee, lodopab-ct,
@@ -19,6 +19,9 @@ Three template families are supported:
 - ``code-execution`` — function-signature + docstring + hidden test
   suite, scored by a sandboxed pytest invocation. Used by code-humaneval
   family (Phase 24).
+- ``tool-calling`` — OpenAI-style function-calling task with shared
+  mock-primitive library; D2-C composite reward over action validity
+  + final workspace state. Used by tool-calling family (Phase 25).
 
 Usage::
 
@@ -27,6 +30,8 @@ Usage::
         --domain "algebra"
     python scripts/create_env.py code-humaneval --template code-execution \\
         --domain "general programming"
+    python scripts/create_env.py tool-calling-single --template tool-calling \\
+        --domain "tool orchestration"
 
 After scaffolding, edit the ``NotImplementedError`` stubs and run
 ``python scripts/validate_env.py environments/<env_py>``.
@@ -47,6 +52,7 @@ TEMPLATES: dict[str, Path] = {
     "inverse-problem": REPO_ROOT / "templates" / "inverse-problem" / "template",
     "symbolic-math": REPO_ROOT / "templates" / "symbolic-math" / "template",
     "code-execution": REPO_ROOT / "templates" / "code-execution" / "template",
+    "tool-calling": REPO_ROOT / "templates" / "tool-calling" / "template",
 }
 
 # Backward-compatible default — existing scaffold tests reach in for
