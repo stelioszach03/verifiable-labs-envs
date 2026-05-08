@@ -25,6 +25,9 @@ _REGISTRY: dict[str, str] = {
     "tool-calling-single": "verifiable_labs_envs.envs.tool_calling_single",
     "tool-calling-multiturn": "verifiable_labs_envs.envs.tool_calling_multiturn",
     "tool-calling-debug": "verifiable_labs_envs.envs.tool_calling_debug",
+    # Phase 26 — sql env family.
+    "sql-single-turn": "verifiable_labs_envs.envs.sql_single_turn",
+    "sql-multiturn": "verifiable_labs_envs.envs.sql_multiturn",
 }
 
 

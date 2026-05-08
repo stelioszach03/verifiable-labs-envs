@@ -39,6 +39,12 @@ from verifiable_labs_envs.solvers.adapters.sparse_fourier_multiturn import (
 from verifiable_labs_envs.solvers.adapters.sparse_fourier_tools import (
     SparseFourierToolsAdapter,
 )
+from verifiable_labs_envs.solvers.adapters.sql_multiturn import (
+    SqlMultiturnAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.sql_single_turn import (
+    SqlSingleTurnAdapter,
+)
 from verifiable_labs_envs.solvers.adapters.super_resolution import SuperResolutionLLMAdapter
 from verifiable_labs_envs.solvers.adapters.tool_calling_debug import (
     ToolCallingDebugAdapter,
@@ -73,6 +79,9 @@ register_adapter(CodeMiniRepoAdapter())
 register_adapter(ToolCallingSingleAdapter())
 register_adapter(ToolCallingMultiturnAdapter())
 register_adapter(ToolCallingDebugAdapter())
+# Phase 26 — sql env family.
+register_adapter(SqlSingleTurnAdapter())
+register_adapter(SqlMultiturnAdapter())
 
 __all__ = [
     "SparseFourierLLMAdapter",
@@ -95,4 +104,6 @@ __all__ = [
     "ToolCallingSingleAdapter",
     "ToolCallingMultiturnAdapter",
     "ToolCallingDebugAdapter",
+    "SqlSingleTurnAdapter",
+    "SqlMultiturnAdapter",
 ]

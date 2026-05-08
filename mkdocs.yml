@@ -89,6 +89,8 @@ nav:
       - Tool calling (single): environments/tool-calling-single.md
       - Tool calling (multi-turn): environments/tool-calling-multiturn.md
       - Tool calling (debug): environments/tool-calling-debug.md
+      - SQL (single-turn): environments/sql-single-turn.md
+      - SQL (multi-turn): environments/sql-multiturn.md
   - Tutorials:
       - First evaluation: tutorials/first-evaluation.md
       - Creating a custom env: tutorials/creating-custom-env.md

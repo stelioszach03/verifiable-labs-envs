@@ -45,6 +45,9 @@ _DOMAIN: dict[str, str] = {
     "tool-calling-single": "tool-calling",
     "tool-calling-multiturn": "tool-calling",
     "tool-calling-debug": "tool-calling",
+    # Phase 26 — sql env family.
+    "sql-single-turn": "text-to-sql",
+    "sql-multiturn": "text-to-sql",
 }
 
 
@@ -115,6 +118,14 @@ _DESCRIPTIONS: dict[str, str] = {
         "Trace-debug tool-calling env: each instance ships a partial "
         "tool-call trajectory plus the workspace snapshot it produced; "
         "the model continues from that point.",
+    "sql-single-turn":
+        "Single-turn text-to-SQL env across 8 procedural schema "
+        "templates (filter, aggregate, join, subquery, CTE, date "
+        "arithmetic) with SQLite sandbox + result-set comparator.",
+    "sql-multiturn":
+        "Three-turn dialogue variant of sql-single-turn; verifier "
+        "feedback echoes parse status + row-count diagnostics, gold "
+        "result-set held out (R10).",
 }
 
 
