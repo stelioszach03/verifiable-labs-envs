@@ -73,13 +73,19 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # drain Redis-queued dataset jobs; cancelled gracefully on shutdown.
     from vlabs_api.dataset_worker import spawn_worker_pool
 
+    # Phase 28.C — spawn the in-app monitor pool (workers + scheduler
+    # tick). Scheduler reads ``monitors.next_run_at`` and creates
+    # ``monitor_runs`` rows; workers drain ``vlabs:monitor:queue``.
+    from vlabs_api.monitor_worker import spawn_monitor_pool
+
     worker_tasks = await spawn_worker_pool()
+    monitor_tasks = await spawn_monitor_pool()
     try:
         yield
     finally:
-        for t in worker_tasks:
+        for t in worker_tasks + monitor_tasks:
             t.cancel()
-        for t in worker_tasks:
+        for t in worker_tasks + monitor_tasks:
             with contextlib.suppress(asyncio.CancelledError, Exception):
                 await t
         await dispose_engine()

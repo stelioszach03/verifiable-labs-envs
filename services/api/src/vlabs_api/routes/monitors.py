@@ -29,11 +29,12 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from vlabs_api.auth import AuthContext
-from vlabs_api.db import Monitor, get_db
+from vlabs_api.db import Monitor, MonitorRun, get_db
 from vlabs_api.errors import (
     MonitorInvalidState,
     MonitorNameConflict,
     MonitorNotFound,
+    MonitorRunNotFound,
     MonitorTierExceeded,
     UnknownEnvironment,
 )
@@ -41,6 +42,7 @@ from vlabs_api.ids import (
     encode_monitor_id,
     encode_monitor_run_id,
     parse_monitor_id,
+    parse_monitor_run_id,
 )
 from vlabs_api.llm_key_crypto import encrypt_llm_api_key
 from vlabs_api.monitor_cadence import (
@@ -55,6 +57,9 @@ from vlabs_api.schemas import (
     MonitorCreateResponse,
     MonitorList,
     MonitorResponse,
+    MonitorRunList,
+    MonitorRunResponse,
+    MonitorRunSummary,
     MonitorSummary,
     MonitorUpdateRequest,
 )
@@ -497,6 +502,150 @@ async def delete_monitor(
     await session.commit()
 
 
+# ── Phase 28.C: manual run trigger + run history ───────────────────
+
+
+def _run_to_summary(run: MonitorRun) -> MonitorRunSummary:
+    return MonitorRunSummary(
+        monitor_run_id=encode_monitor_run_id(run.id),
+        monitor_id=encode_monitor_id(run.monitor_id),
+        scheduled_at=run.scheduled_at,
+        started_at=run.started_at,
+        finished_at=run.finished_at,
+        status=run.status,  # type: ignore[arg-type]
+        regression_verdict=run.regression_verdict,  # type: ignore[arg-type]
+        trigger=run.trigger,  # type: ignore[arg-type]
+        cost_usd_estimate=(
+            float(run.cost_usd_estimate)
+            if run.cost_usd_estimate is not None
+            else None
+        ),
+    )
+
+
+def _run_to_response(
+    run: MonitorRun, *, pdf_url: str | None = None,
+) -> MonitorRunResponse:
+    return MonitorRunResponse(
+        monitor_run_id=encode_monitor_run_id(run.id),
+        monitor_id=encode_monitor_id(run.monitor_id),
+        scheduled_at=run.scheduled_at,
+        started_at=run.started_at,
+        finished_at=run.finished_at,
+        status=run.status,  # type: ignore[arg-type]
+        summary_stats=run.summary_stats,
+        regression_verdict=run.regression_verdict,  # type: ignore[arg-type]
+        verdict_payload=run.verdict_payload,
+        pdf_url=pdf_url,
+        pdf_sha256=run.pdf_sha256,
+        cost_usd_estimate=(
+            float(run.cost_usd_estimate)
+            if run.cost_usd_estimate is not None
+            else None
+        ),
+        error=run.error,
+        trigger=run.trigger,  # type: ignore[arg-type]
+    )
+
+
+@router.post(
+    "/monitors/{monitor_id}/run",
+    response_model=MonitorRunResponse,
+    status_code=202,
+)
+async def trigger_monitor_run(
+    monitor_id: str,
+    auth: AuthContext = Depends(enforce_rate_limit),
+    session: AsyncSession = Depends(get_db),
+) -> MonitorRunResponse:
+    """Schedule an out-of-band audit run.
+
+    Does NOT advance ``monitors.next_run_at`` — the next scheduled run
+    still fires on its original cadence. The new ``monitor_runs`` row
+    starts in ``status='queued'`` and is enqueued onto the Redis
+    queue if available; the in-app worker pool drains it.
+    """
+    from vlabs_api.monitor_scheduler import schedule_manual_run
+    from vlabs_api.monitor_worker import enqueue_monitor_run
+
+    monitor = await _load_monitor(session, monitor_id, auth.user_id)
+    if monitor.status != "active":
+        raise MonitorInvalidState(
+            detail=(
+                f"monitor status={monitor.status!r}; only 'active' "
+                "monitors can be triggered manually"
+            )
+        )
+    run = await schedule_manual_run(session, monitor)
+    await enqueue_monitor_run(run.id)
+    return _run_to_response(run)
+
+
+@router.get(
+    "/monitors/{monitor_id}/runs",
+    response_model=MonitorRunList,
+)
+async def list_monitor_runs(
+    monitor_id: str,
+    auth: AuthContext = Depends(enforce_rate_limit),
+    session: AsyncSession = Depends(get_db),
+    limit: int = Query(default=DEFAULT_LIMIT, ge=1, le=MAX_LIMIT),
+    offset: int = Query(default=0, ge=0),
+    status: str | None = Query(default=None, max_length=32),
+) -> MonitorRunList:
+    monitor = await _load_monitor(session, monitor_id, auth.user_id)
+    base = select(MonitorRun).where(MonitorRun.monitor_id == monitor.id)
+    count_base = select(func.count(MonitorRun.id)).where(
+        MonitorRun.monitor_id == monitor.id
+    )
+    if status is not None:
+        base = base.where(MonitorRun.status == status)
+        count_base = count_base.where(MonitorRun.status == status)
+    total = int((await session.execute(count_base)).scalar_one())
+    res = await session.execute(
+        base.order_by(MonitorRun.scheduled_at.desc()).limit(limit).offset(offset)
+    )
+    rows = res.scalars().all()
+    return MonitorRunList(
+        items=[_run_to_summary(r) for r in rows],
+        total=total,
+        limit=limit,
+        offset=offset,
+    )
+
+
+@router.get(
+    "/monitors/{monitor_id}/runs/{run_id}",
+    response_model=MonitorRunResponse,
+)
+async def get_monitor_run(
+    monitor_id: str,
+    run_id: str,
+    auth: AuthContext = Depends(enforce_rate_limit),
+    session: AsyncSession = Depends(get_db),
+) -> MonitorRunResponse:
+    monitor = await _load_monitor(session, monitor_id, auth.user_id)
+    run_uuid = parse_monitor_run_id(run_id)
+    res = await session.execute(
+        select(MonitorRun)
+        .where(MonitorRun.id == run_uuid)
+        .where(MonitorRun.monitor_id == monitor.id)
+    )
+    run = res.scalar_one_or_none()
+    if run is None:
+        raise MonitorRunNotFound(detail=f"run_id={run_id}")
+
+    pdf_url: str | None = None
+    if run.pdf_storage_key:
+        try:
+            from vlabs_api.storage import generate_signed_url
+            url, _expires = generate_signed_url(run.pdf_storage_key)
+            pdf_url = url
+        except Exception:  # noqa: BLE001
+            pdf_url = None
+    return _run_to_response(run, pdf_url=pdf_url)
+
+
 # Aliased helpers re-exported so 28.C / 28.D / 28.E modules can reuse
 # the loader + response shaper without depending on internal closures.
 __all__ = [
@@ -504,6 +653,8 @@ __all__ = [
     "_load_monitor",
     "_monitor_to_response",
     "_monitor_to_summary",
+    "_run_to_response",
+    "_run_to_summary",
     "_alert_channels_to_storage",
     "_alert_channels_to_response",
     "_fingerprint",
