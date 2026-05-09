@@ -130,7 +130,8 @@ Examples: [`examples/agents/`](examples/agents).
 | | shipped | planned |
 |---|---|---|
 | **environments** | 25 envs across 10 domains (env-catalogue track closed at 27.E; subsequent work prioritises customer-validated demand) | demand-driven additions only — v0.2 |
-| **API** | `/v1/{health, environments, sessions, leaderboard}` (open, rate-limited) | per-user auth, Redis-backed sessions — v0.2 |
+| **API** | `/v1/{health, environments, sessions, leaderboard}` + auth-gated `/v1/{calibrate, instance, score, datasets, monitors}` (Phase 22-28) | per-user auth, Redis-backed sessions — v0.2 |
+| **continuous monitoring** | `/v1/monitors` — register a model endpoint, schedule audits (daily/weekly/monthly), get email/Slack alerts on regressed conformal coverage or paired-bootstrap reward drops (Phase 28) | Stripe metered billing post-incorporation |
 | **SDK** | sync + async clients on PyPI as `verifiable-labs` (re-exports `load_environment` for local mode) | optional slim install — Tier-1 polish |
 | **CLI** | `envs · run · compare · report · init-env · validate-env` | static viewer / dashboard — v0.3 stretch |
 | **audit reports** | [`vlabs-audit`](tools/vlabs-audit/README.md) — single command turns any frontier model into a LaTeX/PDF capability report ([sample](reports/sample_anonymized.pdf)) | multi-model side-by-side — v0.0.2 |

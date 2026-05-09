@@ -1,0 +1,3806 @@
+{
+  "components": {
+    "schemas": {
+      "APIKeyCreated": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "plaintext_key": {
+            "description": "Returned ONCE on creation; never persisted in plaintext.",
+            "title": "Plaintext Key",
+            "type": "string"
+          },
+          "prefix": {
+            "title": "Prefix",
+            "type": "string"
+          },
+          "revoked_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revoked At"
+          }
+        },
+        "required": [
+          "id",
+          "prefix",
+          "name",
+          "created_at",
+          "plaintext_key"
+        ],
+        "title": "APIKeyCreated",
+        "type": "object"
+      },
+      "APIKeyInfo": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "prefix": {
+            "title": "Prefix",
+            "type": "string"
+          },
+          "revoked_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revoked At"
+          }
+        },
+        "required": [
+          "id",
+          "prefix",
+          "name",
+          "created_at"
+        ],
+        "title": "APIKeyInfo",
+        "type": "object"
+      },
+      "APIKeyList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/APIKeyInfo"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "APIKeyList",
+        "type": "object"
+      },
+      "AdminDashboardCounts": {
+        "properties": {
+          "api_keys_active": {
+            "title": "Api Keys Active",
+            "type": "integer"
+          },
+          "api_keys_revoked": {
+            "title": "Api Keys Revoked",
+            "type": "integer"
+          },
+          "calibrations_total": {
+            "title": "Calibrations Total",
+            "type": "integer"
+          },
+          "evaluations_total": {
+            "title": "Evaluations Total",
+            "type": "integer"
+          },
+          "subscriptions_active": {
+            "title": "Subscriptions Active",
+            "type": "integer"
+          },
+          "users": {
+            "title": "Users",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "users",
+          "api_keys_active",
+          "api_keys_revoked",
+          "calibrations_total",
+          "evaluations_total",
+          "subscriptions_active"
+        ],
+        "title": "AdminDashboardCounts",
+        "type": "object"
+      },
+      "AdminDashboardLastRun": {
+        "properties": {
+          "api_key_prefix": {
+            "title": "Api Key Prefix",
+            "type": "string"
+          },
+          "calibration_id": {
+            "title": "Calibration Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "n_calibration": {
+            "title": "N Calibration",
+            "type": "integer"
+          },
+          "quantile": {
+            "title": "Quantile",
+            "type": "number"
+          }
+        },
+        "required": [
+          "calibration_id",
+          "api_key_prefix",
+          "n_calibration",
+          "quantile",
+          "created_at"
+        ],
+        "title": "AdminDashboardLastRun",
+        "type": "object"
+      },
+      "AdminDashboardResponse": {
+        "description": "Aggregate stats served by GET /v1/admin/dashboard.",
+        "properties": {
+          "billing_enabled": {
+            "title": "Billing Enabled",
+            "type": "boolean"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/AdminDashboardCounts"
+          },
+          "most_recent_calibrations": {
+            "items": {
+              "$ref": "#/components/schemas/AdminDashboardLastRun"
+            },
+            "title": "Most Recent Calibrations",
+            "type": "array"
+          }
+        },
+        "required": [
+          "counts",
+          "most_recent_calibrations",
+          "billing_enabled"
+        ],
+        "title": "AdminDashboardResponse",
+        "type": "object"
+      },
+      "AuditCallList": {
+        "description": "``GET /v1/score/audit`` response body (Phase 22.D).\n\nOffset-pagination: clients page via ``?limit=N&offset=K``. ``total``\nis the count of rows owned by this user (cheap COUNT query against\nthe ``audit_calls_user_idx`` index).",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AuditCallSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "AuditCallList",
+        "type": "object"
+      },
+      "AuditCallResponse": {
+        "description": "``GET /v1/score/audit/{audit_id}`` response body (Phase 22.D).\n\nMirrors the fields on the ``audit_calls`` row. Completion text is\nNEVER returned \u2014 only its SHA-256 hash, per the GDPR guarantee in\nPHASE_22_PLAN.md \u00a75.3.",
+        "properties": {
+          "audit_id": {
+            "title": "Audit Id",
+            "type": "string"
+          },
+          "completion_hash": {
+            "title": "Completion Hash",
+            "type": "string"
+          },
+          "components_breakdown": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Components Breakdown",
+            "type": "object"
+          },
+          "conformal_interval": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Conformal Interval",
+            "type": "array"
+          },
+          "coverage_guarantee": {
+            "title": "Coverage Guarantee",
+            "type": "number"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "env_id": {
+            "title": "Env Id",
+            "type": "string"
+          },
+          "env_version": {
+            "title": "Env Version",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
+          "latency_ms": {
+            "title": "Latency Ms",
+            "type": "integer"
+          },
+          "reward": {
+            "title": "Reward",
+            "type": "number"
+          },
+          "seed": {
+            "title": "Seed",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "audit_id",
+          "env_id",
+          "env_version",
+          "seed",
+          "completion_hash",
+          "reward",
+          "conformal_interval",
+          "coverage_guarantee",
+          "components_breakdown",
+          "latency_ms",
+          "idempotency_key",
+          "created_at"
+        ],
+        "title": "AuditCallResponse",
+        "type": "object"
+      },
+      "AuditCallSummary": {
+        "description": "List-view row \u2014 light enough to paginate at 100 per page.",
+        "properties": {
+          "audit_id": {
+            "title": "Audit Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "env_id": {
+            "title": "Env Id",
+            "type": "string"
+          },
+          "env_version": {
+            "title": "Env Version",
+            "type": "string"
+          },
+          "latency_ms": {
+            "title": "Latency Ms",
+            "type": "integer"
+          },
+          "reward": {
+            "title": "Reward",
+            "type": "number"
+          }
+        },
+        "required": [
+          "audit_id",
+          "env_id",
+          "env_version",
+          "reward",
+          "latency_ms",
+          "created_at"
+        ],
+        "title": "AuditCallSummary",
+        "type": "object"
+      },
+      "AuditEvaluation": {
+        "properties": {
+          "empirical_coverage": {
+            "title": "Empirical Coverage",
+            "type": "number"
+          },
+          "n": {
+            "title": "N",
+            "type": "integer"
+          },
+          "passes": {
+            "title": "Passes",
+            "type": "boolean"
+          },
+          "ts": {
+            "format": "date-time",
+            "title": "Ts",
+            "type": "string"
+          }
+        },
+        "required": [
+          "n",
+          "empirical_coverage",
+          "passes",
+          "ts"
+        ],
+        "title": "AuditEvaluation",
+        "type": "object"
+      },
+      "AuditResponse": {
+        "properties": {
+          "alpha": {
+            "title": "Alpha",
+            "type": "number"
+          },
+          "calibration_id": {
+            "title": "Calibration Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "evaluations": {
+            "items": {
+              "$ref": "#/components/schemas/AuditEvaluation"
+            },
+            "title": "Evaluations",
+            "type": "array"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "title": "Metadata",
+            "type": "object"
+          },
+          "n_calibration": {
+            "title": "N Calibration",
+            "type": "integer"
+          },
+          "nonconformity": {
+            "enum": [
+              "scaled_residual",
+              "abs_residual",
+              "binary"
+            ],
+            "title": "Nonconformity",
+            "type": "string"
+          },
+          "nonconformity_stats": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Nonconformity Stats",
+            "type": "object"
+          },
+          "quantile": {
+            "title": "Quantile",
+            "type": "number"
+          },
+          "target_coverage": {
+            "title": "Target Coverage",
+            "type": "number"
+          }
+        },
+        "required": [
+          "calibration_id",
+          "created_at",
+          "alpha",
+          "nonconformity",
+          "n_calibration",
+          "quantile",
+          "target_coverage",
+          "nonconformity_stats",
+          "metadata",
+          "evaluations"
+        ],
+        "title": "AuditResponse",
+        "type": "object"
+      },
+      "CalibrateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "alpha": {
+            "default": 0.1,
+            "exclusiveMaximum": 1.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Alpha",
+            "type": "number"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "title": "Metadata",
+            "type": "object"
+          },
+          "nonconformity": {
+            "default": "scaled_residual",
+            "enum": [
+              "scaled_residual",
+              "abs_residual",
+              "binary"
+            ],
+            "title": "Nonconformity",
+            "type": "string"
+          },
+          "traces": {
+            "items": {
+              "$ref": "#/components/schemas/CalibrationTrace"
+            },
+            "maxItems": 1000000,
+            "minItems": 2,
+            "title": "Traces",
+            "type": "array"
+          }
+        },
+        "required": [
+          "traces"
+        ],
+        "title": "CalibrateRequest",
+        "type": "object"
+      },
+      "CalibrateResponse": {
+        "properties": {
+          "alpha": {
+            "title": "Alpha",
+            "type": "number"
+          },
+          "calibration_id": {
+            "title": "Calibration Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "n_calibration": {
+            "title": "N Calibration",
+            "type": "integer"
+          },
+          "nonconformity": {
+            "enum": [
+              "scaled_residual",
+              "abs_residual",
+              "binary"
+            ],
+            "title": "Nonconformity",
+            "type": "string"
+          },
+          "nonconformity_stats": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Nonconformity Stats",
+            "type": "object"
+          },
+          "quantile": {
+            "title": "Quantile",
+            "type": "number"
+          },
+          "target_coverage": {
+            "title": "Target Coverage",
+            "type": "number"
+          }
+        },
+        "required": [
+          "calibration_id",
+          "alpha",
+          "nonconformity",
+          "n_calibration",
+          "quantile",
+          "target_coverage",
+          "nonconformity_stats",
+          "created_at"
+        ],
+        "title": "CalibrateResponse",
+        "type": "object"
+      },
+      "CalibrationTrace": {
+        "additionalProperties": false,
+        "properties": {
+          "predicted_reward": {
+            "title": "Predicted Reward",
+            "type": "number"
+          },
+          "reference_reward": {
+            "title": "Reference Reward",
+            "type": "number"
+          },
+          "uncertainty": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uncertainty"
+          }
+        },
+        "required": [
+          "predicted_reward",
+          "reference_reward"
+        ],
+        "title": "CalibrationTrace",
+        "type": "object"
+      },
+      "CheckoutRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "tier": {
+            "enum": [
+              "pro",
+              "team"
+            ],
+            "title": "Tier",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tier"
+        ],
+        "title": "CheckoutRequest",
+        "type": "object"
+      },
+      "CheckoutResponse": {
+        "properties": {
+          "tier": {
+            "enum": [
+              "pro",
+              "team"
+            ],
+            "title": "Tier",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "tier"
+        ],
+        "title": "CheckoutResponse",
+        "type": "object"
+      },
+      "CreateAPIKeyRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "CreateAPIKeyRequest",
+        "type": "object"
+      },
+      "DatasetCreateRequest": {
+        "additionalProperties": false,
+        "description": "``POST /v1/datasets`` request body (Phase 23.B).\n\nPHASE_23_PLAN.md \u00a75.D1: customer brings their own LLM endpoint.\nThe API key is encrypted at rest via ``pgp_sym_encrypt`` (pgcrypto)\nusing the symmetric key from ``VLABS_DATA_LLM_KEY_ENCRYPTION``.\n\nThe optional ``budget_usd_cap`` is a hard stop \u2014 the worker stops\ngeneration when ``budget_usd_spent >= budget_usd_cap`` and emits a\n``state=succeeded`` row with ``generated_tuples < requested_tuples``\n(PHASE_23_PLAN.md \u00a710).",
+        "properties": {
+          "budget_usd_cap": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Budget Usd Cap"
+          },
+          "env_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Env Id",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
+          "llm_api_key": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Llm Api Key",
+            "type": "string"
+          },
+          "llm_endpoint_url": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Llm Endpoint Url",
+            "type": "string"
+          },
+          "llm_model": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Llm Model",
+            "type": "string"
+          },
+          "output_format": {
+            "default": "parquet",
+            "enum": [
+              "parquet",
+              "jsonl"
+            ],
+            "title": "Output Format",
+            "type": "string"
+          },
+          "requested_tuples": {
+            "maximum": 100000.0,
+            "minimum": 1.0,
+            "title": "Requested Tuples",
+            "type": "integer"
+          },
+          "seed_start": {
+            "minimum": 0.0,
+            "title": "Seed Start",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "env_id",
+          "requested_tuples",
+          "seed_start",
+          "llm_endpoint_url",
+          "llm_api_key",
+          "llm_model"
+        ],
+        "title": "DatasetCreateRequest",
+        "type": "object"
+      },
+      "DatasetCreateResponse": {
+        "description": "``POST /v1/datasets`` response \u2014 returned immediately on enqueue.\n\nThe job runs asynchronously; clients poll\n``GET /v1/datasets/{dataset_id}`` for status.",
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "dataset_id": {
+            "title": "Dataset Id",
+            "type": "string"
+          },
+          "env_version": {
+            "title": "Env Version",
+            "type": "string"
+          },
+          "output_format": {
+            "enum": [
+              "parquet",
+              "jsonl"
+            ],
+            "title": "Output Format",
+            "type": "string"
+          },
+          "requested_tuples": {
+            "title": "Requested Tuples",
+            "type": "integer"
+          },
+          "seed_end": {
+            "title": "Seed End",
+            "type": "integer"
+          },
+          "seed_start": {
+            "title": "Seed Start",
+            "type": "integer"
+          },
+          "state": {
+            "enum": [
+              "created",
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "archived",
+              "hard_deleted"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dataset_id",
+          "state",
+          "requested_tuples",
+          "seed_start",
+          "seed_end",
+          "output_format",
+          "env_version",
+          "created_at"
+        ],
+        "title": "DatasetCreateResponse",
+        "type": "object"
+      },
+      "DatasetJobList": {
+        "description": "``GET /v1/datasets`` response body (Phase 23.D).",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DatasetJobSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "DatasetJobList",
+        "type": "object"
+      },
+      "DatasetJobResponse": {
+        "description": "``GET /v1/datasets/{dataset_id}`` response body (Phase 23.D).\n\nThe customer's LLM API key is NEVER returned (only the URL +\nmodel). Storage pointer fields populate as the job progresses\nthrough the lifecycle.",
+        "properties": {
+          "budget_usd_cap": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Budget Usd Cap"
+          },
+          "budget_usd_spent": {
+            "title": "Budget Usd Spent",
+            "type": "number"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "completion_success_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completion Success Rate"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "dataset_id": {
+            "title": "Dataset Id",
+            "type": "string"
+          },
+          "env_id": {
+            "title": "Env Id",
+            "type": "string"
+          },
+          "env_version": {
+            "title": "Env Version",
+            "type": "string"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "generated_tuples": {
+            "title": "Generated Tuples",
+            "type": "integer"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
+          "llm_endpoint_url": {
+            "title": "Llm Endpoint Url",
+            "type": "string"
+          },
+          "llm_model": {
+            "title": "Llm Model",
+            "type": "string"
+          },
+          "mean_reward": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Reward"
+          },
+          "output_format": {
+            "enum": [
+              "parquet",
+              "jsonl"
+            ],
+            "title": "Output Format",
+            "type": "string"
+          },
+          "p25_reward": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P25 Reward"
+          },
+          "p50_reward": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P50 Reward"
+          },
+          "p75_reward": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P75 Reward"
+          },
+          "requested_tuples": {
+            "title": "Requested Tuples",
+            "type": "integer"
+          },
+          "seed_end": {
+            "title": "Seed End",
+            "type": "integer"
+          },
+          "seed_start": {
+            "title": "Seed Start",
+            "type": "integer"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "state": {
+            "enum": [
+              "created",
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "archived",
+              "hard_deleted"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "std_reward": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Std Reward"
+          },
+          "storage_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Sha256"
+          },
+          "storage_size_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Size Bytes"
+          }
+        },
+        "required": [
+          "dataset_id",
+          "env_id",
+          "env_version",
+          "requested_tuples",
+          "generated_tuples",
+          "seed_start",
+          "seed_end",
+          "llm_endpoint_url",
+          "llm_model",
+          "output_format",
+          "budget_usd_cap",
+          "budget_usd_spent",
+          "state",
+          "mean_reward",
+          "std_reward",
+          "p25_reward",
+          "p50_reward",
+          "p75_reward",
+          "completion_success_rate",
+          "storage_sha256",
+          "storage_size_bytes",
+          "error",
+          "idempotency_key",
+          "created_at",
+          "started_at",
+          "completed_at"
+        ],
+        "title": "DatasetJobResponse",
+        "type": "object"
+      },
+      "DatasetJobSummary": {
+        "description": "List-view row for ``GET /v1/datasets`` (Phase 23.D).",
+        "properties": {
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "dataset_id": {
+            "title": "Dataset Id",
+            "type": "string"
+          },
+          "env_id": {
+            "title": "Env Id",
+            "type": "string"
+          },
+          "env_version": {
+            "title": "Env Version",
+            "type": "string"
+          },
+          "generated_tuples": {
+            "title": "Generated Tuples",
+            "type": "integer"
+          },
+          "requested_tuples": {
+            "title": "Requested Tuples",
+            "type": "integer"
+          },
+          "state": {
+            "enum": [
+              "created",
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "archived",
+              "hard_deleted"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dataset_id",
+          "env_id",
+          "env_version",
+          "requested_tuples",
+          "generated_tuples",
+          "state",
+          "created_at",
+          "completed_at"
+        ],
+        "title": "DatasetJobSummary",
+        "type": "object"
+      },
+      "EvaluateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "calibration_id": {
+            "title": "Calibration Id",
+            "type": "string"
+          },
+          "tolerance": {
+            "default": 0.05,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Tolerance",
+            "type": "number"
+          },
+          "traces": {
+            "items": {
+              "$ref": "#/components/schemas/CalibrationTrace"
+            },
+            "maxItems": 1000000,
+            "minItems": 1,
+            "title": "Traces",
+            "type": "array"
+          }
+        },
+        "required": [
+          "calibration_id",
+          "traces"
+        ],
+        "title": "EvaluateRequest",
+        "type": "object"
+      },
+      "EvaluateResponse": {
+        "properties": {
+          "calibration_id": {
+            "title": "Calibration Id",
+            "type": "string"
+          },
+          "empirical_coverage": {
+            "title": "Empirical Coverage",
+            "type": "number"
+          },
+          "interval_width_mean": {
+            "title": "Interval Width Mean",
+            "type": "number"
+          },
+          "interval_width_median": {
+            "title": "Interval Width Median",
+            "type": "number"
+          },
+          "n": {
+            "title": "N",
+            "type": "integer"
+          },
+          "n_in_interval": {
+            "title": "N In Interval",
+            "type": "integer"
+          },
+          "nonconformity": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Nonconformity",
+            "type": "object"
+          },
+          "passes": {
+            "title": "Passes",
+            "type": "boolean"
+          },
+          "target_coverage": {
+            "title": "Target Coverage",
+            "type": "number"
+          },
+          "tolerance": {
+            "title": "Tolerance",
+            "type": "number"
+          }
+        },
+        "required": [
+          "calibration_id",
+          "target_coverage",
+          "empirical_coverage",
+          "n",
+          "n_in_interval",
+          "interval_width_mean",
+          "interval_width_median",
+          "tolerance",
+          "passes",
+          "nonconformity"
+        ],
+        "title": "EvaluateResponse",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HealthResponse": {
+        "properties": {
+          "environment": {
+            "enum": [
+              "dev",
+              "staging",
+              "prod"
+            ],
+            "title": "Environment",
+            "type": "string"
+          },
+          "status": {
+            "const": "ok",
+            "default": "ok",
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version",
+          "environment"
+        ],
+        "title": "HealthResponse",
+        "type": "object"
+      },
+      "InstanceRequest": {
+        "additionalProperties": false,
+        "description": "``POST /v1/instance`` request body.",
+        "properties": {
+          "difficulty_kwargs": {
+            "additionalProperties": true,
+            "title": "Difficulty Kwargs",
+            "type": "object"
+          },
+          "env_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Env Id",
+            "type": "string"
+          },
+          "seed": {
+            "minimum": 0.0,
+            "title": "Seed",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "env_id",
+          "seed"
+        ],
+        "title": "InstanceRequest",
+        "type": "object"
+      },
+      "InstanceResponse": {
+        "description": "``POST /v1/instance`` response body.\n\n``prompt`` is the LLM-facing problem text rendered through the\nenv's adapter (``adapter.build_user_prompt(instance)``). ``metadata``\ncarries the env's public-input dict (``Instance.as_inputs()``)\nminus oracle fields. ``env_version`` pins the env catalogue\nrevision used to render this instance \u2014 Phase 22.C ``/v1/score``\nre-checks the version on persistence.",
+        "properties": {
+          "env_version": {
+            "title": "Env Version",
+            "type": "string"
+          },
+          "instance_seed": {
+            "title": "Instance Seed",
+            "type": "integer"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "title": "Metadata",
+            "type": "object"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string"
+          }
+        },
+        "required": [
+          "instance_seed",
+          "prompt",
+          "metadata",
+          "env_version"
+        ],
+        "title": "InstanceResponse",
+        "type": "object"
+      },
+      "MonitorAlertChannel": {
+        "additionalProperties": false,
+        "description": "One alert-dispatch channel attached to a monitor.\n\nThe Slack webhook URL is encrypted at rest at the row layer\n(Phase 28.D); on the wire the customer supplies the plain URL,\nand the response surface returns ``url_fingerprint`` only (first\n8 hex chars of SHA-256). The same shape forward-extends for\nPagerDuty / generic-webhook channels in v0.0.2.",
+        "properties": {
+          "address": {
+            "anyOf": [
+              {
+                "maxLength": 320,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Email recipient address (type=email).",
+            "title": "Address"
+          },
+          "type": {
+            "enum": [
+              "email",
+              "slack",
+              "webhook"
+            ],
+            "title": "Type",
+            "type": "string"
+          },
+          "webhook_url": {
+            "anyOf": [
+              {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Slack webhook URL (type=slack).",
+            "title": "Webhook Url"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "MonitorAlertChannel",
+        "type": "object"
+      },
+      "MonitorAlertChannelInfo": {
+        "description": "Response-side projection \u2014 never includes raw secrets.",
+        "properties": {
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "type": {
+            "enum": [
+              "email",
+              "slack",
+              "webhook"
+            ],
+            "title": "Type",
+            "type": "string"
+          },
+          "webhook_url_fingerprint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "First 8 hex chars of SHA-256(webhook_url).",
+            "title": "Webhook Url Fingerprint"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "MonitorAlertChannelInfo",
+        "type": "object"
+      },
+      "MonitorCreateRequest": {
+        "additionalProperties": false,
+        "description": "``POST /v1/monitors`` request body (Phase 28.B).",
+        "properties": {
+          "alert_channels": {
+            "items": {
+              "$ref": "#/components/schemas/MonitorAlertChannel"
+            },
+            "title": "Alert Channels",
+            "type": "array"
+          },
+          "auth_token": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "title": "Auth Token",
+            "type": "string"
+          },
+          "cadence": {
+            "enum": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "title": "Cadence",
+            "type": "string"
+          },
+          "env_subset": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 25,
+            "minItems": 1,
+            "title": "Env Subset",
+            "type": "array"
+          },
+          "episodes_per_env": {
+            "maximum": 200.0,
+            "minimum": 1.0,
+            "title": "Episodes Per Env",
+            "type": "integer"
+          },
+          "model_endpoint": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Model Endpoint",
+            "type": "string"
+          },
+          "model_name": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Model Name",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "model_endpoint",
+          "model_name",
+          "auth_token",
+          "cadence",
+          "env_subset",
+          "episodes_per_env"
+        ],
+        "title": "MonitorCreateRequest",
+        "type": "object"
+      },
+      "MonitorCreateResponse": {
+        "description": "``POST /v1/monitors`` response (Phase 28.B).",
+        "properties": {
+          "auth_token_fingerprint": {
+            "title": "Auth Token Fingerprint",
+            "type": "string"
+          },
+          "cadence": {
+            "enum": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "title": "Cadence",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "monitor_id": {
+            "title": "Monitor Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "next_run_at": {
+            "format": "date-time",
+            "title": "Next Run At",
+            "type": "string"
+          },
+          "projected_monthly_episodes": {
+            "title": "Projected Monthly Episodes",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "paused",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tier_limit_episodes": {
+            "title": "Tier Limit Episodes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "monitor_id",
+          "name",
+          "status",
+          "cadence",
+          "next_run_at",
+          "auth_token_fingerprint",
+          "projected_monthly_episodes",
+          "tier_limit_episodes",
+          "created_at"
+        ],
+        "title": "MonitorCreateResponse",
+        "type": "object"
+      },
+      "MonitorList": {
+        "description": "``GET /v1/monitors`` response.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MonitorSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "MonitorList",
+        "type": "object"
+      },
+      "MonitorResponse": {
+        "description": "``GET /v1/monitors/{id}`` response (Phase 28.B).",
+        "properties": {
+          "alert_channels": {
+            "items": {
+              "$ref": "#/components/schemas/MonitorAlertChannelInfo"
+            },
+            "title": "Alert Channels",
+            "type": "array"
+          },
+          "auth_token_fingerprint": {
+            "title": "Auth Token Fingerprint",
+            "type": "string"
+          },
+          "baseline_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Run Id"
+          },
+          "cadence": {
+            "enum": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "title": "Cadence",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "env_subset": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Env Subset",
+            "type": "array"
+          },
+          "episodes_per_env": {
+            "title": "Episodes Per Env",
+            "type": "integer"
+          },
+          "last_run_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Run At"
+          },
+          "model_endpoint": {
+            "title": "Model Endpoint",
+            "type": "string"
+          },
+          "model_name": {
+            "title": "Model Name",
+            "type": "string"
+          },
+          "monitor_id": {
+            "title": "Monitor Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "next_run_at": {
+            "format": "date-time",
+            "title": "Next Run At",
+            "type": "string"
+          },
+          "projected_monthly_episodes": {
+            "title": "Projected Monthly Episodes",
+            "type": "integer"
+          },
+          "retention_days": {
+            "title": "Retention Days",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "paused",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "monitor_id",
+          "name",
+          "model_endpoint",
+          "model_name",
+          "auth_token_fingerprint",
+          "cadence",
+          "env_subset",
+          "episodes_per_env",
+          "alert_channels",
+          "status",
+          "retention_days",
+          "baseline_run_id",
+          "created_at",
+          "updated_at",
+          "last_run_at",
+          "next_run_at",
+          "projected_monthly_episodes"
+        ],
+        "title": "MonitorResponse",
+        "type": "object"
+      },
+      "MonitorRunList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MonitorRunSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "MonitorRunList",
+        "type": "object"
+      },
+      "MonitorRunResponse": {
+        "description": "``GET /v1/monitors/{id}/runs/{rid}`` response (Phase 28.E).",
+        "properties": {
+          "cost_usd_estimate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Usd Estimate"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "monitor_id": {
+            "title": "Monitor Id",
+            "type": "string"
+          },
+          "monitor_run_id": {
+            "title": "Monitor Run Id",
+            "type": "string"
+          },
+          "pdf_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pdf Sha256"
+          },
+          "pdf_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pdf Url"
+          },
+          "regression_verdict": {
+            "anyOf": [
+              {
+                "enum": [
+                  "ok",
+                  "warning",
+                  "regressed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Regression Verdict"
+          },
+          "scheduled_at": {
+            "format": "date-time",
+            "title": "Scheduled At",
+            "type": "string"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "success",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "summary_stats": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary Stats"
+          },
+          "trigger": {
+            "enum": [
+              "scheduled",
+              "manual"
+            ],
+            "title": "Trigger",
+            "type": "string"
+          },
+          "verdict_payload": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verdict Payload"
+          }
+        },
+        "required": [
+          "monitor_run_id",
+          "monitor_id",
+          "scheduled_at",
+          "started_at",
+          "finished_at",
+          "status",
+          "summary_stats",
+          "regression_verdict",
+          "verdict_payload",
+          "pdf_url",
+          "pdf_sha256",
+          "cost_usd_estimate",
+          "error",
+          "trigger"
+        ],
+        "title": "MonitorRunResponse",
+        "type": "object"
+      },
+      "MonitorRunSummary": {
+        "description": "List-view row for ``GET /v1/monitors/{id}/runs`` (Phase 28.E).\n\nSurfaced in 28.B as the basic shape; the run lifecycle (status\ntransitions, summary stats, verdict) lands as the worker\nintegration in 28.C.",
+        "properties": {
+          "cost_usd_estimate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Usd Estimate"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "monitor_id": {
+            "title": "Monitor Id",
+            "type": "string"
+          },
+          "monitor_run_id": {
+            "title": "Monitor Run Id",
+            "type": "string"
+          },
+          "regression_verdict": {
+            "anyOf": [
+              {
+                "enum": [
+                  "ok",
+                  "warning",
+                  "regressed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Regression Verdict"
+          },
+          "scheduled_at": {
+            "format": "date-time",
+            "title": "Scheduled At",
+            "type": "string"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "success",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "trigger": {
+            "enum": [
+              "scheduled",
+              "manual"
+            ],
+            "title": "Trigger",
+            "type": "string"
+          }
+        },
+        "required": [
+          "monitor_run_id",
+          "monitor_id",
+          "scheduled_at",
+          "started_at",
+          "finished_at",
+          "status",
+          "regression_verdict",
+          "trigger",
+          "cost_usd_estimate"
+        ],
+        "title": "MonitorRunSummary",
+        "type": "object"
+      },
+      "MonitorSummary": {
+        "description": "List-view row for ``GET /v1/monitors`` (Phase 28.B).",
+        "properties": {
+          "cadence": {
+            "enum": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "title": "Cadence",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "env_subset": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Env Subset",
+            "type": "array"
+          },
+          "episodes_per_env": {
+            "title": "Episodes Per Env",
+            "type": "integer"
+          },
+          "last_run_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Run At"
+          },
+          "model_name": {
+            "title": "Model Name",
+            "type": "string"
+          },
+          "monitor_id": {
+            "title": "Monitor Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "next_run_at": {
+            "format": "date-time",
+            "title": "Next Run At",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "paused",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "monitor_id",
+          "name",
+          "model_name",
+          "cadence",
+          "status",
+          "env_subset",
+          "episodes_per_env",
+          "last_run_at",
+          "next_run_at",
+          "created_at"
+        ],
+        "title": "MonitorSummary",
+        "type": "object"
+      },
+      "MonitorUpdateRequest": {
+        "additionalProperties": false,
+        "description": "``PATCH /v1/monitors/{id}`` body \u2014 partial update (Phase 28.B).",
+        "properties": {
+          "alert_channels": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MonitorAlertChannel"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alert Channels"
+          },
+          "auth_token": {
+            "anyOf": [
+              {
+                "maxLength": 4096,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auth Token"
+          },
+          "cadence": {
+            "anyOf": [
+              {
+                "enum": [
+                  "daily",
+                  "weekly",
+                  "monthly"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cadence"
+          },
+          "env_subset": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 25,
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Env Subset"
+          },
+          "episodes_per_env": {
+            "anyOf": [
+              {
+                "maximum": 200.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Episodes Per Env"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "rebaseline": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rebaseline"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "active",
+                  "paused",
+                  "failed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "MonitorUpdateRequest",
+        "type": "object"
+      },
+      "PortalResponse": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "PortalResponse",
+        "type": "object"
+      },
+      "PredictRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "calibration_id": {
+            "title": "Calibration Id",
+            "type": "string"
+          },
+          "predicted_reward": {
+            "title": "Predicted Reward",
+            "type": "number"
+          },
+          "uncertainty": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uncertainty"
+          }
+        },
+        "required": [
+          "calibration_id",
+          "predicted_reward"
+        ],
+        "title": "PredictRequest",
+        "type": "object"
+      },
+      "PredictResponse": {
+        "properties": {
+          "alpha": {
+            "title": "Alpha",
+            "type": "number"
+          },
+          "calibration_id": {
+            "title": "Calibration Id",
+            "type": "string"
+          },
+          "interval": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Interval",
+            "type": "array"
+          },
+          "predicted_reward": {
+            "title": "Predicted Reward",
+            "type": "number"
+          },
+          "quantile": {
+            "title": "Quantile",
+            "type": "number"
+          },
+          "sigma": {
+            "title": "Sigma",
+            "type": "number"
+          },
+          "target_coverage": {
+            "title": "Target Coverage",
+            "type": "number"
+          }
+        },
+        "required": [
+          "calibration_id",
+          "predicted_reward",
+          "sigma",
+          "interval",
+          "quantile",
+          "alpha",
+          "target_coverage"
+        ],
+        "title": "PredictResponse",
+        "type": "object"
+      },
+      "ScoreRequest": {
+        "additionalProperties": false,
+        "description": "``POST /v1/score`` request body.\n\nPHASE_22_PLAN.md \u00a75.2: ``completion`` is the LLM's text response;\nserver re-derives the instance from ``(env_id, seed)`` and\ncalls ``adapter.parse_response(completion, instance)``. The\ncompletion is hashed (SHA-256) before storage \u2014 never persisted in\nplaintext (\u00a75.3 GDPR guarantee).",
+        "properties": {
+          "completion": {
+            "maxLength": 1048576,
+            "minLength": 0,
+            "title": "Completion",
+            "type": "string"
+          },
+          "difficulty_kwargs": {
+            "additionalProperties": true,
+            "title": "Difficulty Kwargs",
+            "type": "object"
+          },
+          "env_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Env Id",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
+          "seed": {
+            "minimum": 0.0,
+            "title": "Seed",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "env_id",
+          "seed",
+          "completion"
+        ],
+        "title": "ScoreRequest",
+        "type": "object"
+      },
+      "ScoreResponse": {
+        "description": "``POST /v1/score`` response body.",
+        "properties": {
+          "audit_id": {
+            "title": "Audit Id",
+            "type": "string"
+          },
+          "components_breakdown": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Components Breakdown",
+            "type": "object"
+          },
+          "conformal_interval": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Conformal Interval",
+            "type": "array"
+          },
+          "coverage_guarantee": {
+            "title": "Coverage Guarantee",
+            "type": "number"
+          },
+          "env_version": {
+            "title": "Env Version",
+            "type": "string"
+          },
+          "latency_ms": {
+            "title": "Latency Ms",
+            "type": "integer"
+          },
+          "reward": {
+            "title": "Reward",
+            "type": "number"
+          }
+        },
+        "required": [
+          "reward",
+          "conformal_interval",
+          "coverage_guarantee",
+          "audit_id",
+          "components_breakdown",
+          "env_version",
+          "latency_ms"
+        ],
+        "title": "ScoreResponse",
+        "type": "object"
+      },
+      "TierQuota": {
+        "properties": {
+          "rpm": {
+            "title": "Rpm",
+            "type": "integer"
+          },
+          "traces_per_month": {
+            "title": "Traces Per Month",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "traces_per_month",
+          "rpm"
+        ],
+        "title": "TierQuota",
+        "type": "object"
+      },
+      "UsageCounts": {
+        "properties": {
+          "calibrations": {
+            "title": "Calibrations",
+            "type": "integer"
+          },
+          "evaluations": {
+            "title": "Evaluations",
+            "type": "integer"
+          },
+          "predictions": {
+            "title": "Predictions",
+            "type": "integer"
+          },
+          "traces": {
+            "title": "Traces",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "traces",
+          "calibrations",
+          "evaluations",
+          "predictions"
+        ],
+        "title": "UsageCounts",
+        "type": "object"
+      },
+      "UsagePeriod": {
+        "properties": {
+          "end": {
+            "title": "End",
+            "type": "string"
+          },
+          "start": {
+            "title": "Start",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start",
+          "end"
+        ],
+        "title": "UsagePeriod",
+        "type": "object"
+      },
+      "UsageRemaining": {
+        "properties": {
+          "traces": {
+            "title": "Traces",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "traces"
+        ],
+        "title": "UsageRemaining",
+        "type": "object"
+      },
+      "UsageResponse": {
+        "properties": {
+          "current_period": {
+            "$ref": "#/components/schemas/UsagePeriod"
+          },
+          "quota": {
+            "$ref": "#/components/schemas/TierQuota"
+          },
+          "remaining": {
+            "$ref": "#/components/schemas/UsageRemaining"
+          },
+          "tier": {
+            "enum": [
+              "free",
+              "pro",
+              "team"
+            ],
+            "title": "Tier",
+            "type": "string"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/UsageCounts"
+          }
+        },
+        "required": [
+          "tier",
+          "quota",
+          "current_period",
+          "usage",
+          "remaining"
+        ],
+        "title": "UsageResponse",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Verifiable Labs Hosted Calibration API. Wraps vlabs-calibrate with auth, quotas, and audit history.",
+    "title": "vlabs-api",
+    "version": "0.0.1"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/v1/admin/dashboard": {
+      "get": {
+        "operationId": "admin_dashboard_v1_admin_dashboard_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminDashboardResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Admin Dashboard",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/v1/audit/{calibration_id}": {
+      "get": {
+        "operationId": "audit_endpoint_v1_audit__calibration_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calibration_id",
+            "required": true,
+            "schema": {
+              "title": "Calibration Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Audit Endpoint",
+        "tags": [
+          "audit"
+        ]
+      }
+    },
+    "/v1/billing/checkout": {
+      "post": {
+        "operationId": "billing_checkout_v1_billing_checkout_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckoutRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Billing Checkout",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/portal": {
+      "post": {
+        "operationId": "billing_portal_v1_billing_portal_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Billing Portal",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/calibrate": {
+      "post": {
+        "operationId": "calibrate_endpoint_v1_calibrate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalibrateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalibrateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Calibrate Endpoint",
+        "tags": [
+          "calibration"
+        ]
+      }
+    },
+    "/v1/datasets": {
+      "get": {
+        "description": "Paginated list of the caller's dataset jobs.\n\nSorted by ``created_at DESC`` so newest jobs land first. Optional\n``state`` filter narrows to a single lifecycle phase\n(``queued``/``running``/``succeeded``/``failed``/...).",
+        "operationId": "list_dataset_jobs_v1_datasets_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 32,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetJobList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Dataset Jobs",
+        "tags": [
+          "datasets"
+        ]
+      },
+      "post": {
+        "operationId": "create_dataset_job_v1_datasets_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasetCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetCreateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Dataset Job",
+        "tags": [
+          "datasets"
+        ]
+      }
+    },
+    "/v1/datasets/{dataset_id}": {
+      "get": {
+        "description": "Single dataset job detail. 404 if id is malformed, missing, or\nnot owned by the authenticated user (same surface \u2014 we don't\nleak which is which).",
+        "operationId": "get_dataset_job_v1_datasets__dataset_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dataset_id",
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetJobResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Dataset Job",
+        "tags": [
+          "datasets"
+        ]
+      }
+    },
+    "/v1/datasets/{dataset_id}/download": {
+      "get": {
+        "description": "Hand out a presigned download URL for a succeeded job.\n\nDefault response is a 302 redirect to the signed R2 URL.\n``Accept: application/json`` returns the URL inline (preferred for\nSDKs that need to log the SHA-256 + size before downloading).",
+        "operationId": "download_dataset_v1_datasets__dataset_id__download_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dataset_id",
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "accept",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Accept"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download Dataset",
+        "tags": [
+          "datasets"
+        ]
+      }
+    },
+    "/v1/evaluate": {
+      "post": {
+        "operationId": "evaluate_endpoint_v1_evaluate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Evaluate Endpoint",
+        "tags": [
+          "calibration"
+        ]
+      }
+    },
+    "/v1/instance": {
+      "post": {
+        "operationId": "instance_endpoint_v1_instance_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstanceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstanceResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Instance Endpoint",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "/v1/keys": {
+      "get": {
+        "operationId": "list_api_keys_v1_keys_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIKeyList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Api Keys",
+        "tags": [
+          "management"
+        ]
+      },
+      "post": {
+        "operationId": "create_api_key_v1_keys_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAPIKeyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIKeyCreated"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Api Key",
+        "tags": [
+          "management"
+        ]
+      }
+    },
+    "/v1/keys/{key_id}": {
+      "delete": {
+        "operationId": "revoke_api_key_v1_keys__key_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key_id",
+            "required": true,
+            "schema": {
+              "title": "Key Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIKeyInfo"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Revoke Api Key",
+        "tags": [
+          "management"
+        ]
+      }
+    },
+    "/v1/monitors": {
+      "get": {
+        "description": "Paginated list, sorted ``created_at DESC`` (matches /v1/datasets).",
+        "operationId": "list_monitors_v1_monitors_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 32,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Monitors",
+        "tags": [
+          "monitors"
+        ]
+      },
+      "post": {
+        "operationId": "create_monitor_v1_monitors_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorCreateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Monitor",
+        "tags": [
+          "monitors"
+        ]
+      }
+    },
+    "/v1/monitors/{monitor_id}": {
+      "delete": {
+        "description": "Soft-delete: status -> 'failed', next_run_at frozen at now+30d.\n\nHard-delete is admin-only (out of scope for 28.B). We use 'failed'\nrather than introducing a 'deleted' status so the existing\nmonitors_status_check constraint stays unchanged.",
+        "operationId": "delete_monitor_v1_monitors__monitor_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "monitor_id",
+            "required": true,
+            "schema": {
+              "title": "Monitor Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Monitor",
+        "tags": [
+          "monitors"
+        ]
+      },
+      "get": {
+        "operationId": "get_monitor_v1_monitors__monitor_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "monitor_id",
+            "required": true,
+            "schema": {
+              "title": "Monitor Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Monitor",
+        "tags": [
+          "monitors"
+        ]
+      },
+      "patch": {
+        "operationId": "update_monitor_v1_monitors__monitor_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "monitor_id",
+            "required": true,
+            "schema": {
+              "title": "Monitor Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Monitor",
+        "tags": [
+          "monitors"
+        ]
+      }
+    },
+    "/v1/monitors/{monitor_id}/run": {
+      "post": {
+        "description": "Schedule an out-of-band audit run.\n\nDoes NOT advance ``monitors.next_run_at`` \u2014 the next scheduled run\nstill fires on its original cadence. The new ``monitor_runs`` row\nstarts in ``status='queued'`` and is enqueued onto the Redis\nqueue if available; the in-app worker pool drains it.",
+        "operationId": "trigger_monitor_run_v1_monitors__monitor_id__run_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "monitor_id",
+            "required": true,
+            "schema": {
+              "title": "Monitor Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorRunResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Trigger Monitor Run",
+        "tags": [
+          "monitors"
+        ]
+      }
+    },
+    "/v1/monitors/{monitor_id}/runs": {
+      "get": {
+        "operationId": "list_monitor_runs_v1_monitors__monitor_id__runs_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "monitor_id",
+            "required": true,
+            "schema": {
+              "title": "Monitor Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 32,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorRunList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Monitor Runs",
+        "tags": [
+          "monitors"
+        ]
+      }
+    },
+    "/v1/monitors/{monitor_id}/runs/{run_id}": {
+      "get": {
+        "operationId": "get_monitor_run_v1_monitors__monitor_id__runs__run_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "monitor_id",
+            "required": true,
+            "schema": {
+              "title": "Monitor Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorRunResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Monitor Run",
+        "tags": [
+          "monitors"
+        ]
+      }
+    },
+    "/v1/predict": {
+      "post": {
+        "operationId": "predict_endpoint_v1_predict_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PredictRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PredictResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Predict Endpoint",
+        "tags": [
+          "calibration"
+        ]
+      }
+    },
+    "/v1/score": {
+      "post": {
+        "operationId": "score_endpoint_v1_score_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScoreRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoreResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Score Endpoint",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "/v1/score/audit": {
+      "get": {
+        "description": "Paginated list of audit calls owned by the authenticated user.\n\nSorted by ``created_at DESC`` so the newest calls land first.\nOffset-pagination keeps the contract simple; if a user has > 1 M\nrows we'll switch to cursor pagination in a follow-up.",
+        "operationId": "list_audit_calls_v1_score_audit_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditCallList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Audit Calls",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "/v1/score/audit/{audit_id}": {
+      "get": {
+        "description": "Single audit-call detail. 404 if id is malformed, missing, or\nnot owned by the authenticated user (RLS-safe \u2014 same surface).",
+        "operationId": "get_audit_call_v1_score_audit__audit_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "audit_id",
+            "required": true,
+            "schema": {
+              "title": "Audit Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditCallResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Audit Call",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "/v1/usage": {
+      "get": {
+        "operationId": "usage_endpoint_v1_usage_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Usage Endpoint",
+        "tags": [
+          "billing"
+        ]
+      }
+    }
+  }
+}
