@@ -40,11 +40,13 @@ from vlabs_api.config import get_settings
 from vlabs_api.db import Monitor, MonitorRun
 from vlabs_api.ids import encode_monitor_id, encode_monitor_run_id
 from vlabs_api.llm_key_crypto import decrypt_llm_api_key
+from vlabs_api.monitor_alerts import dispatch_monitor_alerts
 from vlabs_api.monitor_episode_runner import (
     compute_run_summary,
     run_monitor_episodes,
 )
 from vlabs_api.monitor_pdf import render_monitor_pdf
+from vlabs_api.monitor_regression import compute_verdict
 from vlabs_api.monitor_scheduler import scheduler_tick
 from vlabs_api.redis_client import get_client as get_redis
 from vlabs_api.storage import upload_dataset
@@ -173,6 +175,8 @@ async def _mark_success(
     pdf_storage_key: str,
     pdf_sha256: str,
     cost_usd_estimate: float,
+    verdict: str | None = None,
+    verdict_payload: dict[str, Any] | None = None,
 ) -> None:
     run.status = "success"
     run.finished_at = datetime.now(UTC)
@@ -180,8 +184,10 @@ async def _mark_success(
     run.pdf_storage_key = pdf_storage_key
     run.pdf_sha256 = pdf_sha256
     run.cost_usd_estimate = float(cost_usd_estimate)
-    # Verdict + verdict_payload populate in 28.D once the regression
-    # module lands. 28.C leaves them NULL.
+    if verdict is not None:
+        run.regression_verdict = verdict
+    if verdict_payload is not None:
+        run.verdict_payload = verdict_payload
     await session.commit()
 
 
@@ -276,6 +282,28 @@ async def process_monitor_run(
 
     summary = compute_run_summary(results)
 
+    # Compute regression verdict against the (optional) baseline summary.
+    baseline_summary: dict[str, Any] | None = None
+    async with factory() as session:  # type: ignore[misc]
+        m_res = await session.execute(
+            select(Monitor).where(Monitor.id == monitor_pk)
+        )
+        monitor_row = m_res.scalar_one()
+        baseline_run_id = monitor_row.baseline_run_id
+        if baseline_run_id is not None and baseline_run_id != run_id:
+            br_res = await session.execute(
+                select(MonitorRun).where(MonitorRun.id == baseline_run_id)
+            )
+            baseline_run = br_res.scalar_one_or_none()
+            if baseline_run is not None and baseline_run.summary_stats:
+                baseline_summary = dict(baseline_run.summary_stats)
+    verdict_payload = compute_verdict(
+        current_summary=summary,
+        baseline_summary=baseline_summary,
+        rng_seed=int(run_id.int) & 0xFFFFFFFF,
+    )
+    verdict = verdict_payload["verdict"]
+
     # Render + upload PDF (best-effort — failure does not block the run).
     pdf_key = f"monitors/{monitor_id_hex}/{run_id.hex}.pdf"
     pdf_sha256 = ""
@@ -286,7 +314,7 @@ async def process_monitor_run(
             run_id=encode_monitor_run_id(run_id),
             scheduled_at=str(run.scheduled_at if run else ""),
             finished_at=datetime.now(UTC).isoformat(),
-            verdict="ok",  # 28.D will populate the real verdict
+            verdict=verdict,
             summary=summary,
         )
         # Reuse the dataset upload helper — it accepts arbitrary bytes
@@ -319,6 +347,8 @@ async def process_monitor_run(
             pdf_storage_key=pdf_key,
             pdf_sha256=pdf_sha256,
             cost_usd_estimate=float(summary["cost_usd_estimate"]),
+            verdict=verdict,
+            verdict_payload=verdict_payload,
         )
 
         # D6-A: snapshot the first successful run as the baseline.
@@ -330,6 +360,31 @@ async def process_monitor_run(
             monitor.baseline_run_id = run.id
         monitor.last_run_at = datetime.now(UTC)
         await session.commit()
+
+        # D7 alert dispatch — best-effort. Never blocks run-row commit
+        # (which already happened above). 'ok' verdicts skip the email
+        # burst entirely; warning + regressed dispatch all configured
+        # channels and persist monitor_alerts rows for the audit trail.
+        if verdict in ("warning", "regressed"):
+            try:
+                # Re-fetch monitor with alert_channels populated.
+                m_res = await session.execute(
+                    select(Monitor).where(Monitor.id == monitor_pk)
+                )
+                monitor_row = m_res.scalar_one()
+                await dispatch_monitor_alerts(
+                    session,
+                    monitor=monitor_row,
+                    run=run,
+                    summary=summary,
+                    verdict_payload=verdict_payload,
+                )
+            except Exception as exc:  # noqa: BLE001
+                log.warning(
+                    "monitor_worker.alert_dispatch_failed",
+                    run_id=str(run_id),
+                    error=f"{type(exc).__name__}: {exc}",
+                )
 
 
 # ───────────────────────── worker loop ─────────────────────────────

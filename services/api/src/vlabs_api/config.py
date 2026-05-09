@@ -136,6 +136,16 @@ class Settings(BaseSettings):
     clerk_jwt_issuer: str | None = None  # e.g. https://something.clerk.accounts.dev
     clerk_jwks_url: str | None = None  # auto-derived from issuer if not set
 
+    # ── Phase 28 — continuous monitoring secrets ──────────────────
+    # Email + Slack are best-effort: tests run with VLABS_LOCAL_FAKE_EMAIL=true
+    # so the alert dispatcher writes .eml stubs to /tmp/vlabs-emails/<ts>.eml
+    # instead of hitting Resend. Production deploys MUST set both
+    # VLABS_EMAIL_FROM and VLABS_EMAIL_API_KEY (Resend / SendGrid / SES key).
+    vlabs_email_from: str = ""
+    vlabs_email_api_key: str = ""
+    vlabs_slack_webhook_default: str = ""
+    vlabs_local_fake_email: bool = False
+
     # ── Tier limits (composed in) ─────────────────────────────────
     @property
     def tiers(self) -> TierLimits:
