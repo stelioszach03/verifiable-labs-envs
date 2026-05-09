@@ -12,6 +12,7 @@ from typing import Any
 
 from verifiable_labs_envs.envs.code_humaneval_tools import (
     SYSTEM_PROMPT_TOOLS,
+    TOOL_SCHEMAS,
     build_user_prompt,
     parse_response,
 )
@@ -27,6 +28,11 @@ class CodeHumanevalToolsAdapter(EnvAdapter):
 
     def parse_response(self, text: str, instance: Any) -> Any:
         return parse_response(text, instance)
+
+    def get_tools_schema(self, instance: Any) -> list[dict[str, Any]] | None:
+        """Forward the env's 3-primitive read/write/run_test schema."""
+        del instance
+        return list(TOOL_SCHEMAS)
 
 
 __all__ = ["CodeHumanevalToolsAdapter"]

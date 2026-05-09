@@ -8,10 +8,12 @@ from verifiable_labs_envs.envs.tool_calling_multiturn import (
 )
 from verifiable_labs_envs.envs.tool_calling_single import (
     SYSTEM_PROMPT,
+    TOOL_SCHEMAS,
     build_user_prompt,
     parse_response,
 )
 from verifiable_labs_envs.solvers.llm_solver import EnvAdapter
+from verifiable_labs_envs.tool_primitives import schemas_for
 
 SYSTEM_PROMPT_MT = (
     SYSTEM_PROMPT
@@ -42,6 +44,13 @@ class ToolCallingMultiturnAdapter(EnvAdapter):
         # feedback message directly from the workspace state; this
         # method is here only to satisfy the EnvAdapter interface.
         return render_turn_feedback(last_call=None, n_tool_calls=0, budget=0)
+
+    def get_tools_schema(self, instance: Any) -> list[dict[str, Any]] | None:
+        """Forward the env's tool schema (Phase 25 contract)."""
+        names = getattr(instance, "available_tools", None)
+        if names:
+            return schemas_for(names) or list(TOOL_SCHEMAS)
+        return list(TOOL_SCHEMAS)
 
 
 __all__ = ["ToolCallingMultiturnAdapter", "SYSTEM_PROMPT_MT"]

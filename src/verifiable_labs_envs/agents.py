@@ -193,7 +193,25 @@ class OpenAICompatibleAgent:
             api_key=api_key,
         )
 
-    def solve(self, observation: dict[str, Any]) -> dict[str, Any]:
+    def solve(
+        self,
+        observation: dict[str, Any],
+        *,
+        tools_schema: list[dict[str, Any]] | None = None,
+    ) -> dict[str, Any]:
+        """Call the chat-completions endpoint and return a parsed dict.
+
+        ``tools_schema`` (optional, validation-fix Phase 28+): when
+        non-None and non-empty, the schemas are forwarded to the
+        OpenAI client as ``tools=[...]`` with ``tool_choice="auto"``,
+        and any returned ``tool_calls`` are projected into the
+        OpenAI Chat Completions canonical envelope under
+        ``"tool_calls"`` so the env adapter (Phase 25 contract) can
+        consume them. Forward-compatible: providers that reject
+        ``tools=`` (older models) trigger the same retry-without-
+        optional-knobs fallback that already covers
+        ``response_format`` + ``max_tokens``.
+        """
         system = observation.get("system_prompt", "You are a helpful assistant.")
         user = observation.get("prompt_text") or json.dumps(observation)
         if not self.api_key:
@@ -221,7 +239,15 @@ class OpenAICompatibleAgent:
             "temperature": self.temperature,
             "max_tokens": 8192,
         }
-        if wants_json:
+        # ``response_format=json_object`` and ``tools=[...]`` are
+        # mutually exclusive on the OpenAI / OpenRouter API surface.
+        # When tools_schema is provided, prefer the structured-tool
+        # path and drop response_format to avoid a 400 from the
+        # provider.
+        if tools_schema:
+            kwargs["tools"] = list(tools_schema)
+            kwargs["tool_choice"] = "auto"
+        elif wants_json:
             kwargs["response_format"] = {"type": "json_object"}
         t0 = time.perf_counter()
         try:
@@ -230,17 +256,49 @@ class OpenAICompatibleAgent:
             # Retry without the optional knobs if the provider rejected them.
             kwargs.pop("response_format", None)
             kwargs.pop("max_tokens", None)
-            if "max_tokens" in str(e) or "response_format" in str(e):
+            kwargs.pop("tools", None)
+            kwargs.pop("tool_choice", None)
+            err_str = str(e)
+            if (
+                "max_tokens" in err_str
+                or "response_format" in err_str
+                or "tools" in err_str
+                or "tool_choice" in err_str
+            ):
                 resp = client.chat.completions.create(**kwargs)
             else:
                 raise
         latency_ms = (time.perf_counter() - t0) * 1000.0
-        text = resp.choices[0].message.content or ""
+        message = resp.choices[0].message
+        text = message.content or ""
         # The agent returns a parsed dict; the env's adapter does the
         # final shape-checking. Best-effort: try to parse the LLM output
         # as JSON, otherwise pass the raw text under "answer_text".
         parsed = _try_parse_json(text)
         out: dict[str, Any] = parsed if isinstance(parsed, dict) else {"answer_text": text}
+
+        # Project tool_calls onto the canonical envelope so the env
+        # adapter (Phase 25 contract) can consume them. The OpenAI
+        # SDK returns Pydantic-shaped ``ChatCompletionMessageToolCall``
+        # objects; we serialise to plain dicts for adapter parsing.
+        raw_tool_calls = getattr(message, "tool_calls", None) or []
+        if raw_tool_calls:
+            out["tool_calls"] = [
+                {
+                    "id": getattr(tc, "id", None),
+                    "type": getattr(tc, "type", "function"),
+                    "function": {
+                        "name": getattr(tc.function, "name", None),
+                        "arguments": getattr(tc.function, "arguments", "") or "",
+                    },
+                }
+                for tc in raw_tool_calls
+            ]
+            # When the model invoked tools, also surface the bare text
+            # response (often empty) so adapters can fall back to
+            # "answer_text" if they don't speak tool_calls.
+            out.setdefault("answer_text", text)
+
         out["_latency_ms"] = latency_ms
         # Token usage — surfaced for cost computation in the friendly CLI.
         # Underscore-prefixed so existing consumers (which strip private fields

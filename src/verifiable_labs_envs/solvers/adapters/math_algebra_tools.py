@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from verifiable_labs_envs.envs.math_algebra_tools import TOOL_SCHEMAS
 from verifiable_labs_envs.solvers.adapters.math_algebra import MathAlgebraLLMAdapter
 from verifiable_labs_envs.solvers.llm_solver import EnvAdapter
 
@@ -64,6 +65,11 @@ class MathAlgebraToolsAdapter(EnvAdapter):
 
     def parse_response(self, text: str, instance: Any) -> Any:
         return self._base.parse_response(text, instance)
+
+    def get_tools_schema(self, instance: Any) -> list[dict[str, Any]] | None:
+        """Forward the env's 4-primitive SymPy tool schema."""
+        del instance  # the env exposes a static pool to every instance
+        return list(TOOL_SCHEMAS)
 
 
 __all__ = ["MathAlgebraToolsAdapter", "NAME", "SYSTEM_PROMPT_TOOLS"]

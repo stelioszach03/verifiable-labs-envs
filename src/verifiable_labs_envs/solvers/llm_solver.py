@@ -398,6 +398,22 @@ class EnvAdapter(ABC):
             f"{type(self).__name__} does not support multi-turn rollouts"
         )
 
+    def get_tools_schema(self, instance: Any) -> list[dict[str, Any]] | None:
+        """Return the env's OpenAI-format tool schema, or ``None``.
+
+        Tool-calling-style envs override this to return a list of
+        ``{"type": "function", "function": {…}}`` dicts that the
+        :class:`OpenAICompatibleAgent` forwards via the
+        ``tools=[...]`` parameter on the chat-completions endpoint.
+        Default returns ``None`` — non-tool envs are unaffected.
+
+        Implementations may select schemas per-instance (e.g. an
+        instance with a restricted ``available_tools`` list). When the
+        return is non-empty, the agent will set
+        ``tool_choice="auto"`` on the API call.
+        """
+        return None
+
 
 _ADAPTERS: dict[str, EnvAdapter] = {}
 
