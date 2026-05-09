@@ -1,0 +1,76 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "vlabs-reward-train"
+version = "0.0.1"
+description = "Verifiable Labs reward-distillation training scaffolding (Phase 29.C; GPU runs gated to 29.F)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Stelios Zacharioudakis", email = "sdi2200243@di.uoa.gr" },
+]
+keywords = [
+    "calibration",
+    "conformal-prediction",
+    "distillation",
+    "lora",
+    "reward-modeling",
+    "verifiable-labs",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
+dependencies = [
+    "typer>=0.12",
+    "numpy>=1.26",
+    "vlabs-reward-data",
+    "verifiable-labs-envs",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.5",
+    "torch>=2.3",
+]
+gpu = [
+    # The full GPU-training path. Pinned softly because Phase 29.F
+    # is gated on free-credit approvals; specific pins land then.
+    "torch>=2.3",
+    "transformers>=4.40",
+    "peft>=0.10",
+    "trl>=0.9",
+    "accelerate>=0.30",
+    "bitsandbytes>=0.43",
+    "wandb>=0.17",
+]
+
+[project.scripts]
+vlabs-reward-train = "vlabs_reward_train.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/vlabs_reward_train"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers --import-mode=importlib"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = [
+    "E501",
+    "B008",
+]
