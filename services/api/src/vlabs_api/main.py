@@ -30,6 +30,7 @@ from vlabs_api.routes import (
     keys,
     monitors,
     predict,
+    reward_models,
     score,
     score_audit,
     usage,
@@ -130,6 +131,10 @@ def create_app() -> FastAPI:
     # Counts against monitors_max + monitor_envs_max + monitor_episodes_max
     # tier caps (PHASE_28_PLAN.md §5 D8-C).
     app.include_router(monitors.router, prefix="/v1")
+    # Phase 29 — distilled reward model service. 5 endpoints under
+    # /v1/reward-models/* with stub inference until 29.G lands trained
+    # weights. Counts against usage_counters.reward_scores_count.
+    app.include_router(reward_models.router, prefix="/v1")
     # Management plane — Clerk JWT auth, billing + key issuance
     app.include_router(keys.router, prefix="/v1")
     app.include_router(billing.router, prefix="/v1")

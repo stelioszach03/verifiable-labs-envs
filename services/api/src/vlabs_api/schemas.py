@@ -637,6 +637,140 @@ class AdminDashboardResponse(BaseModel):
     billing_enabled: bool
 
 
+# ── Reward model service (Phase 29.E) ────────────────────────────────
+
+
+RewardModelStatus = Literal["training", "available", "deprecated", "retired"]
+
+
+class RewardModelEvalSummary(BaseModel):
+    """Compact per-model eval summary surfaced on the list endpoint."""
+
+    rewardbench_overall: float | None = None
+    held_out_spearman_avg: float | None = None
+    calibration_coverage: float | None = None
+
+
+class RewardModelInfo(BaseModel):
+    """Full reward-model record surfaced by GET /v1/reward-models/{id}."""
+
+    model_config = ConfigDict(protected_namespaces=())
+
+    model_id: str
+    name: str
+    family: str
+    version: str
+    teacher_source: str
+    student_arch: str
+    training_method: str
+    status: RewardModelStatus
+    conformal_quantile: float | None = None
+    eval_summary: RewardModelEvalSummary = Field(default_factory=RewardModelEvalSummary)
+    created_at: datetime
+    trained_at: datetime | None = None
+    retired_at: datetime | None = None
+
+
+class RewardModelSummary(BaseModel):
+    """Compact view used in paginated listings."""
+
+    model_config = ConfigDict(protected_namespaces=())
+
+    model_id: str
+    family: str
+    version: str
+    status: RewardModelStatus
+    created_at: datetime
+    eval_summary: RewardModelEvalSummary = Field(default_factory=RewardModelEvalSummary)
+
+
+class RewardModelList(BaseModel):
+    items: list[RewardModelSummary]
+    total: int
+    limit: int
+    offset: int
+
+
+class RewardScoreRequest(BaseModel):
+    """``POST /v1/reward-models/{id}/score`` request body.
+
+    ``schema_version`` lets clients gate against the response shape; the
+    stub server in 29.E echoes the version with a ``-stub`` suffix when
+    serving canned responses (so SDKs can detect that the trained
+    student isn't online yet).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    prompt: str = Field(min_length=1)
+    response: str = Field(min_length=1)
+    env_id: str | None = None
+    schema_version: str = "v0.1.0"
+
+
+class RewardScoreResponse(BaseModel):
+    """``POST /v1/reward-models/{id}/score`` response body."""
+
+    model_config = ConfigDict(protected_namespaces=())
+
+    reward: float = Field(ge=0.0, le=1.0)
+    confidence_interval: tuple[float, float]
+    coverage_guarantee: float = Field(ge=0.0, le=1.0)
+    model_id: str
+    schema_version: str
+    cache_hit: bool = False
+    latency_ms: int = Field(ge=0)
+    audit_id: str
+
+
+class RewardScoreBatchItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    prompt: str = Field(min_length=1)
+    response: str = Field(min_length=1)
+    env_id: str | None = None
+
+
+class RewardScoreBatchRequest(BaseModel):
+    """``POST /v1/reward-models/{id}/score/batch`` body. Up to 100 items
+    per call (D8). Idempotent on ``X-Idempotency-Key``."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    items: list[RewardScoreBatchItem] = Field(min_length=1, max_length=100)
+    schema_version: str = "v0.1.0"
+
+
+class RewardScoreBatchResponse(BaseModel):
+    """Same-order array of per-item responses + a summary."""
+
+    model_config = ConfigDict(protected_namespaces=())
+
+    items: list[RewardScoreResponse]
+    total: int
+    model_id: str
+    schema_version: str
+
+
+class RewardEvalsResponse(BaseModel):
+    """Full eval card payload surfaced by
+    ``GET /v1/reward-models/{id}/evals``.
+
+    The shape is intentionally loose-typed: per-env, per-category, and
+    calibration-trace dicts pass through as JSON blobs because they
+    evolve with each released model version (D12-B). Customers parse
+    by key name, not position.
+    """
+
+    model_config = ConfigDict(protected_namespaces=())
+
+    model_id: str
+    eval_summary: RewardModelEvalSummary
+    held_out_envs: dict[str, Any] = Field(default_factory=dict)
+    rewardbench: dict[str, Any] = Field(default_factory=dict)
+    calibration: dict[str, Any] = Field(default_factory=dict)
+
+
 __all__ = [
     "NonconformityName",
     "CalibrationTrace",
@@ -697,4 +831,15 @@ __all__ = [
     "MonitorRunResponse",
     "MonitorRunList",
     "DatasetDownloadResponse",
+    "RewardModelStatus",
+    "RewardModelEvalSummary",
+    "RewardModelInfo",
+    "RewardModelSummary",
+    "RewardModelList",
+    "RewardScoreRequest",
+    "RewardScoreResponse",
+    "RewardScoreBatchItem",
+    "RewardScoreBatchRequest",
+    "RewardScoreBatchResponse",
+    "RewardEvalsResponse",
 ]

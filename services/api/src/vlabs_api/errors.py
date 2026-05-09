@@ -202,6 +202,36 @@ class MonitorNameConflict(APIError):
     title = "a monitor with this name already exists for this user"
 
 
+class RewardModelNotFound(APIError):
+    """Phase 29.E — reward model id not found or in 'training' status."""
+
+    status_code = 404
+    code = "reward_model_not_found"
+    title = "no reward model with this id is available"
+
+
+class RewardModelRetired(APIError):
+    """Phase 29.E — reward model has been retired (status='retired').
+
+    Distinct from :class:`RewardModelNotFound` so customers know the
+    model existed but is no longer served; SDKs should switch to a
+    newer version.
+    """
+
+    status_code = 410
+    code = "reward_model_retired"
+    title = "this reward model version is retired"
+
+
+class RewardModelInvalidRequest(APIError):
+    """Phase 29.E — malformed scoring request (empty prompt/response,
+    too-large payload, etc.)."""
+
+    status_code = 400
+    code = "reward_model_invalid_request"
+    title = "scoring request is malformed"
+
+
 class RateLimited(APIError):
     status_code = 429
     code = "rate_limited"
@@ -307,6 +337,9 @@ __all__ = [
     "MonitorTierExceeded",
     "MonitorInvalidState",
     "MonitorNameConflict",
+    "RewardModelNotFound",
+    "RewardModelRetired",
+    "RewardModelInvalidRequest",
     "RateLimited",
     "InvalidClerkToken",
     "WebhookSignatureInvalid",
