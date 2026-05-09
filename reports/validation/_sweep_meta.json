@@ -1,0 +1,322 @@
+{
+  "envs_executed": [
+    "math-algebra",
+    "math-algebra-multiturn",
+    "math-algebra-tools",
+    "code-humaneval",
+    "code-humaneval-multiturn",
+    "code-humaneval-tools",
+    "code-mini-repo",
+    "tool-calling-single",
+    "tool-calling-multiturn",
+    "tool-calling-debug",
+    "sql-single-turn",
+    "sql-multiturn",
+    "long-context-needle",
+    "long-context-synthesis",
+    "long-context-reasoning"
+  ],
+  "envs_planned": [
+    "math-algebra",
+    "math-algebra-multiturn",
+    "math-algebra-tools",
+    "code-humaneval",
+    "code-humaneval-multiturn",
+    "code-humaneval-tools",
+    "code-mini-repo",
+    "tool-calling-single",
+    "tool-calling-multiturn",
+    "tool-calling-debug",
+    "sql-single-turn",
+    "sql-multiturn",
+    "long-context-needle",
+    "long-context-synthesis",
+    "long-context-reasoning"
+  ],
+  "halt_reason": null,
+  "model": "anthropic/claude-haiku-4.5",
+  "n_per_env": 10,
+  "results": {
+    "code-humaneval": {
+      "anomalies": [],
+      "stats": {
+        "component_means": {
+          "format_valid": 1.0,
+          "parse_valid": 1.0,
+          "pass_rate": 0.0
+        },
+        "cost_usd": 0.0102944,
+        "crashes": 0,
+        "format_valid": "10/10",
+        "mean_reward": 0.30000000000000004,
+        "n": 10,
+        "parse_valid": "10/10",
+        "std_reward": 0.0
+      }
+    },
+    "code-humaneval-multiturn": {
+      "anomalies": [],
+      "stats": {
+        "component_means": {
+          "format_valid": 1.0,
+          "parse_valid": 1.0,
+          "pass_rate": 0.0
+        },
+        "cost_usd": 0.011082400000000001,
+        "crashes": 0,
+        "format_valid": "10/10",
+        "mean_reward": 0.30000000000000004,
+        "n": 10,
+        "parse_valid": "10/10",
+        "std_reward": 0.0
+      }
+    },
+    "code-humaneval-tools": {
+      "anomalies": [
+        "ALL rewards = 0.0 \u2014 adapter parse failure suspected",
+        "ALL format_valid = 0 \u2014 JSON-schema mismatch suspected"
+      ],
+      "stats": {
+        "component_means": {
+          "format_valid": 0.0,
+          "parse_valid": 0.0,
+          "pass_rate": 0.0
+        },
+        "cost_usd": 0.061846399999999996,
+        "crashes": 0,
+        "format_valid": "0/10",
+        "mean_reward": 0.0,
+        "n": 10,
+        "parse_valid": "0/10",
+        "std_reward": 0.0
+      }
+    },
+    "code-mini-repo": {
+      "anomalies": [],
+      "stats": {
+        "component_means": {
+          "format_valid": 1.0,
+          "parse_valid": 1.0,
+          "pass_rate": 0.0
+        },
+        "cost_usd": 0.0091024,
+        "crashes": 0,
+        "format_valid": "10/10",
+        "mean_reward": 0.30000000000000004,
+        "n": 10,
+        "parse_valid": "10/10",
+        "std_reward": 0.0
+      }
+    },
+    "long-context-needle": {
+      "anomalies": [],
+      "stats": {
+        "component_means": {
+          "correctness": 0.8,
+          "format_valid": 1.0,
+          "parse_valid": 1.0
+        },
+        "cost_usd": 0.0414792,
+        "crashes": 0,
+        "format_valid": "10/10",
+        "mean_reward": 0.86,
+        "n": 10,
+        "parse_valid": "10/10",
+        "std_reward": 0.27999999999999997
+      }
+    },
+    "long-context-reasoning": {
+      "anomalies": [
+        "ALL rewards = 1.0 \u2014 reward kernel suspected trivially passing"
+      ],
+      "stats": {
+        "component_means": {
+          "correctness": 1.0,
+          "format_valid": 1.0,
+          "parse_valid": 1.0
+        },
+        "cost_usd": 0.048932,
+        "crashes": 0,
+        "format_valid": "10/10",
+        "mean_reward": 1.0,
+        "n": 10,
+        "parse_valid": "10/10",
+        "std_reward": 0.0
+      }
+    },
+    "long-context-synthesis": {
+      "anomalies": [],
+      "stats": {
+        "component_means": {
+          "correctness": 0.2600026397176952,
+          "format_valid": 1.0,
+          "parse_valid": 1.0
+        },
+        "cost_usd": 0.0487904,
+        "crashes": 0,
+        "format_valid": "10/10",
+        "mean_reward": 0.4820018478023867,
+        "n": 10,
+        "parse_valid": "10/10",
+        "std_reward": 0.06529780198537209
+      }
+    },
+    "math-algebra": {
+      "anomalies": [],
+      "stats": {
+        "component_means": {
+          "correct": 0.9,
+          "format_valid": 0.9,
+          "parse_valid": 0.9
+        },
+        "cost_usd": 0.0032512,
+        "crashes": 0,
+        "format_valid": "9/10",
+        "mean_reward": 0.9,
+        "n": 10,
+        "parse_valid": "9/10",
+        "std_reward": 0.3
+      }
+    },
+    "math-algebra-multiturn": {
+      "anomalies": [
+        "ALL rewards = 1.0 \u2014 reward kernel suspected trivially passing"
+      ],
+      "stats": {
+        "component_means": {
+          "correct": 1.0,
+          "format_valid": 1.0,
+          "parse_valid": 1.0
+        },
+        "cost_usd": 0.0030072000000000002,
+        "crashes": 0,
+        "format_valid": "10/10",
+        "mean_reward": 1.0,
+        "n": 10,
+        "parse_valid": "10/10",
+        "std_reward": 0.0
+      }
+    },
+    "math-algebra-tools": {
+      "anomalies": [
+        "ALL rewards = 0.0 \u2014 adapter parse failure suspected",
+        "ALL format_valid = 0 \u2014 JSON-schema mismatch suspected"
+      ],
+      "stats": {
+        "component_means": {
+          "correct": 0.0,
+          "format_valid": 0.0,
+          "parse_valid": 0.0
+        },
+        "cost_usd": 0.015607200000000002,
+        "crashes": 0,
+        "format_valid": "0/10",
+        "mean_reward": 0.0,
+        "n": 10,
+        "parse_valid": "0/10",
+        "std_reward": 0.0
+      }
+    },
+    "sql-multiturn": {
+      "anomalies": [
+        "ALL rewards = 1.0 \u2014 reward kernel suspected trivially passing"
+      ],
+      "stats": {
+        "component_means": {
+          "correctness": 1.0,
+          "format_valid": 1.0,
+          "parse_valid": 1.0
+        },
+        "cost_usd": 0.005076000000000001,
+        "crashes": 0,
+        "format_valid": "10/10",
+        "mean_reward": 1.0,
+        "n": 10,
+        "parse_valid": "10/10",
+        "std_reward": 0.0
+      }
+    },
+    "sql-single-turn": {
+      "anomalies": [
+        "ALL rewards = 1.0 \u2014 reward kernel suspected trivially passing"
+      ],
+      "stats": {
+        "component_means": {
+          "correctness": 1.0,
+          "format_valid": 1.0,
+          "parse_valid": 1.0
+        },
+        "cost_usd": 0.0046760000000000005,
+        "crashes": 0,
+        "format_valid": "10/10",
+        "mean_reward": 1.0,
+        "n": 10,
+        "parse_valid": "10/10",
+        "std_reward": 0.0
+      }
+    },
+    "tool-calling-debug": {
+      "anomalies": [
+        "ALL rewards = 0.0 \u2014 adapter parse failure suspected",
+        "ALL format_valid = 0 \u2014 JSON-schema mismatch suspected"
+      ],
+      "stats": {
+        "component_means": {
+          "correctness": 0.0,
+          "format_valid": 0.0,
+          "parse_valid": 0.0
+        },
+        "cost_usd": 0.0153256,
+        "crashes": 0,
+        "format_valid": "0/10",
+        "mean_reward": 0.0,
+        "n": 10,
+        "parse_valid": "0/10",
+        "std_reward": 0.0
+      }
+    },
+    "tool-calling-multiturn": {
+      "anomalies": [
+        "ALL rewards = 0.0 \u2014 adapter parse failure suspected",
+        "ALL format_valid = 0 \u2014 JSON-schema mismatch suspected"
+      ],
+      "stats": {
+        "component_means": {
+          "correctness": 0.0,
+          "format_valid": 0.0,
+          "parse_valid": 0.0
+        },
+        "cost_usd": 0.013760800000000002,
+        "crashes": 0,
+        "format_valid": "0/10",
+        "mean_reward": 0.0,
+        "n": 10,
+        "parse_valid": "0/10",
+        "std_reward": 0.0
+      }
+    },
+    "tool-calling-single": {
+      "anomalies": [
+        "ALL rewards = 0.0 \u2014 adapter parse failure suspected",
+        "ALL format_valid = 0 \u2014 JSON-schema mismatch suspected"
+      ],
+      "stats": {
+        "component_means": {
+          "correctness": 0.0,
+          "format_valid": 0.0,
+          "parse_valid": 0.0
+        },
+        "cost_usd": 0.0136008,
+        "crashes": 0,
+        "format_valid": "0/10",
+        "mean_reward": 0.0,
+        "n": 10,
+        "parse_valid": "0/10",
+        "std_reward": 0.0
+      }
+    }
+  },
+  "seed_start": 1000,
+  "timestamp_utc": "2026-05-09T15:35:43Z",
+  "total_cost_usd": 0.305832
+}
