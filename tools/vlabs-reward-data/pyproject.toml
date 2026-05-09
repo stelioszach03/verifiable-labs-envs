@@ -1,0 +1,68 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "vlabs-reward-data"
+version = "0.0.1"
+description = "Verifiable Labs reward distillation dataset extraction CLI (Phase 29.B)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Stelios Zacharioudakis", email = "sdi2200243@di.uoa.gr" },
+]
+keywords = [
+    "calibration",
+    "conformal-prediction",
+    "distillation",
+    "reward-modeling",
+    "verifiable-labs",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
+dependencies = [
+    "typer>=0.12",
+    "numpy>=1.26",
+    "verifiable-labs-envs",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.5",
+]
+hf = [
+    "datasets>=2.18",
+]
+judge = [
+    "httpx>=0.27",
+]
+
+[project.scripts]
+vlabs-reward-data = "vlabs_reward_data.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/vlabs_reward_data"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers --import-mode=importlib"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = [
+    "E501",
+    "B008",  # Typer's Annotated[..., Option(...)] pattern uses defaults
+]
