@@ -459,9 +459,17 @@ def test_pytest_summary_parser_returns_zeros_on_empty() -> None:
 
 
 def test_build_pytest_manifest_shape() -> None:
+    """Manifest invokes pytest via ``sys.executable -m pytest`` so the
+    sandboxed subprocess doesn't depend on a ``pytest`` console script
+    being on ``$PATH``. Pre-fix shape used a bare ``"pytest"`` token
+    which broke on ``pip install --user`` setups (see
+    ``reports/sandbox_investigation.md``)."""
+    import sys
     m = build_pytest_manifest(["a.py", "b.py"], timeout_s=12.5)
     assert m["runner"] == "pytest"
-    assert m["test_cmd"] == ["pytest", "-q", "--tb=line", "a.py", "b.py"]
+    assert m["test_cmd"] == [
+        sys.executable, "-m", "pytest", "-q", "--tb=line", "a.py", "b.py",
+    ]
     assert m["expected_exit"] == 0
     assert m["timeout_s"] == 12.5
 

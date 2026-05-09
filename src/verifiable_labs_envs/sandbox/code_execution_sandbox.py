@@ -179,9 +179,22 @@ def build_pytest_manifest(
     parallelisation, and per-test timeouts are layered on top in the
     env modules that need them.
     """
+    # ``sys.executable -m pytest`` instead of bare ``pytest`` so the
+    # sandboxed subprocess doesn't depend on a ``pytest`` console
+    # script being on ``$PATH``. Latent since 24.B (commit 665d26c) —
+    # masked when CI Docker images installed pytest system-wide;
+    # surfaces on every ``pip install --user`` setup. Diagnosis +
+    # reproducer in ``reports/sandbox_investigation.md``.
     return {
         "runner": "pytest",
-        "test_cmd": ["pytest", "-q", "--tb=line", *test_files],
+        "test_cmd": [
+            sys.executable,
+            "-m",
+            "pytest",
+            "-q",
+            "--tb=line",
+            *test_files,
+        ],
         "expected_exit": 0,
         "timeout_s": float(timeout_s),
     }
