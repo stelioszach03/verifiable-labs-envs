@@ -384,6 +384,188 @@ class DatasetDownloadResponse(BaseModel):
     output_format: DatasetOutputFormat
 
 
+# ── Phase 28 — continuous capability monitoring ─────────────────────
+
+
+MonitorCadence = Literal["daily", "weekly", "monthly"]
+MonitorStatus = Literal["active", "paused", "failed"]
+MonitorRunStatus = Literal["queued", "running", "success", "failed"]
+MonitorRunTrigger = Literal["scheduled", "manual"]
+MonitorRegressionVerdict = Literal["ok", "warning", "regressed"]
+MonitorAlertChannelType = Literal["email", "slack", "webhook"]
+
+
+class MonitorAlertChannel(BaseModel):
+    """One alert-dispatch channel attached to a monitor.
+
+    The Slack webhook URL is encrypted at rest at the row layer
+    (Phase 28.D); on the wire the customer supplies the plain URL,
+    and the response surface returns ``url_fingerprint`` only (first
+    8 hex chars of SHA-256). The same shape forward-extends for
+    PagerDuty / generic-webhook channels in v0.0.2.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    type: MonitorAlertChannelType
+    address: str | None = Field(
+        default=None,
+        description="Email recipient address (type=email).",
+        max_length=320,
+    )
+    webhook_url: str | None = Field(
+        default=None,
+        description="Slack webhook URL (type=slack).",
+        max_length=2_048,
+    )
+
+
+class MonitorAlertChannelInfo(BaseModel):
+    """Response-side projection — never includes raw secrets."""
+
+    type: MonitorAlertChannelType
+    address: str | None = None
+    webhook_url_fingerprint: str | None = Field(
+        default=None,
+        description="First 8 hex chars of SHA-256(webhook_url).",
+    )
+
+
+class MonitorCreateRequest(BaseModel):
+    """``POST /v1/monitors`` request body (Phase 28.B)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=128)
+    model_endpoint: str = Field(min_length=1, max_length=2_048)
+    model_name: str = Field(min_length=1, max_length=128)
+    auth_token: str = Field(min_length=1, max_length=4_096)
+    cadence: MonitorCadence
+    env_subset: list[str] = Field(min_length=1, max_length=25)
+    episodes_per_env: int = Field(ge=1, le=200)
+    alert_channels: list[MonitorAlertChannel] = Field(default_factory=list)
+
+
+class MonitorUpdateRequest(BaseModel):
+    """``PATCH /v1/monitors/{id}`` body — partial update (Phase 28.B)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: str | None = Field(default=None, min_length=1, max_length=128)
+    cadence: MonitorCadence | None = None
+    env_subset: list[str] | None = Field(default=None, min_length=1, max_length=25)
+    episodes_per_env: int | None = Field(default=None, ge=1, le=200)
+    alert_channels: list[MonitorAlertChannel] | None = None
+    auth_token: str | None = Field(default=None, min_length=1, max_length=4_096)
+    status: MonitorStatus | None = None
+    rebaseline: bool | None = None
+
+
+class MonitorCreateResponse(BaseModel):
+    """``POST /v1/monitors`` response (Phase 28.B)."""
+
+    monitor_id: str
+    name: str
+    status: MonitorStatus
+    cadence: MonitorCadence
+    next_run_at: datetime
+    auth_token_fingerprint: str
+    projected_monthly_episodes: int
+    tier_limit_episodes: int
+    created_at: datetime
+
+
+class MonitorResponse(BaseModel):
+    """``GET /v1/monitors/{id}`` response (Phase 28.B)."""
+
+    monitor_id: str
+    name: str
+    model_endpoint: str
+    model_name: str
+    auth_token_fingerprint: str
+    cadence: MonitorCadence
+    env_subset: list[str]
+    episodes_per_env: int
+    alert_channels: list[MonitorAlertChannelInfo]
+    status: MonitorStatus
+    retention_days: int
+    baseline_run_id: str | None
+    created_at: datetime
+    updated_at: datetime
+    last_run_at: datetime | None
+    next_run_at: datetime
+    projected_monthly_episodes: int
+
+
+class MonitorSummary(BaseModel):
+    """List-view row for ``GET /v1/monitors`` (Phase 28.B)."""
+
+    monitor_id: str
+    name: str
+    model_name: str
+    cadence: MonitorCadence
+    status: MonitorStatus
+    env_subset: list[str]
+    episodes_per_env: int
+    last_run_at: datetime | None
+    next_run_at: datetime
+    created_at: datetime
+
+
+class MonitorList(BaseModel):
+    """``GET /v1/monitors`` response."""
+
+    items: list[MonitorSummary]
+    total: int
+    limit: int
+    offset: int
+
+
+class MonitorRunSummary(BaseModel):
+    """List-view row for ``GET /v1/monitors/{id}/runs`` (Phase 28.E).
+
+    Surfaced in 28.B as the basic shape; the run lifecycle (status
+    transitions, summary stats, verdict) lands as the worker
+    integration in 28.C.
+    """
+
+    monitor_run_id: str
+    monitor_id: str
+    scheduled_at: datetime
+    started_at: datetime | None
+    finished_at: datetime | None
+    status: MonitorRunStatus
+    regression_verdict: MonitorRegressionVerdict | None
+    trigger: MonitorRunTrigger
+    cost_usd_estimate: float | None
+
+
+class MonitorRunResponse(BaseModel):
+    """``GET /v1/monitors/{id}/runs/{rid}`` response (Phase 28.E)."""
+
+    monitor_run_id: str
+    monitor_id: str
+    scheduled_at: datetime
+    started_at: datetime | None
+    finished_at: datetime | None
+    status: MonitorRunStatus
+    summary_stats: dict[str, Any] | None
+    regression_verdict: MonitorRegressionVerdict | None
+    verdict_payload: dict[str, Any] | None
+    pdf_url: str | None
+    pdf_sha256: str | None
+    cost_usd_estimate: float | None
+    error: str | None
+    trigger: MonitorRunTrigger
+
+
+class MonitorRunList(BaseModel):
+    items: list[MonitorRunSummary]
+    total: int
+    limit: int
+    offset: int
+
+
 # ── Stage B: billing + key management schemas ────────────────────────
 
 
@@ -497,5 +679,22 @@ __all__ = [
     "DatasetJobResponse",
     "DatasetJobSummary",
     "DatasetJobList",
+    "MonitorCadence",
+    "MonitorStatus",
+    "MonitorRunStatus",
+    "MonitorRunTrigger",
+    "MonitorRegressionVerdict",
+    "MonitorAlertChannelType",
+    "MonitorAlertChannel",
+    "MonitorAlertChannelInfo",
+    "MonitorCreateRequest",
+    "MonitorUpdateRequest",
+    "MonitorCreateResponse",
+    "MonitorResponse",
+    "MonitorSummary",
+    "MonitorList",
+    "MonitorRunSummary",
+    "MonitorRunResponse",
+    "MonitorRunList",
     "DatasetDownloadResponse",
 ]

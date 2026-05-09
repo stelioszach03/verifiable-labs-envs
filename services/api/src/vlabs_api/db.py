@@ -27,8 +27,10 @@ from sqlalchemy import (
     Index,
     Integer,
     LargeBinary,
+    Numeric,
     String,
     Text,
+    UniqueConstraint,
     text,
 )
 from sqlalchemy.dialects.postgresql import JSONB, UUID
@@ -336,6 +338,196 @@ class DatasetJob(Base):
     )
 
 
+class Monitor(Base):
+    """Continuous-capability monitor configuration (Phase 28.B).
+
+    PHASE_28_PLAN.md §6 schema. The customer-supplied LLM auth token
+    is encrypted at rest via the existing Fernet helper
+    (:mod:`vlabs_api.llm_key_crypto`); the ``auth_token_fingerprint``
+    is the first 8 hex chars of SHA-256(plaintext) — surfaced as the
+    "is this the key I think it is?" UX without leaking the token.
+
+    Cadence semantics (D3-A): one of ``daily | weekly | monthly``.
+    The scheduler tick (Phase 28.C) reads ``next_run_at`` to decide
+    when to fire. ``status='paused'`` rows are skipped; ``failed``
+    rows wait for explicit re-activation.
+    """
+
+    __tablename__ = "monitors"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    api_key_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("api_keys.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    model_endpoint: Mapped[str] = mapped_column(Text, nullable=False)
+    model_name: Mapped[str] = mapped_column(Text, nullable=False)
+    auth_token_encrypted: Mapped[bytes] = mapped_column(
+        LargeBinary, nullable=False
+    )
+    auth_token_fingerprint: Mapped[str] = mapped_column(Text, nullable=False)
+    cadence: Mapped[str] = mapped_column(Text, nullable=False)
+    env_subset: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
+    episodes_per_env: Mapped[int] = mapped_column(Integer, nullable=False)
+    alert_channels: Mapped[list[dict[str, Any]]] = mapped_column(
+        JSONB, nullable=False, default=list
+    )
+    # The FK from monitors.baseline_run_id → monitor_runs.id creates a
+    # circular dependency at the SQLAlchemy metadata level (monitor_runs
+    # already FKs back to monitors). The Alembic migration adds the FK
+    # via a separate ALTER TABLE statement after both tables exist (see
+    # 0005_add_monitors.py) — at the ORM level we keep this as a plain
+    # UUID column so Base.metadata.create_all/drop_all in tests doesn't
+    # trip on the cycle.
+    baseline_run_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=True,
+    )
+    status: Mapped[str] = mapped_column(Text, nullable=False, default="active")
+    retention_days: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=90
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=_now_utc
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=_now_utc
+    )
+    last_run_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    next_run_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "cadence IN ('daily','weekly','monthly')",
+            name="monitors_cadence_check",
+        ),
+        CheckConstraint(
+            "status IN ('active','paused','failed')",
+            name="monitors_status_check",
+        ),
+        Index("monitors_user_idx", "user_id", "created_at"),
+        Index(
+            "monitors_next_run_idx",
+            "next_run_at",
+            postgresql_where=text("status='active'"),
+        ),
+    )
+
+
+class MonitorRun(Base):
+    """One firing instance of a monitor (Phase 28.B).
+
+    Created by the scheduler tick (Phase 28.C); transitions
+    ``queued → running → success | failed``. The
+    ``UNIQUE(monitor_id, scheduled_at)`` constraint blocks
+    duplicate-enqueue races (R10 mitigation).
+    """
+
+    __tablename__ = "monitor_runs"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    monitor_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("monitors.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    scheduled_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
+    started_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    finished_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    status: Mapped[str] = mapped_column(Text, nullable=False, default="queued")
+    summary_stats: Mapped[dict[str, Any] | None] = mapped_column(
+        JSONB, nullable=True
+    )
+    regression_verdict: Mapped[str | None] = mapped_column(Text, nullable=True)
+    verdict_payload: Mapped[dict[str, Any] | None] = mapped_column(
+        JSONB, nullable=True
+    )
+    pdf_storage_key: Mapped[str | None] = mapped_column(Text, nullable=True)
+    pdf_sha256: Mapped[str | None] = mapped_column(Text, nullable=True)
+    cost_usd_estimate: Mapped[float | None] = mapped_column(
+        Numeric(10, 4), nullable=True
+    )
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    trigger: Mapped[str] = mapped_column(
+        Text, nullable=False, default="scheduled"
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('queued','running','success','failed')",
+            name="monitor_runs_status_check",
+        ),
+        CheckConstraint(
+            "regression_verdict IS NULL OR "
+            "regression_verdict IN ('ok','warning','regressed')",
+            name="monitor_runs_verdict_check",
+        ),
+        CheckConstraint(
+            "trigger IN ('scheduled','manual')",
+            name="monitor_runs_trigger_check",
+        ),
+        UniqueConstraint(
+            "monitor_id", "scheduled_at",
+            name="monitor_runs_idempotency",
+        ),
+        Index("monitor_runs_monitor_idx", "monitor_id", "scheduled_at"),
+        Index("monitor_runs_status_idx", "status", "scheduled_at"),
+    )
+
+
+class MonitorAlert(Base):
+    """Per-channel alert delivery row (Phase 28.D)."""
+
+    __tablename__ = "monitor_alerts"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    monitor_run_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("monitor_runs.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    channel: Mapped[str] = mapped_column(Text, nullable=False)
+    dispatched_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    delivered_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    delivery_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    retry_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    __table_args__ = (
+        CheckConstraint(
+            "channel IN ('email','slack','webhook')",
+            name="monitor_alerts_channel_check",
+        ),
+        Index("monitor_alerts_run_idx", "monitor_run_id"),
+    )
+
+
 class StripeEvent(Base):
     __tablename__ = "stripe_events"
 
@@ -450,6 +642,9 @@ __all__ = [
     "UsageCounter",
     "AuditCall",
     "DatasetJob",
+    "Monitor",
+    "MonitorRun",
+    "MonitorAlert",
     "StripeEvent",
     "Subscription",
     "init_engine",

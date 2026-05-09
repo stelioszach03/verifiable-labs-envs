@@ -156,6 +156,52 @@ class DatasetJobInvalidState(APIError):
     title = "operation not valid for job state"
 
 
+class MonitorNotFound(APIError):
+    """Phase 28.B — monitor_id not found or not owned by the caller."""
+
+    status_code = 404
+    code = "monitor_not_found"
+    title = "no monitor with this id is owned by this API key"
+
+
+class MonitorRunNotFound(APIError):
+    """Phase 28.B — monitor_run_id not found or not owned by the caller."""
+
+    status_code = 404
+    code = "monitor_run_not_found"
+    title = "no monitor run with this id is owned by this API key"
+
+
+class MonitorTierExceeded(APIError):
+    """Phase 28.B — monitor creation rejected by tier-cap pre-flight.
+
+    Distinct from generic :class:`QuotaExceeded` (which counts monthly
+    usage) — this fires at create-time when the new monitor's projected
+    monthly load would exceed the tier ceiling, or when the user's
+    active-monitor count is already at ``monitors_max``.
+    """
+
+    status_code = 402
+    code = "monitor_tier_exceeded"
+    title = "monitor would exceed tier cap"
+
+
+class MonitorInvalidState(APIError):
+    """Phase 28.B — operation not valid for the monitor's current state."""
+
+    status_code = 409
+    code = "monitor_invalid_state"
+    title = "operation not valid for monitor state"
+
+
+class MonitorNameConflict(APIError):
+    """Phase 28.B — duplicate monitor name within a single user."""
+
+    status_code = 409
+    code = "monitor_name_conflict"
+    title = "a monitor with this name already exists for this user"
+
+
 class RateLimited(APIError):
     status_code = 429
     code = "rate_limited"
@@ -256,6 +302,11 @@ __all__ = [
     "BudgetExceeded",
     "R2StorageError",
     "DatasetJobInvalidState",
+    "MonitorNotFound",
+    "MonitorRunNotFound",
+    "MonitorTierExceeded",
+    "MonitorInvalidState",
+    "MonitorNameConflict",
     "RateLimited",
     "InvalidClerkToken",
     "WebhookSignatureInvalid",

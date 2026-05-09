@@ -28,6 +28,7 @@ from vlabs_api.routes import (
     health,
     instance,
     keys,
+    monitors,
     predict,
     score,
     score_audit,
@@ -118,6 +119,11 @@ def create_app() -> FastAPI:
     # Counts against tuples_per_month tier quota; idempotent re-issues
     # of POST /v1/datasets do not increment the counter.
     app.include_router(datasets.router, prefix="/v1")
+    # Phase 28 — continuous capability monitoring. Long-lived monitor
+    # configurations + scheduled audit runs against customer endpoints.
+    # Counts against monitors_max + monitor_envs_max + monitor_episodes_max
+    # tier caps (PHASE_28_PLAN.md §5 D8-C).
+    app.include_router(monitors.router, prefix="/v1")
     # Management plane — Clerk JWT auth, billing + key issuance
     app.include_router(keys.router, prefix="/v1")
     app.include_router(billing.router, prefix="/v1")

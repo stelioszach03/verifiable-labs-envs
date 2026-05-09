@@ -59,6 +59,33 @@ def tier_tuples_limit(tier: Tier) -> int:
     }[tier]
 
 
+def tier_monitor_caps(tier: Tier) -> tuple[int, int, int]:
+    """Return ``(monitors_max, monitor_envs_max, monitor_episodes_max)``.
+
+    Phase 28 D8-C ruling: continuous-monitoring tier caps are enforced
+    at create-time on ``POST /v1/monitors``. Triple is ``(active monitor
+    count cap, env subset size cap, episodes per env cap)``.
+    """
+    t: TierLimits = get_settings().tiers
+    return {
+        "free": (
+            t.free_monitors_max,
+            t.free_monitor_envs_max,
+            t.free_monitor_episodes_max,
+        ),
+        "pro": (
+            t.pro_monitors_max,
+            t.pro_monitor_envs_max,
+            t.pro_monitor_episodes_max,
+        ),
+        "team": (
+            t.team_monitors_max,
+            t.team_monitor_envs_max,
+            t.team_monitor_episodes_max,
+        ),
+    }[tier]
+
+
 async def resolve_tier(session: AsyncSession, user_id: uuid.UUID) -> Tier:
     """Look up the user's effective tier from active subscriptions."""
     stmt = (
@@ -190,6 +217,7 @@ __all__ = [
     "tier_limits",
     "tier_scores_limit",
     "tier_tuples_limit",
+    "tier_monitor_caps",
     "resolve_tier",
     "get_current_counter",
     "increment_counter",

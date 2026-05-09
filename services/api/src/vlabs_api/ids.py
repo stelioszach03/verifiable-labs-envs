@@ -8,11 +8,19 @@ from __future__ import annotations
 
 import uuid
 
-from vlabs_api.errors import AuditCallNotFound, CalibrationNotFound, DatasetJobNotFound
+from vlabs_api.errors import (
+    AuditCallNotFound,
+    CalibrationNotFound,
+    DatasetJobNotFound,
+    MonitorNotFound,
+    MonitorRunNotFound,
+)
 
 CALIBRATION_PREFIX = "cal_"
 AUDIT_PREFIX = "aud_"
 DATASET_PREFIX = "ds_"
+MONITOR_PREFIX = "mon_"
+MONITOR_RUN_PREFIX = "mr_"
 
 
 def encode_calibration_id(uid: uuid.UUID) -> str:
@@ -71,14 +79,52 @@ def parse_dataset_id(s: str) -> uuid.UUID:
         raise DatasetJobNotFound(detail=f"invalid dataset_id: {s!r}") from exc
 
 
+def encode_monitor_id(uid: uuid.UUID) -> str:
+    """Phase 28.B — public ID for ``monitors`` rows."""
+    return f"{MONITOR_PREFIX}{uid.hex}"
+
+
+def parse_monitor_id(s: str) -> uuid.UUID:
+    """Phase 28.B — inverse of :func:`encode_monitor_id`."""
+    raw = s[len(MONITOR_PREFIX):] if s.startswith(MONITOR_PREFIX) else s
+    try:
+        return uuid.UUID(raw)
+    except (ValueError, AttributeError) as exc:
+        raise MonitorNotFound(detail=f"invalid monitor_id: {s!r}") from exc
+
+
+def encode_monitor_run_id(uid: uuid.UUID) -> str:
+    """Phase 28.B — public ID for ``monitor_runs`` rows."""
+    return f"{MONITOR_RUN_PREFIX}{uid.hex}"
+
+
+def parse_monitor_run_id(s: str) -> uuid.UUID:
+    """Phase 28.B — inverse of :func:`encode_monitor_run_id`."""
+    raw = (
+        s[len(MONITOR_RUN_PREFIX):]
+        if s.startswith(MONITOR_RUN_PREFIX)
+        else s
+    )
+    try:
+        return uuid.UUID(raw)
+    except (ValueError, AttributeError) as exc:
+        raise MonitorRunNotFound(detail=f"invalid monitor_run_id: {s!r}") from exc
+
+
 __all__ = [
     "CALIBRATION_PREFIX",
     "AUDIT_PREFIX",
     "DATASET_PREFIX",
+    "MONITOR_PREFIX",
+    "MONITOR_RUN_PREFIX",
     "encode_calibration_id",
     "parse_calibration_id",
     "encode_audit_id",
     "parse_audit_id",
     "encode_dataset_id",
     "parse_dataset_id",
+    "encode_monitor_id",
+    "parse_monitor_id",
+    "encode_monitor_run_id",
+    "parse_monitor_run_id",
 ]

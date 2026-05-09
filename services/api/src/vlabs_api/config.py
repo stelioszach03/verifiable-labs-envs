@@ -38,6 +38,18 @@ class TierLimits(BaseSettings):
     free_tuples_per_month: int = 1_000
     pro_tuples_per_month: int = 100_000
     team_tuples_per_month: int = 1_000_000
+    # Phase 28.B — continuous monitoring tier caps (PHASE_28_PLAN.md
+    # §5 D8-C / §12). Active-monitor count + per-monitor envs +
+    # episodes are all enforced at POST /v1/monitors create-time.
+    free_monitors_max: int = 1
+    free_monitor_envs_max: int = 1
+    free_monitor_episodes_max: int = 10
+    pro_monitors_max: int = 3
+    pro_monitor_envs_max: int = 3
+    pro_monitor_episodes_max: int = 30
+    team_monitors_max: int = 10
+    team_monitor_envs_max: int = 5
+    team_monitor_episodes_max: int = 50
 
 
 class Settings(BaseSettings):
