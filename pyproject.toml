@@ -89,6 +89,35 @@ verifiable = "verifiable_labs_envs.cli:main"
 [tool.hatch.build.targets.wheel]
 packages = ["src/verifiable_labs_envs", "src/verifiable_labs_api"]
 
+# Sdist: tight inclusion list — ship only what `pip install` actually
+# needs (SDK source + license + readme + project metadata). The
+# repo also carries 1.3 GB of services/, multi-MB calibration_data,
+# pre-built fixtures and per-version snapshots; without an explicit
+# include list hatchling pulls all tracked files and the resulting
+# sdist exceeds PyPI's 100 MB per-file cap (we hit 223 MB on the
+# 0.1.0a2 first attempt). This block keeps the sdist functionally
+# equivalent to the wheel.
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/verifiable_labs_envs/**/*.py",
+    "src/verifiable_labs_envs/py.typed",
+    "src/verifiable_labs_api/**/*.py",
+    "src/verifiable_labs_api/py.typed",
+    "LICENSE",
+    "README.md",
+    "pyproject.toml",
+]
+exclude = [
+    "**/__pycache__",
+    "**/*.pyc",
+    "**/.DS_Store",
+    "**/calibration_data/**",
+    "**/v0.0.1/**",
+    "**/fixtures/**",
+    "**/runs_local/**",
+    "**/wandb/**",
+]
+
 [tool.pytest.ini_options]
 testpaths = [
     "tests",
