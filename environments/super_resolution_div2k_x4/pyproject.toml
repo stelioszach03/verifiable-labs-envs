@@ -1,7 +1,8 @@
 [project]
 name = "super-resolution-div2k-x4"
+tags = ["scientific-reasoning", "super-resolution", "imaging", "rlvr"]
 description = "4× single-image super-resolution with a bicubic baseline."
-version = "0.2.1"
+version = "0.2.2"
 requires-python = ">=3.11"
 dependencies = [
     # verifiers>=0.1.12 (not >=0.1.13): the 0.1.13 line is dev-only at
@@ -29,3 +30,6 @@ include = ["super_resolution_div2k_x4.py", "pyproject.toml"]
 [tool.verifiers.eval]
 num_examples = 5
 rollouts_per_example = 3
+
+[tool.hatch.build.targets.wheel]
+include = ["super_resolution_div2k_x4.py"]
