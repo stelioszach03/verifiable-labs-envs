@@ -125,3 +125,8 @@ LICENSE [0-9]
 # in framework version digits (iso_42001.md, soc2.md). The wildcard
 # above otherwise sweeps them out.
 !docs/standards/*.md
+# Track A preflight — smoke scripts + tests deliberately end in phase
+# numbers (smoke_phase29_*.py, test_smoke_phase29.py, etc.). The
+# *[0-9].py wildcard above otherwise sweeps them out.
+!scripts/preflight/*.py
+!tests/preflight/*.py
