@@ -211,8 +211,36 @@ def judge(
         raise typer.Exit(code=2)
 
     api_key = resolve_api_key()
-    if force_stub or not is_phase29_collect_frontier_enabled():
-        typer.echo("using stub_judge_caller (offline / gates not met)")
+    # The is_phase29_collect_frontier_enabled() gate AND-s the env
+    # flag with API-key presence, so when the user sets the flag but
+    # forgets to export the key the gate silently returns False and
+    # the run drops into stub mode without warning. That's surprising:
+    # the user saying "VLABS_PHASE29_COLLECT_FRONTIER=1" has explicitly
+    # opted in, so we must hard-fail rather than emit fake stub
+    # "judgments" labelled as if they were live. Inline the flag check
+    # so the abort branch is reachable.
+    flag_raw = os.environ.get("VLABS_PHASE29_COLLECT_FRONTIER", "").strip().lower()
+    flag_set = flag_raw in {"1", "true", "yes", "on"}
+
+    if force_stub:
+        typer.echo("using stub_judge_caller (--force-stub)")
+        results = sample_frontier_judgments(
+            rows,
+            fraction=float(fraction),
+            judge_model=judge_model,
+            api_key="<stub>",
+            judge_caller=stub_judge_caller,
+            seed=int(seed),
+            max_rows=int(max_rows),
+        )
+    elif flag_set and not api_key:
+        typer.echo(
+            "ABORT: VLABS_PHASE29_COLLECT_FRONTIER=1 but no OPENROUTER_API_KEY.",
+            err=True,
+        )
+        raise typer.Exit(code=2)
+    elif not is_phase29_collect_frontier_enabled():
+        typer.echo("using stub_judge_caller (offline / gate not enabled)")
         results = sample_frontier_judgments(
             rows,
             fraction=float(fraction),
@@ -223,9 +251,6 @@ def judge(
             max_rows=int(max_rows),
         )
     else:
-        if not api_key:
-            typer.echo("ABORT: VLABS_PHASE29_COLLECT_FRONTIER=1 but no API key.", err=True)
-            raise typer.Exit(code=2)
         results = sample_frontier_judgments(
             rows,
             fraction=float(fraction),
