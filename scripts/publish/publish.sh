@@ -27,6 +27,19 @@ set -uo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 DIST_ROOT="${REPO_ROOT}/dist/publish"
 
+# Auto-source ~/.vlabs-secrets/pypi-tokens.env (written by
+# scripts/publish/_save_pypi_tokens.sh) when the env vars aren't
+# already set. Lets non-interactive callers (CI, agent runs) pick
+# up tokens written once + persisted with chmod 600.
+_TOKENS_FILE="${HOME}/.vlabs-secrets/pypi-tokens.env"
+if [ -f "$_TOKENS_FILE" ]; then
+    if [ -z "${PYPI_API_TOKEN:-}" ] || [ -z "${TEST_PYPI_API_TOKEN:-}" ]; then
+        # shellcheck disable=SC1090
+        set -a; . "$_TOKENS_FILE"; set +a
+    fi
+fi
+unset _TOKENS_FILE
+
 # ── arg parsing ──────────────────────────────────────────────────
 
 MODE=""           # test | prod | dry-run | list

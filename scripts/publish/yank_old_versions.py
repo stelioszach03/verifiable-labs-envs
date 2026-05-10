@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -41,6 +42,30 @@ helpers = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = helpers
 assert spec.loader is not None
 spec.loader.exec_module(helpers)
+
+
+def _maybe_load_persisted_tokens() -> None:
+    """Auto-source ~/.vlabs-secrets/pypi-tokens.env when env vars
+    aren't already set. Mirrors the auto-source logic in publish.sh
+    so non-interactive runs can pick up tokens written once via
+    ``scripts/publish/_save_pypi_tokens.sh``."""
+    path = Path.home() / ".vlabs-secrets" / "pypi-tokens.env"
+    if not path.is_file():
+        return
+    if os.environ.get("PYPI_API_TOKEN") and os.environ.get("TEST_PYPI_API_TOKEN"):
+        return
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, _, v = line.partition("=")
+        k = k.strip()
+        v = v.strip().strip("'").strip('"')
+        if k and v and not os.environ.get(k):
+            os.environ[k] = v
+
+
+_maybe_load_persisted_tokens()
 
 
 # Per the PyPI legacy upload API (https://upload.pypi.org/legacy/),
