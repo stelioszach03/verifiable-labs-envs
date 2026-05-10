@@ -1,0 +1,14 @@
+{
+  "n_traces": 120,
+  "n_steps": 120,
+  "n_traces_with_step_judgments": 28,
+  "by_source": {
+    "env": 92,
+    "judgment": 28
+  },
+  "schema_version": "v0.0.1",
+  "files": {
+    "jsonl": "dataset/prm-dataset-v0.0.1.jsonl",
+    "parquet": "dataset/prm-dataset-v0.0.1.parquet"
+  }
+}
