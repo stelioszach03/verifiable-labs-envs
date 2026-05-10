@@ -44,6 +44,15 @@ jobs:
           pip install -e "services/api[dev]"
           # Editable audit tool so tools/vlabs-audit/tests are runnable.
           pip install -e "tools/vlabs-audit[dev]"
+          # Phase 29 / 30 dataset + training tooling — pytest collects
+          # tests from these dirs (see pyproject.toml testpaths), so the
+          # editable installs are required for ModuleNotFoundError to
+          # stay quiet at collection time.
+          pip install -e tools/vlabs-reward-data
+          pip install -e tools/vlabs-reward-train
+          pip install -e tools/vlabs-prm-data
+          pip install -e tools/vlabs-prm-train
+          pip install -e tools/vlabs-prm-eval
 
       - name: Install tectonic (Linux only — vlabs-audit LaTeX integration)
         if: runner.os == 'Linux'
