@@ -31,6 +31,10 @@ dependencies = [
     "openai>=1.50",
     "python-dotenv>=1.0",
     "matplotlib>=3.9",
+    # Lazy-imported by long_context_primitives; lives in root deps so
+    # pytest collection of the long-context env tests stays clean
+    # without forcing every consumer to add a separate sub-package.
+    "tiktoken>=0.5",
 ]
 
 [project.optional-dependencies]
