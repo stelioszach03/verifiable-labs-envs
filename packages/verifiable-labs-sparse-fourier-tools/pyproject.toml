@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling>=1.24"]
+requires = ["hatchling>=1.24,<1.27"]
 build-backend = "hatchling.build"
 
 [project]
@@ -8,7 +8,7 @@ version = "0.3.1"
 description = "Tool-use sparse Fourier recovery — primitive composition (fft, ifft, threshold, compute_residual, sparsity_norm). No solver oracle."
 readme = "README.md"
 requires-python = ">=3.11"
-license = { file = "LICENSE" }
+license = { text = "Apache-2.0" }
 authors = [{ name = "Stelios Zacharioudakis" }]
 keywords = ["reinforcement-learning", "inverse-problems", "rlvr", "evaluation", "scientific-ml"]
 classifiers = [
