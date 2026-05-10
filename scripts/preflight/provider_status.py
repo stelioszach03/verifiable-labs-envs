@@ -62,6 +62,22 @@ def _http_get(url: str, headers: dict[str, str], timeout: float) -> tuple[int, d
         return r.status_code, r.text
 
 
+def _http_post(
+    url: str, headers: dict[str, str], json_body: dict, timeout: float
+) -> tuple[int, dict | str]:
+    """Single sync POST — returns (status_code, parsed_body_or_text).
+
+    Used by the W&B probe (``/graphql`` is POST-only). Mirror seam
+    of :func:`_http_get` for the test harness."""
+    import httpx
+
+    r = httpx.post(url, headers=headers, json=json_body, timeout=timeout)
+    try:
+        return r.status_code, r.json()
+    except Exception:
+        return r.status_code, r.text
+
+
 def probe_vultr(token: str, timeout: float = DEFAULT_TIMEOUT) -> ProviderResult:
     code, body = _http_get(
         "https://api.vultr.com/v2/account",
@@ -131,16 +147,27 @@ def probe_hf(token: str, timeout: float = DEFAULT_TIMEOUT) -> ProviderResult:
 
 
 def probe_wandb(token: str, timeout: float = DEFAULT_TIMEOUT) -> ProviderResult:
-    code, body = _http_get(
-        "https://api.wandb.ai/graphql",
-        {"Authorization": f"Bearer api:{token}"},
-        timeout,
-    )
-    if code in (401, 403):
-        return ProviderResult("wandb", "unauth", None, None, str(body))
-    if code >= 500:
-        return ProviderResult("wandb", "error", None, None, f"http {code}")
-    return ProviderResult("wandb", "ok", None, False)
+    """Auth-ping wandb.ai. The ``/graphql`` endpoint is POST-only and
+    expects a query body, so a bare GET returns 4xx regardless of the
+    auth header. Sends a minimal ``{ viewer { username } }`` GraphQL
+    POST and tries both the modern ``Bearer {token}`` scheme (used by
+    Personal Access Tokens that start with ``wandb_``) and the legacy
+    ``Bearer api:{token}`` scheme (40-char hex API keys)."""
+    last_body: dict | str = ""
+    for header_value in (f"Bearer {token}", f"Bearer api:{token}"):
+        code, body = _http_post(
+            "https://api.wandb.ai/graphql",
+            {"Authorization": header_value},
+            {"query": "{ viewer { username } }"},
+            timeout,
+        )
+        last_body = body
+        if code == 200:
+            return ProviderResult("wandb", "ok", None, False)
+        if code >= 500:
+            return ProviderResult("wandb", "error", None, None, f"http {code}")
+    # Both schemes returned 4xx other than 200 — auth failed.
+    return ProviderResult("wandb", "unauth", None, None, str(last_body))
 
 
 def probe_openrouter(token: str, timeout: float = DEFAULT_TIMEOUT) -> ProviderResult:

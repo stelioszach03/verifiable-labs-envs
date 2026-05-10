@@ -118,12 +118,38 @@ def test_probe_hf_unauth(ps, monkeypatch) -> None:
 
 
 def test_probe_wandb_ok(ps, monkeypatch) -> None:
-    def _stub(url, headers, timeout):
-        return 200, {"data": {"viewer": {"name": "stelios"}}}
+    """Modern ``Bearer {token}`` scheme returns 200 from /graphql POST.
 
-    monkeypatch.setattr(ps, "_http_get", _stub)
+    Note that probe_wandb uses ``_http_post`` (not ``_http_get``) for
+    the W&B endpoint because /graphql is POST-only — see provider_
+    status.py docstring."""
+
+    def _stub_post(url, headers, json_body, timeout):
+        assert "graphql" in url
+        assert headers["Authorization"].startswith("Bearer ")
+        assert json_body["query"] == "{ viewer { username } }"
+        return 200, {"data": {"viewer": {"username": "stelios"}}}
+
+    monkeypatch.setattr(ps, "_http_post", _stub_post)
     r = ps.probe_wandb("token")
     assert r.status == "ok"
+
+
+def test_probe_wandb_falls_back_legacy_scheme(ps, monkeypatch) -> None:
+    """First call (modern Bearer) 401, second call (legacy Bearer
+    api:) 200 — probe_wandb returns ok."""
+    calls: list[str] = []
+
+    def _stub_post(url, headers, json_body, timeout):
+        calls.append(headers["Authorization"])
+        if headers["Authorization"].startswith("Bearer api:"):
+            return 200, {"data": {"viewer": {"username": "stelios"}}}
+        return 401, {"error": "Malformed token"}
+
+    monkeypatch.setattr(ps, "_http_post", _stub_post)
+    r = ps.probe_wandb("legacy-40-hex-key")
+    assert r.status == "ok"
+    assert len(calls) == 2  # tried modern first, then legacy
 
 
 def test_probe_openrouter_with_remaining_balance(ps, monkeypatch) -> None:
