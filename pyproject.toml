@@ -100,6 +100,7 @@ testpaths = [
     "tools/vlabs-reward-train/tests",
     "tools/vlabs-prm-data/tests",
     "tools/vlabs-prm-train/tests",
+    "tools/vlabs-prm-eval/tests",
 ]
 # --import-mode=importlib: required so multiple `tests/__init__.py` packages
 # (one per packages/* sub-package) don't collide on pytest's prepend importer.
