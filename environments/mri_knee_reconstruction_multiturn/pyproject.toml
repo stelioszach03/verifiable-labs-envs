@@ -1,7 +1,8 @@
 [project]
 name = "mri-knee-reconstruction-multiturn"
+tags = ["scientific-reasoning", "medical-imaging", "multiturn", "rlvr"]
 description = "3-turn MRI knee reconstruction with k-space-residual feedback between turns."
-version = "1.0.1"
+version = "1.0.2"
 requires-python = ">=3.11"
 dependencies = [
     # verifiers>=0.1.12 (not >=0.1.13): the 0.1.13 line is dev-only at
@@ -29,3 +30,6 @@ include = ["mri_knee_reconstruction_multiturn.py", "pyproject.toml"]
 [tool.verifiers.eval]
 num_examples = 5
 rollouts_per_example = 3
+
+[tool.hatch.build.targets.wheel]
+include = ["mri_knee_reconstruction_multiturn.py"]

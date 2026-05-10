@@ -1,7 +1,8 @@
 [project]
 name = "mri-knee-reconstruction"
+tags = ["scientific-reasoning", "medical-imaging", "mri", "rlvr"]
 description = "MRI knee reconstruction from 4x-undersampled Cartesian k-space with zero-filled-IFFT baseline and conformal σ̂."
-version = "1.0.1"
+version = "1.0.2"
 requires-python = ">=3.11"
 dependencies = [
     # verifiers>=0.1.12 (not >=0.1.13): the 0.1.13 line is dev-only at
@@ -29,3 +30,6 @@ include = ["mri_knee_reconstruction.py", "pyproject.toml"]
 [tool.verifiers.eval]
 num_examples = 5
 rollouts_per_example = 3
+
+[tool.hatch.build.targets.wheel]
+include = ["mri_knee_reconstruction.py"]

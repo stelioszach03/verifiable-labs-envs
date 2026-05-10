@@ -1,7 +1,8 @@
 [project]
 name = "long-context-reasoning"
+tags = ["long-context", "reasoning", "rlvr"]
 description = "Multi-hop reasoning over long documents (>10k tokens)."
-version = "0.1.2"
+version = "0.1.3"
 requires-python = ">=3.11"
 dependencies = [
     "verifiers>=0.1.12",
@@ -11,12 +12,13 @@ authors = [{ name = "Stelios Zacharioudakis" }]
 license = { text = "Apache-2.0" }
 
 [build-system]
-requires = ["setuptools>=64", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.setuptools]
-py-modules = ["long_context_reasoning"]
 
 [tool.verifiers.eval]
 module = "long_context_reasoning"
 factory = "load_environment"
+
+[tool.hatch.build.targets.wheel]
+include = ["long_context_reasoning.py"]
