@@ -37,8 +37,14 @@ from verifiable_labs_envs.sandbox.code_execution_sandbox import (
 )
 
 pytestmark = pytest.mark.skipif(
-    sys.platform != "linux",
-    reason="sandbox isolation requires Linux (rlimits + unshare).",
+    sys.platform != "linux" or not _unshare_available(),
+    reason=(
+        "sandbox isolation requires Linux + a kernel that allows "
+        "``unshare -rn`` (user-namespace creation). GitHub-hosted "
+        "ubuntu-latest runners ship the binary but the kernel rejects "
+        "uid_map writes inside the runner container — see the comment "
+        "on _unshare_available() in code_execution_sandbox.py."
+    ),
 )
 
 
