@@ -100,7 +100,9 @@ async def truncate_data(setup_db) -> AsyncIterator[None]:
     async with db._SessionFactory() as s:  # type: ignore[misc]
         await s.execute(
             text(
-                "TRUNCATE TABLE process_reward_model_runs, "
+                "TRUNCATE TABLE attestation_renewals, attestation_audits, "
+                "attestation_artifacts, attestations, "
+                "process_reward_model_runs, "
                 "process_reward_models, "
                 "reward_model_runs, reward_models, "
                 "monitor_alerts, monitor_runs, monitors, "

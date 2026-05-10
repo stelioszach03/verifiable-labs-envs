@@ -20,6 +20,7 @@ from vlabs_api.errors import APIError, to_problem_json
 from vlabs_api.redis_client import aclose as redis_aclose
 from vlabs_api.routes import (
     admin,
+    attestations,
     audit,
     billing,
     calibrate,
@@ -141,6 +142,11 @@ def create_app() -> FastAPI:
     # 30.G lands trained weights. Counts against
     # usage_counters.process_reward_scores_count.
     app.include_router(process_reward_models.router, prefix="/v1")
+    # Phase 31 — V-Certified attestation programme. 7 owner endpoints
+    # under /v1/attestations/* (X-Vlabs-Key auth). Public verification
+    # endpoints (registry / verify / badge / CRL) ship in 31.D as a
+    # separate router with IP-based rate limiting.
+    app.include_router(attestations.router, prefix="/v1")
     # Management plane — Clerk JWT auth, billing + key issuance
     app.include_router(keys.router, prefix="/v1")
     app.include_router(billing.router, prefix="/v1")

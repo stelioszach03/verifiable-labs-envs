@@ -637,6 +637,205 @@ class AdminDashboardResponse(BaseModel):
     billing_enabled: bool
 
 
+# ── V-Certified attestation programme (Phase 31.B) ──────────────────
+
+
+AttestationScopeType = Literal["model", "deployment", "organization"]
+AttestationTier = Literal["bronze", "silver", "gold"]
+AttestationStatus = Literal[
+    "draft",
+    "submitted",
+    "under_review",
+    "approved",
+    "revoked",
+    "expired",
+    "withdrawn",
+]
+AttestationCycle = Literal["annual", "continuous"]
+AttestationArtifactKind = Literal[
+    "training_doc",
+    "audit_report",
+    "monitor_record",
+    "rm_record",
+    "prm_record",
+    "change_mgmt",
+    "legal_signoff",
+    "third_party_audit",
+]
+AttestationStandardName = Literal[
+    "iso_42001",
+    "nist_ai_rmf",
+    "eu_ai_act",
+    "soc2",
+]
+AttestationAuditDecision = Literal[
+    "approve", "reject", "request_more", "revoke"
+]
+AttestationAuditorKind = Literal["self", "vlabs", "third_party"]
+
+
+class AttestationCreateRequest(BaseModel):
+    """``POST /v1/attestations`` request body.
+
+    Customer creates a draft attestation; can later attach artifacts
+    and submit. ``standards_requested`` is the subset of frameworks
+    the customer wants crosswalk-aligned in the eventual report;
+    must be a subset of the locked D8 enumeration.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    organization: str = Field(min_length=1, max_length=200)
+    scope_type: AttestationScopeType
+    scope_subject: str = Field(min_length=1, max_length=500)
+    tier: AttestationTier
+    cycle: AttestationCycle
+    standards_requested: list[AttestationStandardName] = Field(
+        default_factory=list
+    )
+
+
+class AttestationPatchRequest(BaseModel):
+    """``PATCH /v1/attestations/{id}`` request body.
+
+    All fields optional — only set the ones being mutated. ``action``
+    handles state transitions (``submit``, ``withdraw``).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    action: Literal["submit", "withdraw"] | None = None
+    organization: str | None = Field(default=None, min_length=1, max_length=200)
+    scope_subject: str | None = Field(default=None, min_length=1, max_length=500)
+    standards_requested: list[AttestationStandardName] | None = None
+
+
+class AttestationStandardsAlignment(BaseModel):
+    """Frozen-at-issuance crosswalk version snapshot (R1 mitigation)."""
+
+    standards: list[AttestationStandardName] = Field(default_factory=list)
+    crosswalk_version: str | None = None
+    framework_versions: dict[str, str] = Field(default_factory=dict)
+
+
+class AttestationInfo(BaseModel):
+    """Full owner-facing attestation record."""
+
+    model_config = ConfigDict(protected_namespaces=())
+
+    id: str
+    public_id: str
+    organization: str
+    scope_type: AttestationScopeType
+    scope_subject: str
+    tier: AttestationTier
+    status: AttestationStatus
+    cycle: AttestationCycle
+    issued_at: datetime | None = None
+    expires_at: datetime | None = None
+    revoked_at: datetime | None = None
+    revocation_reason: str | None = None
+    cert_serial: str | None = None
+    standards_alignment: AttestationStandardsAlignment = Field(
+        default_factory=AttestationStandardsAlignment
+    )
+    artifact_count: int = 0
+    created_at: datetime
+
+
+class AttestationSummary(BaseModel):
+    """Compact view used in paginated listings."""
+
+    model_config = ConfigDict(protected_namespaces=())
+
+    id: str
+    public_id: str
+    organization: str
+    scope_type: AttestationScopeType
+    scope_subject: str
+    tier: AttestationTier
+    status: AttestationStatus
+    cycle: AttestationCycle
+    issued_at: datetime | None = None
+    expires_at: datetime | None = None
+    created_at: datetime
+
+
+class AttestationList(BaseModel):
+    items: list[AttestationSummary]
+    total: int
+    limit: int
+    offset: int
+
+
+class AttestationArtifactRequest(BaseModel):
+    """Metadata fields for ``POST /v1/attestations/{id}/artifacts``.
+
+    The actual file bytes travel as the JSON ``content_b64`` field
+    (base64-encoded). v0.0.1 uses a JSON body for simpler test
+    fixturing; v0.0.2 may switch to multipart/form-data for
+    large-file streaming.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    kind: AttestationArtifactKind
+    filename: str = Field(min_length=1, max_length=300)
+    content_b64: str = Field(min_length=1)
+    encrypted: bool = False
+
+
+class AttestationArtifactInfo(BaseModel):
+    """Returned by artifact-upload."""
+
+    id: str
+    attestation_id: str
+    kind: AttestationArtifactKind
+    storage_uri: str
+    sha256_hash: str
+    encrypted: bool
+    size_bytes: int
+    submitted_at: datetime
+
+
+class AttestationRenewalRequest(BaseModel):
+    """``POST /v1/attestations/{id}/renew`` body."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    idempotency_key: str | None = Field(default=None, max_length=200)
+
+
+class AttestationRenewalInfo(BaseModel):
+    """Returned by renewal-initiation endpoint."""
+
+    id: str
+    attestation_id: str
+    cycle_number: int
+    initiated_at: datetime
+    completed_at: datetime | None = None
+    new_cert_serial: str | None = None
+
+
+class AttestationRevokeRequest(BaseModel):
+    """``DELETE /v1/attestations/{id}`` body — JSON, not query string."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    revocation_reason: str = Field(min_length=1, max_length=1000)
+
+
+class AttestationAuditEntry(BaseModel):
+    """One row from the multi-party-audit trail (D12 / R6 transparency)."""
+
+    id: str
+    auditor_kind: AttestationAuditorKind
+    auditor_label: str | None = None
+    decision: AttestationAuditDecision
+    audit_summary: dict[str, Any] = Field(default_factory=dict)
+    decided_at: datetime
+
+
 # ── Process reward model service (Phase 30.E) ────────────────────────
 
 
@@ -998,4 +1197,24 @@ __all__ = [
     "ProcessRewardScoreBatchRequest",
     "ProcessRewardScoreBatchResponse",
     "ProcessRewardEvalsResponse",
+    "AttestationScopeType",
+    "AttestationTier",
+    "AttestationStatus",
+    "AttestationCycle",
+    "AttestationArtifactKind",
+    "AttestationStandardName",
+    "AttestationAuditDecision",
+    "AttestationAuditorKind",
+    "AttestationCreateRequest",
+    "AttestationPatchRequest",
+    "AttestationStandardsAlignment",
+    "AttestationInfo",
+    "AttestationSummary",
+    "AttestationList",
+    "AttestationArtifactRequest",
+    "AttestationArtifactInfo",
+    "AttestationRenewalRequest",
+    "AttestationRenewalInfo",
+    "AttestationRevokeRequest",
+    "AttestationAuditEntry",
 ]

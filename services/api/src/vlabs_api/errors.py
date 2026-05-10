@@ -267,6 +267,62 @@ class ProcessRewardTraceTooLong(APIError):
     title = "process reward trace exceeds max-steps cap"
 
 
+class AttestationNotFound(APIError):
+    """Phase 31.B — attestation id (or public_id) unknown / not owned
+    by the authenticated user."""
+
+    status_code = 404
+    code = "attestation_not_found"
+    title = "no attestation with this id is owned by this API key"
+
+
+class AttestationRevoked(APIError):
+    """Phase 31.B — operation rejected because the attestation is in
+    ``revoked`` status. Distinct from :class:`AttestationNotFound`
+    so customers know the attestation existed + when it was revoked."""
+
+    status_code = 410
+    code = "attestation_revoked"
+    title = "attestation has been revoked"
+
+
+class AttestationInvalidArtifact(APIError):
+    """Phase 31.B — uploaded artifact malformed (missing kind, empty,
+    too small, mismatched SHA-256, non-allowed file type)."""
+
+    status_code = 400
+    code = "attestation_invalid_artifact"
+    title = "uploaded artifact is malformed"
+
+
+class AttestationArtifactTooLarge(APIError):
+    """Phase 31.B — uploaded artifact exceeds the 50 MB cap (D9)."""
+
+    status_code = 413
+    code = "attestation_artifact_too_large"
+    title = "uploaded artifact exceeds 50 MB limit"
+
+
+class AttestationStandardMismatch(APIError):
+    """Phase 31.B — requested standards crosswalk is not supported by
+    the V-Certified programme (must be subset of {iso_42001, nist_ai_rmf,
+    eu_ai_act, soc2})."""
+
+    status_code = 400
+    code = "attestation_standard_mismatch"
+    title = "requested standards alignment includes unsupported framework"
+
+
+class AttestationInvalidState(APIError):
+    """Phase 31.B — operation not valid for the attestation's current
+    status (e.g. submit on already-submitted, renew on draft, revoke
+    on not-yet-issued)."""
+
+    status_code = 409
+    code = "attestation_invalid_state"
+    title = "operation not valid for attestation state"
+
+
 class RateLimited(APIError):
     status_code = 429
     code = "rate_limited"
@@ -379,6 +435,12 @@ __all__ = [
     "ProcessRewardModelRetired",
     "ProcessRewardInvalidTrace",
     "ProcessRewardTraceTooLong",
+    "AttestationNotFound",
+    "AttestationRevoked",
+    "AttestationInvalidArtifact",
+    "AttestationArtifactTooLarge",
+    "AttestationStandardMismatch",
+    "AttestationInvalidState",
     "RateLimited",
     "InvalidClerkToken",
     "WebhookSignatureInvalid",

@@ -195,6 +195,15 @@ class UsageCounter(Base):
     process_reward_scores_count: Mapped[int] = mapped_column(
         BigInteger, nullable=False, default=0
     )
+    # Phase 31.B — counts /v1/attestations/verify/* public verification
+    # calls. Public endpoints are unauthenticated so the per-key counter
+    # increments only when the verifying request carries a Vlabs key
+    # (e.g. a customer's compliance pipeline running attestation checks
+    # via their server-side credentials). Anonymous verifications go
+    # through Cloudflare + Redis caching and are not metered per-user.
+    attestation_verifications_count: Mapped[int] = mapped_column(
+        BigInteger, nullable=False, default=0
+    )
 
 
 class AuditCall(Base):
@@ -809,6 +818,237 @@ class ProcessRewardModelRun(Base):
     )
 
 
+class Attestation(Base):
+    """V-Certified attestation record (Phase 31.B).
+
+    PHASE_31_PLAN.md §6 schema. ``public_id`` is the short URL-safe
+    ``vl-<8-base32>`` identifier surfaced on the public verification
+    endpoint; ``id`` is the internal UUID. ``cert_serial`` is the
+    locked X.509 serial issued by the V-Certified Intermediate CA
+    (D5-A) on approval; NULL until issued + after revocation.
+    ``standards_alignment`` snapshots the crosswalk versions used at
+    issuance time (R1 mitigation — frozen for the lifetime of this
+    attestation regardless of upstream framework revisions).
+    """
+
+    __tablename__ = "attestations"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    public_id: Mapped[str] = mapped_column(
+        Text, nullable=False, unique=True
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    api_key_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("api_keys.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    organization: Mapped[str] = mapped_column(Text, nullable=False)
+    scope_type: Mapped[str] = mapped_column(Text, nullable=False)
+    scope_subject: Mapped[str] = mapped_column(Text, nullable=False)
+    tier: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(
+        Text, nullable=False, default="draft"
+    )
+    cycle: Mapped[str] = mapped_column(Text, nullable=False)
+    issued_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    revoked_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    revocation_reason: Mapped[str | None] = mapped_column(
+        Text, nullable=True
+    )
+    cert_serial: Mapped[str | None] = mapped_column(
+        Text, nullable=True, unique=True
+    )
+    standards_alignment: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=_now_utc
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "scope_type IN ('model','deployment','organization')",
+            name="attestations_scope_type_check",
+        ),
+        CheckConstraint(
+            "tier IN ('bronze','silver','gold')",
+            name="attestations_tier_check",
+        ),
+        CheckConstraint(
+            "status IN ('draft','submitted','under_review','approved',"
+            "'revoked','expired','withdrawn')",
+            name="attestations_status_check",
+        ),
+        CheckConstraint(
+            "cycle IN ('annual','continuous')",
+            name="attestations_cycle_check",
+        ),
+        Index("attestations_user_idx", "user_id", "created_at"),
+        Index("attestations_status_idx", "status"),
+        Index("attestations_tier_idx", "tier"),
+    )
+
+
+class AttestationArtifact(Base):
+    """One supporting evidence artifact for an attestation (Phase 31.B).
+
+    ``kind`` is the locked D9 enumeration. ``storage_uri`` points to
+    R2 (``r2://vlabs-attestations/<attestation_id>/<artifact_id>/``);
+    ``sha256_hash`` is computed at upload for tamper detection.
+    ``encrypted=true`` opts into Fernet encryption for sensitive
+    customer trade-secret artifacts (R11 mitigation).
+    """
+
+    __tablename__ = "attestation_artifacts"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    attestation_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("attestations.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    kind: Mapped[str] = mapped_column(Text, nullable=False)
+    storage_uri: Mapped[str] = mapped_column(Text, nullable=False)
+    sha256_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    encrypted: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False
+    )
+    size_bytes: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    submitted_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=_now_utc
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "kind IN ('training_doc','audit_report','monitor_record',"
+            "'rm_record','prm_record','change_mgmt','legal_signoff',"
+            "'third_party_audit')",
+            name="attestation_artifacts_kind_check",
+        ),
+        Index("attestation_artifacts_attestation_idx", "attestation_id"),
+    )
+
+
+class AttestationAudit(Base):
+    """Multi-party audit decision row for an attestation (Phase 31.B).
+
+    Each row is one auditor's decision recorded as part of the D12 +
+    R6 multi-party-approval trail. ``auditor_kind`` matches D10-D
+    tier mapping (``self`` for Bronze, ``vlabs`` for Silver,
+    ``third_party`` for Gold). ``audit_summary`` is a JSONB structured
+    record (artifact-by-artifact verdict + free-form notes).
+    Multi-signature revocation under §5 D12 condition 1 requires
+    ≥ 2 ``auditor_kind='vlabs'`` rows with ``decision='revoke'``.
+    """
+
+    __tablename__ = "attestation_audits"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    attestation_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("attestations.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    auditor_kind: Mapped[str] = mapped_column(Text, nullable=False)
+    auditor_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    auditor_label: Mapped[str | None] = mapped_column(Text, nullable=True)
+    audit_summary: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False
+    )
+    decision: Mapped[str] = mapped_column(Text, nullable=False)
+    decided_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=_now_utc
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "auditor_kind IN ('self','vlabs','third_party')",
+            name="attestation_audits_auditor_kind_check",
+        ),
+        CheckConstraint(
+            "decision IN ('approve','reject','request_more','revoke')",
+            name="attestation_audits_decision_check",
+        ),
+        Index(
+            "attestation_audits_attestation_idx",
+            "attestation_id",
+            "decided_at",
+        ),
+    )
+
+
+class AttestationRenewal(Base):
+    """One renewal cycle initiation for an attestation (Phase 31.B).
+
+    Records the lifecycle of a recertification (D3-B annual + D3-C
+    continuous monthly check). ``cycle_number`` is monotonic per
+    attestation. ``idempotency_key`` lets the client safely retry
+    ``POST /v1/attestations/{id}/renew`` within a 24 h window via
+    the same partial-unique-index pattern as Phase 23.
+    """
+
+    __tablename__ = "attestation_renewals"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    attestation_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("attestations.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    cycle_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    idempotency_key: Mapped[str | None] = mapped_column(
+        Text, nullable=True
+    )
+    initiated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=_now_utc
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    new_cert_serial: Mapped[str | None] = mapped_column(
+        Text, nullable=True
+    )
+
+    __table_args__ = (
+        Index(
+            "attestation_renewals_attestation_idx",
+            "attestation_id",
+            "cycle_number",
+        ),
+        Index(
+            "attestation_renewals_idempotency_idx",
+            "idempotency_key",
+            "attestation_id",
+            unique=True,
+            postgresql_where=text("idempotency_key IS NOT NULL"),
+        ),
+    )
+
+
 class StripeEvent(Base):
     __tablename__ = "stripe_events"
 
@@ -930,6 +1170,10 @@ __all__ = [
     "RewardModelRun",
     "ProcessRewardModel",
     "ProcessRewardModelRun",
+    "Attestation",
+    "AttestationArtifact",
+    "AttestationAudit",
+    "AttestationRenewal",
     "StripeEvent",
     "Subscription",
     "init_engine",
