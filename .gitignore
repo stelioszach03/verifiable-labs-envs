@@ -121,3 +121,7 @@ Icon
 *[0-9].md
 *[0-9].py
 LICENSE [0-9]
+# Phase 31.E — V-Certified standards crosswalk docs deliberately end
+# in framework version digits (iso_42001.md, soc2.md). The wildcard
+# above otherwise sweeps them out.
+!docs/standards/*.md

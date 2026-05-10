@@ -238,12 +238,27 @@ async def _issue_certificate_for_attestation(
 
 def _build_alignment(standards: Sequence[str]) -> dict[str, Any]:
     """Build the ``standards_alignment`` JSONB payload at issuance
-    time. Crosswalk_version stays NULL until 31.E ships the actual
-    crosswalks; 31.E backfills the version on issuance."""
+    time. ``crosswalk_version`` is the version locked when this
+    attestation was created — frozen for the lifetime of the
+    attestation per R1 mitigation, even if the upstream crosswalk
+    version subsequently bumps. ``framework_versions`` carries the
+    upstream framework versions current at issuance."""
+    from vlabs_api.standards import CROSSWALK_VERSION
+
+    framework_versions: dict[str, str] = {}
+    for s in standards:
+        if s == "iso_42001":
+            framework_versions["iso_42001"] = "ISO/IEC 42001:2023"
+        elif s == "nist_ai_rmf":
+            framework_versions["nist_ai_rmf"] = "1.0 (Jan 2023)"
+        elif s == "eu_ai_act":
+            framework_versions["eu_ai_act"] = "Regulation (EU) 2024/1689"
+        elif s == "soc2":
+            framework_versions["soc2"] = "TSC 2017 (with 2022 revisions)"
     return {
         "standards": list(standards),
-        "crosswalk_version": None,
-        "framework_versions": {},
+        "crosswalk_version": CROSSWALK_VERSION,
+        "framework_versions": framework_versions,
     }
 
 

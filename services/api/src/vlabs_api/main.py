@@ -20,6 +20,7 @@ from vlabs_api.errors import APIError, to_problem_json
 from vlabs_api.redis_client import aclose as redis_aclose
 from vlabs_api.routes import (
     admin,
+    admin_attestations,
     attestations,
     attestations_public,
     audit,
@@ -36,6 +37,7 @@ from vlabs_api.routes import (
     reward_models,
     score,
     score_audit,
+    standards,
     usage,
     webhook,
 )
@@ -151,6 +153,12 @@ def create_app() -> FastAPI:
     # are unauthenticated with per-IP rate limits (60-600 req/min/IP).
     app.include_router(attestations_public.router, prefix="/v1")
     app.include_router(attestations.router, prefix="/v1")
+    # Phase 31.E — public standards crosswalks endpoint + admin review
+    # board. Crosswalks are static frontend-friendly endpoints; the
+    # admin review-board endpoints sit under /v1/admin/attestations/*
+    # with Clerk + admin-allowlist gating.
+    app.include_router(standards.router, prefix="/v1")
+    app.include_router(admin_attestations.router, prefix="/v1")
     # Management plane — Clerk JWT auth, billing + key issuance
     app.include_router(keys.router, prefix="/v1")
     app.include_router(billing.router, prefix="/v1")

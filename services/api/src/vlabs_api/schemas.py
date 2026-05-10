@@ -836,6 +836,17 @@ class AttestationAuditEntry(BaseModel):
     decided_at: datetime
 
 
+class AttestationAdminDecisionRequest(BaseModel):
+    """``POST /v1/admin/attestations/{id}/decisions`` body (Phase 31.E)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    auditor_kind: AttestationAuditorKind
+    auditor_label: str | None = Field(default=None, max_length=200)
+    decision: AttestationAuditDecision
+    audit_summary: dict[str, Any] = Field(default_factory=dict)
+
+
 # ── Public verification (Phase 31.D) ─────────────────────────────────
 
 
@@ -1274,6 +1285,7 @@ __all__ = [
     "AttestationRenewalInfo",
     "AttestationRevokeRequest",
     "AttestationAuditEntry",
+    "AttestationAdminDecisionRequest",
     "AttestationPublicSummary",
     "AttestationPublicList",
     "AttestationPublicInfo",
