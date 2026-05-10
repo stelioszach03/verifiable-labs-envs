@@ -282,6 +282,68 @@ def summary(
     typer.echo(json.dumps(dataset_summary(rows), indent=2, sort_keys=True))
 
 
+@app.command("extract-rewardbench")
+def extract_rewardbench(
+    n: Annotated[
+        int,
+        typer.Option("--n", min=0, help="Number of preference pairs to pull."),
+    ] = 1500,
+    seed: Annotated[int, typer.Option("--seed", help="Sampling seed.")] = 0,
+    subset: Annotated[
+        str,
+        typer.Option(
+            "--subset",
+            help="RewardBench category filter, or 'all' for the full mix.",
+        ),
+    ] = "all",
+    output: Annotated[
+        Path,
+        typer.Option("--output", "-o", help="JSONL output path."),
+    ] = Path("reports/reward_distillation/rewardbench.jsonl"),
+    no_synthetic_fallback: Annotated[
+        bool,
+        typer.Option(
+            "--no-synthetic-fallback",
+            help="Hard-fail if allenai/reward-bench is unreachable.",
+        ),
+    ] = False,
+) -> None:
+    """Pull preference pairs from ``allenai/reward-bench`` (D7-C cross-check).
+
+    The output JSONL has the canonical RewardBench shape::
+
+        {"prompt": ..., "chosen": ..., "rejected": ...,
+         "category": ..., "pair_id": ..., "source": "rewardbench"}
+
+    These rows feed the Bradley-Terry preference path in
+    ``vlabs-reward-train``; they are NOT the same shape as
+    :class:`RewardTrainingRow` (env-procedural rows) — the trainer
+    wraps both shapes via the preference-vs-pointwise dispatch.
+    """
+    from verifiable_labs_envs.reward_distillation.rewardbench_adapter import (
+        load_rewardbench_subset,
+    )
+
+    pairs = load_rewardbench_subset(
+        n=int(n),
+        seed=int(seed),
+        subset=str(subset),
+        fallback_to_synthetic=not bool(no_synthetic_fallback),
+    )
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("w", encoding="utf-8") as fh:
+        for p in pairs:
+            row = p.to_dict()
+            row["source"] = "rewardbench"
+            fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+    by_cat: dict[str, int] = {}
+    for p in pairs:
+        by_cat[p.category] = by_cat.get(p.category, 0) + 1
+    typer.echo(f"wrote {len(pairs)} rewardbench pairs → {output}")
+    typer.echo(json.dumps({"n_pairs": len(pairs), "per_category": by_cat}, indent=2))
+
+
 @app.command()
 def version() -> None:
     """Print the CLI version and exit."""
