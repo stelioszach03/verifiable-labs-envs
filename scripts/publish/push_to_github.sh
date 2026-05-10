@@ -139,22 +139,45 @@ else
     echo "$TRAILERS" | sed 's/^/    /'
 fi
 
-# ── 3. dirty WT guard ──────────────────────────────────────────────
-if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
-    echo "" >&2
-    echo "ERROR: working tree has uncommitted changes — filter-branch needs" >&2
-    echo "a clean tree. Stash or commit them first, then re-run." >&2
-    echo "" >&2
-    git status --short >&2
-    exit 2
+# ── 3. dirty WT detection — auto-stash with restore on exit ───────
+#
+# filter-branch enforces a clean working tree. The Phase 18 v5
+# contract deliberately keeps PHASE_18_v5_PLAN.md modified + a known
+# set of untracked files in the tree, so we can't ask the maintainer
+# to manually stash. Instead: stash silently (incl. untracked, with
+# a recognisable label), run filter-branch, restore on exit.
+NEEDS_STASH=0
+STASH_LABEL="push_to_github auto-stash $(date -u +%Y%m%dT%H%M%SZ)"
+if [ -n "$(git status --porcelain)" ]; then
+    NEEDS_STASH=1
+    echo ""
+    echo "  → working tree is dirty; auto-stashing (label: $STASH_LABEL)"
 fi
 
 # ── 4. dry-run early-exit ──────────────────────────────────────────
 if [ "$DRY_RUN" -eq 1 ]; then
     echo ""
     echo "  --dry-run set; not rewriting or pushing."
+    if [ "$NEEDS_STASH" -eq 1 ]; then
+        echo "  (would auto-stash these entries before rewriting:)"
+        git status --short | sed 's/^/    /'
+    fi
     exit 0
 fi
+
+restore_stash() {
+    if [ "$NEEDS_STASH" -eq 1 ]; then
+        echo ""
+        echo "  → restoring auto-stashed working tree..."
+        # ``git stash pop`` returns non-zero on merge conflict but we
+        # don't want the trap to swallow it silently.
+        if ! git stash pop --quiet; then
+            echo "  ⚠ stash pop reported conflicts. Inspect:" >&2
+            echo "      git stash list" >&2
+            echo "      git status" >&2
+        fi
+    fi
+}
 
 # ── 5. confirm ─────────────────────────────────────────────────────
 if [ "$ASSUME_YES" -ne 1 ]; then
@@ -168,6 +191,14 @@ fi
 
 # ── 6. rewrite ─────────────────────────────────────────────────────
 echo ""
+
+# Stash NOW (after the confirm prompt) so a user who answers "no"
+# doesn't end up with their WT in a stash.
+if [ "$NEEDS_STASH" -eq 1 ]; then
+    git stash push --include-untracked --quiet -m "$STASH_LABEL"
+    trap restore_stash EXIT
+fi
+
 echo "  → rewriting $N_COMMITS commits via git filter-branch..."
 
 # Wipe any stale backup ref so filter-branch doesn't refuse to run.
