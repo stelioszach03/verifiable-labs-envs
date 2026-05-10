@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "verifiable-labs-tool-calling-debug"
-version = "0.1.0"
+version = "0.1.1"
 description = "Trace-debug procedural tool-calling RL environment with prefix-conditioned trajectory completion"
 readme = "README.md"
 requires-python = ">=3.11"

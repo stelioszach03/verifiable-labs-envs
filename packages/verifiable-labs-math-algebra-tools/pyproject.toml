@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "verifiable-labs-math-algebra-tools"
-version = "0.1.0"
+version = "0.1.1"
 description = "Tool-use algebraic-simplification RL environment with SymPy primitives, conformal coverage, and SymPy-verified rewards"
 readme = "README.md"
 requires-python = ">=3.11"

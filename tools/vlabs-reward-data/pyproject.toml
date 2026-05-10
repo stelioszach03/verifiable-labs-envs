@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "vlabs-reward-data"
-version = "0.0.1"
+version = "0.0.2"
 description = "Verifiable Labs reward distillation dataset extraction CLI (Phase 29.B)."
 readme = "README.md"
 requires-python = ">=3.11"

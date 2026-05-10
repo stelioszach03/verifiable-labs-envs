@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "vlabs-reward-train"
-version = "0.0.1"
+version = "0.0.2"
 description = "Verifiable Labs reward-distillation training scaffolding (Phase 29.C; GPU runs gated to 29.F)."
 readme = "README.md"
 requires-python = ">=3.11"

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "verifiable-labs-super-resolution"
-version = "0.1.0"
+version = "0.1.1"
 description = "4× single-image super-resolution with bicubic baseline"
 readme = "README.md"
 requires-python = ">=3.11"

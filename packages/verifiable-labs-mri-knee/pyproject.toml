@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "verifiable-labs-mri-knee"
-version = "1.0.0"
+version = "1.0.1"
 description = "MRI knee reconstruction from 4x-undersampled Cartesian k-space with zero-filled-IFFT baseline + conformal σ̂."
 readme = "README.md"
 requires-python = ">=3.11"

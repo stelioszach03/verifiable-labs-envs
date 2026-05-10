@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "vlabs-prm-train"
-version = "0.0.1"
+version = "0.0.2"
 description = "Verifiable Labs process-reward training scaffolding (Phase 30.C; GPU runs gated to 30.F)."
 readme = "README.md"
 requires-python = ">=3.11"

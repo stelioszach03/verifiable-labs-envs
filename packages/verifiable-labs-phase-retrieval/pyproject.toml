@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "verifiable-labs-phase-retrieval"
-version = "1.0.0"
+version = "1.0.1"
 description = "Phase retrieval from magnitude-only Fourier measurements with Gerchberg-Saxton baseline + conformal σ̂."
 readme = "README.md"
 requires-python = ">=3.11"

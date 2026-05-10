@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "verifiable-labs-envs"
-version = "0.1.0a1"
+version = "0.1.0a2"
 description = "Reinforcement-learning environments for scientific reasoning: physics-grounded inverse problems with uncertainty-calibrated rewards."
 readme = "README.md"
 requires-python = ">=3.11"

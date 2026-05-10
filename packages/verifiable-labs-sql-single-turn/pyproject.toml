@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "verifiable-labs-sql-single-turn"
-version = "0.1.0"
+version = "0.1.1"
 description = "Single-turn text-to-SQL RL environment with SQLite sandbox, result-set comparator, and conformal coverage"
 readme = "README.md"
 requires-python = ">=3.11"

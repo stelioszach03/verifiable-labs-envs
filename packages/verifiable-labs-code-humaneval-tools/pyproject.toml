@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "verifiable-labs-code-humaneval-tools"
-version = "0.1.0"
+version = "0.1.1"
 description = "Tool-use procedural code-execution RL environment with read_file/write_file/run_test primitives"
 readme = "README.md"
 requires-python = ">=3.11"
