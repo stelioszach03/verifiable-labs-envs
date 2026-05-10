@@ -1049,6 +1049,42 @@ class AttestationRenewal(Base):
     )
 
 
+class AttestationCertificate(Base):
+    """Issued V-Certified leaf certificate (Phase 31.D).
+
+    One row per approved attestation cert. The PEM is served by the
+    public verification endpoint (``GET /v1/attestations/verify/{id}``)
+    so verifiers can chain it to the V-Certified CA without extra
+    round-trips. The leaf private key is retained briefly for one-time
+    customer download; production hardening (31.G+) will move it to
+    KMS.
+    """
+
+    __tablename__ = "attestation_certificates"
+
+    cert_serial: Mapped[str] = mapped_column(Text, primary_key=True)
+    attestation_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("attestations.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    certificate_pem: Mapped[str] = mapped_column(Text, nullable=False)
+    private_key_pem: Mapped[str | None] = mapped_column(Text, nullable=True)
+    issued_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=_now_utc
+    )
+    revoked_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    __table_args__ = (
+        Index(
+            "ix_attestation_certificates_attestation_id",
+            "attestation_id",
+        ),
+    )
+
+
 class StripeEvent(Base):
     __tablename__ = "stripe_events"
 
@@ -1173,6 +1209,7 @@ __all__ = [
     "Attestation",
     "AttestationArtifact",
     "AttestationAudit",
+    "AttestationCertificate",
     "AttestationRenewal",
     "StripeEvent",
     "Subscription",

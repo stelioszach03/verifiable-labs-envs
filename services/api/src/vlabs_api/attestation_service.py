@@ -39,6 +39,7 @@ from vlabs_api.db import (
     Attestation,
     AttestationArtifact,
     AttestationAudit,
+    AttestationCertificate,
     AttestationRenewal,
 )
 from vlabs_api.errors import (
@@ -172,11 +173,67 @@ def _validate_cycle_for_tier(tier: str, cycle: str) -> None:
 
 
 def _stub_cert_serial() -> str:
-    """31.B placeholder serial. 31.D's PKI module replaces this with
-    an actual X.509 issuance call. The serial format is
-    ``stub-<16-hex>`` so production audits can quickly grep for
-    pre-31.D test data; 31.D's real serial format is plain hex."""
+    """Generate the cert_serial stamped on the attestation row.
+
+    Format is intentionally ``stub-<16-hex>`` for both 31.B legacy
+    audit-trail compatibility and 31.D's real cert issuance — the
+    actual X.509 cert built in 31.D embeds this same string in the
+    leaf cert's OU attribute, so the stub-prefix is a stable handle
+    across the registry, the leaf cert, and the CRL. (The cert's
+    underlying integer serial is hashed deterministically from the
+    stub-prefixed string in :func:`vlabs_api.pki.cert_issuer
+    ._serial_from_str`.)
+    """
     return f"stub-{secrets.token_hex(8)}"
+
+
+async def _issue_certificate_for_attestation(
+    session: AsyncSession,
+    *,
+    attestation: Attestation,
+    cert_serial: str,
+) -> AttestationCertificate | None:
+    """Issue a fresh V-Certified leaf cert for an approved attestation.
+
+    Writes an :class:`AttestationCertificate` row carrying the PEM
+    bytes + leaf private key. The cert_serial argument is the same
+    string stamped on ``attestations.cert_serial`` and is the lookup
+    key for both the verify-by-cert endpoint and the CRL.
+
+    No-op (returns ``None``) when :envvar:`VLABS_LOCAL_FAKE_PKI` is
+    unset — production deploys will get the cert via :mod:`vlabs_api
+    .pki.kms_hsm` once that lands.
+    """
+    import os
+
+    if os.environ.get("VLABS_LOCAL_FAKE_PKI", "").lower() != "true":
+        return None
+
+    # Lazy import — keeps the cryptography library off the hot path
+    # for callers that don't approve attestations.
+    from vlabs_api.pki import issue_leaf_certificate
+
+    lifetime = (
+        DEFAULT_CONTINUOUS_LIFETIME
+        if attestation.cycle == "continuous"
+        else DEFAULT_ANNUAL_LIFETIME
+    )
+    cert_pem, key_pem = issue_leaf_certificate(
+        public_id=attestation.public_id,
+        organization=attestation.organization,
+        cert_serial=cert_serial,
+        lifetime=lifetime,
+    )
+    cert_row = AttestationCertificate(
+        cert_serial=cert_serial,
+        attestation_id=attestation.id,
+        certificate_pem=cert_pem,
+        private_key_pem=key_pem,
+    )
+    session.add(cert_row)
+    await session.flush()
+    await session.refresh(cert_row)
+    return cert_row
 
 
 def _build_alignment(standards: Sequence[str]) -> dict[str, Any]:
@@ -587,6 +644,20 @@ async def revoke_attestation(
         decision="revoke",
     )
     session.add(audit)
+
+    # Phase 31.D — propagate revocation to the cert row so the next
+    # CRL build picks it up. No-op when no cert was issued (e.g.
+    # revoke-from-draft, or VLABS_LOCAL_FAKE_PKI unset).
+    if row.cert_serial is not None:
+        cert_res = await session.execute(
+            select(AttestationCertificate).where(
+                AttestationCertificate.cert_serial == row.cert_serial
+            )
+        )
+        cert_row = cert_res.scalar_one_or_none()
+        if cert_row is not None and cert_row.revoked_at is None:
+            cert_row.revoked_at = row.revoked_at
+
     await session.flush()
     await session.refresh(row)
     return row
@@ -643,6 +714,12 @@ async def record_audit_decision(
             else DEFAULT_ANNUAL_LIFETIME
         )
         row.expires_at = row.issued_at + lifetime
+        # Phase 31.D — issue real X.509 leaf cert + persist PEM. No-op
+        # when VLABS_LOCAL_FAKE_PKI isn't set; production will swap to
+        # kms_hsm via the same call site.
+        await _issue_certificate_for_attestation(
+            session, attestation=row, cert_serial=row.cert_serial
+        )
     elif decision == "reject":
         if row.status not in ("submitted", "under_review"):
             raise AttestationInvalidState(
@@ -673,6 +750,100 @@ async def list_audit_trail(
     return list(res.scalars().all())
 
 
+# ── public verification (Phase 31.D) ───────────────────────────────
+
+
+PUBLIC_REGISTRY_STATUSES: tuple[str, ...] = ("approved", "revoked", "expired")
+"""Statuses surfaced via :func:`list_for_public_registry` /
+:func:`get_by_public_id`. Drafts, submissions, withdrawals never
+appear publicly — only outcomes the customer chose to publish."""
+
+
+async def list_for_public_registry(
+    session: AsyncSession,
+    *,
+    limit: int,
+    offset: int,
+    status: str | None = None,
+) -> tuple[list[Attestation], int]:
+    """Paginated listing of publicly-visible attestations.
+
+    Defaults to all three public statuses (approved / revoked /
+    expired). Optional ``status`` filter narrows further. No owner
+    filter — this is the unauthenticated public registry.
+    """
+    base = select(Attestation).where(
+        Attestation.status.in_(PUBLIC_REGISTRY_STATUSES)
+    )
+    count_q = select(func.count()).select_from(
+        base.subquery()
+    )
+    if status is not None:
+        base = base.where(Attestation.status == status)
+        count_q = select(func.count()).select_from(base.subquery())
+    rows = (
+        await session.execute(
+            base.order_by(Attestation.issued_at.desc().nullslast())
+            .limit(limit)
+            .offset(offset)
+        )
+    ).scalars().all()
+    total = (await session.execute(count_q)).scalar_one()
+    return list(rows), int(total)
+
+
+async def get_by_public_id(
+    session: AsyncSession, *, public_id: str
+) -> Attestation:
+    res = await session.execute(
+        select(Attestation).where(
+            Attestation.public_id == public_id,
+            Attestation.status.in_(PUBLIC_REGISTRY_STATUSES),
+        )
+    )
+    row = res.scalar_one_or_none()
+    if row is None:
+        raise AttestationNotFound(detail=f"public_id={public_id}")
+    return row
+
+
+async def get_by_cert_serial(
+    session: AsyncSession, *, cert_serial: str
+) -> Attestation:
+    res = await session.execute(
+        select(Attestation).where(
+            Attestation.cert_serial == cert_serial,
+            Attestation.status.in_(PUBLIC_REGISTRY_STATUSES),
+        )
+    )
+    row = res.scalar_one_or_none()
+    if row is None:
+        raise AttestationNotFound(detail=f"cert_serial={cert_serial}")
+    return row
+
+
+async def get_certificate(
+    session: AsyncSession, *, cert_serial: str
+) -> AttestationCertificate | None:
+    res = await session.execute(
+        select(AttestationCertificate).where(
+            AttestationCertificate.cert_serial == cert_serial
+        )
+    )
+    return res.scalar_one_or_none()
+
+
+async def list_revoked_certs(
+    session: AsyncSession,
+) -> list[AttestationCertificate]:
+    res = await session.execute(
+        select(AttestationCertificate)
+        .where(AttestationCertificate.revoked_at.is_not(None))
+        .order_by(AttestationCertificate.revoked_at.desc())
+    )
+    return list(res.scalars().all())
+
+
 # ── helper exports ──────────────────────────────────────────────────
 
 
@@ -696,10 +867,16 @@ __all__ = [
     "DEFAULT_CONTINUOUS_LIFETIME",
     "LIVE_STATUSES",
     "MAX_ARTIFACT_SIZE_BYTES",
+    "PUBLIC_REGISTRY_STATUSES",
     "TERMINAL_STATUSES",
     "count_artifacts",
     "create_draft",
+    "get_by_cert_serial",
+    "get_by_public_id",
+    "get_certificate",
     "get_for_owner",
+    "list_for_public_registry",
+    "list_revoked_certs",
     "initiate_renewal",
     "list_audit_trail",
     "list_for_owner",

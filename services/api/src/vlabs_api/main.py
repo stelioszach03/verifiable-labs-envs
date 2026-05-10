@@ -21,6 +21,7 @@ from vlabs_api.redis_client import aclose as redis_aclose
 from vlabs_api.routes import (
     admin,
     attestations,
+    attestations_public,
     audit,
     billing,
     calibrate,
@@ -142,10 +143,13 @@ def create_app() -> FastAPI:
     # 30.G lands trained weights. Counts against
     # usage_counters.process_reward_scores_count.
     app.include_router(process_reward_models.router, prefix="/v1")
-    # Phase 31 — V-Certified attestation programme. 7 owner endpoints
-    # under /v1/attestations/* (X-Vlabs-Key auth). Public verification
-    # endpoints (registry / verify / badge / CRL) ship in 31.D as a
-    # separate router with IP-based rate limiting.
+    # Phase 31 — V-Certified attestation programme.
+    # The public router (registry / verify / verify-by-cert / badge /
+    # crl.pem) is registered FIRST so its literal-string subpaths don't
+    # get swallowed by the owner router's ``/attestations/{att_id}``
+    # path parameter. Owner endpoints use X-Vlabs-Key; public endpoints
+    # are unauthenticated with per-IP rate limits (60-600 req/min/IP).
+    app.include_router(attestations_public.router, prefix="/v1")
     app.include_router(attestations.router, prefix="/v1")
     # Management plane — Clerk JWT auth, billing + key issuance
     app.include_router(keys.router, prefix="/v1")

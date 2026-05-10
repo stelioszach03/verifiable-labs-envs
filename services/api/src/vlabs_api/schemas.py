@@ -836,6 +836,63 @@ class AttestationAuditEntry(BaseModel):
     decided_at: datetime
 
 
+# ── Public verification (Phase 31.D) ─────────────────────────────────
+
+
+class AttestationPublicSummary(BaseModel):
+    """Compact public-registry record (no owner identifiers)."""
+
+    public_id: str
+    organization: str
+    scope_type: AttestationScopeType
+    scope_subject: str
+    tier: AttestationTier
+    status: AttestationStatus
+    issued_at: datetime | None = None
+    expires_at: datetime | None = None
+
+
+class AttestationPublicList(BaseModel):
+    items: list[AttestationPublicSummary]
+    total: int
+    limit: int
+    offset: int
+
+
+class AttestationPublicInfo(BaseModel):
+    """Full public verification payload (cert PEM included when issued)."""
+
+    public_id: str
+    organization: str
+    scope_type: AttestationScopeType
+    scope_subject: str
+    tier: AttestationTier
+    status: AttestationStatus
+    cycle: AttestationCycle
+    issued_at: datetime | None = None
+    expires_at: datetime | None = None
+    revoked_at: datetime | None = None
+    revocation_reason: str | None = None
+    cert_serial: str | None = None
+    certificate_pem: str | None = None
+    standards_alignment: AttestationStandardsAlignment = Field(
+        default_factory=AttestationStandardsAlignment
+    )
+
+
+class AttestationPublicCertificate(BaseModel):
+    """Single-cert verification payload — used by verifiers that only
+    have a leaf cert serial in hand (no public_id)."""
+
+    public_id: str
+    cert_serial: str
+    certificate_pem: str | None = None
+    ca_certificate_pem: str | None = None
+    issued_at: datetime | None = None
+    revoked_at: datetime | None = None
+    attestation_status: AttestationStatus
+
+
 # ── Process reward model service (Phase 30.E) ────────────────────────
 
 
@@ -1217,4 +1274,8 @@ __all__ = [
     "AttestationRenewalInfo",
     "AttestationRevokeRequest",
     "AttestationAuditEntry",
+    "AttestationPublicSummary",
+    "AttestationPublicList",
+    "AttestationPublicInfo",
+    "AttestationPublicCertificate",
 ]

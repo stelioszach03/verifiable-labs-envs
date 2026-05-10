@@ -52,6 +52,11 @@ os.environ.setdefault(
     "VLABS_DATA_LLM_KEY_ENCRYPTION",
     "test-fernet-secret-not-for-prod-32-bytes-long",
 )
+# Phase 31.D: V-Certified PKI runs against the in-memory fake-HSM
+# backend in tests; production must instead set VLABS_LOCAL_FAKE_PKI
+# unset and use kms_hsm (deferred). The fake CA keypair is regenerated
+# per pytest session and never touches disk.
+os.environ.setdefault("VLABS_LOCAL_FAKE_PKI", "true")
 
 # ── Step 2: now safe to import vlabs_api ─────────────────────────────
 from sqlalchemy import text  # noqa: E402
@@ -100,7 +105,8 @@ async def truncate_data(setup_db) -> AsyncIterator[None]:
     async with db._SessionFactory() as s:  # type: ignore[misc]
         await s.execute(
             text(
-                "TRUNCATE TABLE attestation_renewals, attestation_audits, "
+                "TRUNCATE TABLE attestation_certificates, "
+                "attestation_renewals, attestation_audits, "
                 "attestation_artifacts, attestations, "
                 "process_reward_model_runs, "
                 "process_reward_models, "
