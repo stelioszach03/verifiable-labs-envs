@@ -12,6 +12,11 @@ eggs/
 .eggs/
 lib/
 lib64/
+# Re-include services/landing/lib/ — Next.js library code, not Python build
+# artifacts. The Python `lib/` glob above (line 13) sweeps any directory
+# named ``lib`` anywhere in the tree, which accidentally also caught the
+# landing dashboard's TypeScript helpers (Phase 31.C audit caught this).
+!/services/landing/lib/
 parts/
 sdist/
 var/

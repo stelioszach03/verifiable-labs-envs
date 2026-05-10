@@ -7,6 +7,8 @@ const TABS = [
   { href: "/dashboard/api-keys", label: "API keys" },
   { href: "/dashboard/usage", label: "Usage" },
   { href: "/dashboard/billing", label: "Billing" },
+  // Phase 31.C — V-Certified attestation programme dashboard.
+  { href: "/dashboard/attestations", label: "Attestations" },
 ];
 
 export default function DashboardLayout({
