@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "verifiable-labs-tool-calling-multiturn"
-version = "0.1.1"
+version = "0.1.2"
 description = "Multi-turn procedural tool-calling RL environment with verifier-feedback rollouts and per-extra-turn penalty"
 readme = "README.md"
 requires-python = ">=3.11"

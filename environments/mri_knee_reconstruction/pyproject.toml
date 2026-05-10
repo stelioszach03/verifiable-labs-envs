@@ -1,8 +1,7 @@
 [project]
 name = "mri-knee-reconstruction"
 description = "MRI knee reconstruction from 4x-undersampled Cartesian k-space with zero-filled-IFFT baseline and conformal σ̂."
-tags = ["scientific-reasoning", "inverse-problems", "rlvr", "conformal", "eval"]
-version = "1.0.0"
+version = "1.0.1"
 requires-python = ">=3.11"
 dependencies = [
     # verifiers>=0.1.12 (not >=0.1.13): the 0.1.13 line is dev-only at

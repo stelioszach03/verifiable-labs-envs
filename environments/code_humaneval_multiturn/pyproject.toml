@@ -1,0 +1,22 @@
+[project]
+name = "code-humaneval-multiturn"
+description = "Multi-turn HumanEval — failed tests feed back as hints."
+version = "0.1.2"
+requires-python = ">=3.11"
+dependencies = [
+    "verifiers>=0.1.12",
+    "verifiable-labs-envs>=0.1.0a2",
+]
+authors = [{ name = "Stelios Zacharioudakis" }]
+license = { text = "Apache-2.0" }
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["code_humaneval_multiturn"]
+
+[tool.verifiers.eval]
+module = "code_humaneval_multiturn"
+factory = "load_environment"

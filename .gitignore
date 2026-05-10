@@ -147,6 +147,12 @@ reports/preflight/phase30_trainer_run/
 # notes. Never pushed to GitHub; kept on disk so the maintainer can
 # still reference them.
 .private/
+
+# Prime Intellect CLI auto-generates per-env metadata files on every
+# `prime env push`. The version number is the only useful field, and
+# pyproject.toml already carries it — these JSON files just track the
+# wheel SHA + timestamp and re-churn on every push.
+environments/*/.prime/
 # Phase 29/30 v0.0.1 dataset artefacts live on HF Hub (Apache-2.0).
 # Don't bloat the git tree with the JSONL/parquet copies — only the
 # manifest.json (fingerprint + row counts) is tracked for provenance.
