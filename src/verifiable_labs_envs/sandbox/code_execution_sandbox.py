@@ -270,14 +270,44 @@ def _preexec(
     )
 
 
+_UNSHARE_AVAILABLE_CACHE: bool | None = None
+
+
 def _unshare_available() -> bool:
     """True when ``unshare -rn`` can be used for network isolation.
 
-    Linux-only. Cached at module load via the lazy first call.
+    Linux-only. Cached after the first probe.
+
+    The probe runs ``unshare -rn /bin/true`` once because checking
+    ``shutil.which("unshare")`` alone is not enough — GitHub-hosted
+    ``ubuntu-latest`` runners ship the binary, but the kernel refuses
+    ``write /proc/self/uid_map`` inside the runner container (no
+    CAP_SYS_ADMIN, user-namespace creation blocked). On those hosts
+    every ``unshare -rn ...`` invocation fails at runtime; the
+    binary-presence-only check returned ``True`` and downstream
+    sandbox calls produced ``SandboxRuntimeError``. Probing the actual
+    syscall path means the boolean now reflects USABILITY rather than
+    INSTALLATION, so the sandbox tests skip cleanly on unsupported
+    hosts while still asserting hard on WSL / dev / privileged CI.
     """
-    if sys.platform != "linux":
+    global _UNSHARE_AVAILABLE_CACHE
+    if _UNSHARE_AVAILABLE_CACHE is not None:
+        return _UNSHARE_AVAILABLE_CACHE
+    if sys.platform != "linux" or shutil.which("unshare") is None:
+        _UNSHARE_AVAILABLE_CACHE = False
         return False
-    return shutil.which("unshare") is not None
+    import subprocess
+
+    try:
+        result = subprocess.run(
+            ["unshare", "-rn", "--", "/bin/true"],
+            capture_output=True,
+            timeout=2.0,
+        )
+        _UNSHARE_AVAILABLE_CACHE = result.returncode == 0
+    except (subprocess.TimeoutExpired, OSError):
+        _UNSHARE_AVAILABLE_CACHE = False
+    return _UNSHARE_AVAILABLE_CACHE
 
 
 def _wrap_with_unshare(cmd: list[str]) -> list[str]:
