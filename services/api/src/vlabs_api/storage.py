@@ -52,10 +52,43 @@ def _resolve_endpoint() -> str:
     return f"https://{s.vlabs_r2_account_id}.r2.cloudflarestorage.com"
 
 
+# Map a logical ``output_format`` name to a concrete on-disk
+# extension. The previous implementation treated anything other than
+# ``"parquet"`` as ``"jsonl"``, which produced filenames like
+# ``pdf.jsonl`` for monitor PDF artefacts (Phase 28 validation report,
+# reports/validation/SUMMARY.md §"Storage _build_key PDF extension").
+#
+# The fix: extend the format→ext map to cover every output format we
+# generate today, and fall back to the format string itself when an
+# unknown format is requested (so future formats produce sensible
+# names without a code change). The presigned-URL content-type header
+# stays correct in either case — that's set per-upload — but the on-
+# disk filename now matches the format.
+_EXTENSION_BY_FORMAT: dict[str, str] = {
+    "parquet": "parquet",
+    "jsonl": "jsonl",
+    "pdf": "pdf",
+    "csv": "csv",
+    "json": "json",
+}
+
+
+def _ext_for_format(output_format: str) -> str:
+    """Return the on-disk extension for ``output_format``.
+
+    Unknown formats fall back to the format string itself (lower-cased,
+    stripped of any leading ``.``). This keeps ``_build_key`` resilient
+    to new formats without hard-coding a closed set.
+    """
+    if output_format in _EXTENSION_BY_FORMAT:
+        return _EXTENSION_BY_FORMAT[output_format]
+    cleaned = output_format.lstrip(".").lower().strip()
+    return cleaned or "bin"
+
+
 def _build_key(user_id: str, dataset_id: str, output_format: str) -> str:
     """Object key for a dataset payload."""
-    ext = "parquet" if output_format == "parquet" else "jsonl"
-    return f"{user_id}/{dataset_id}/{output_format}.{ext}"
+    return f"{user_id}/{dataset_id}/{output_format}.{_ext_for_format(output_format)}"
 
 
 def _fake_path(key: str) -> Path:
