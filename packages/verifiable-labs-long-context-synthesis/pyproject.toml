@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "verifiable-labs-long-context-synthesis"
-version = "0.1.1"
+version = "0.1.2"
 description = "Multi-needle 3-turn synthesis RL environment with token-F1 scoring and conformal coverage"
 readme = "README.md"
 requires-python = ">=3.11"

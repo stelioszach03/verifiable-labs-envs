@@ -1,0 +1,22 @@
+[project]
+name = "long-context-needle"
+description = "Needle-in-haystack — locate a target sentence in a long document."
+version = "0.1.2"
+requires-python = ">=3.11"
+dependencies = [
+    "verifiers>=0.1.12",
+    "verifiable-labs-envs>=0.1.0a2",
+]
+authors = [{ name = "Stelios Zacharioudakis" }]
+license = { text = "Apache-2.0" }
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["long_context_needle"]
+
+[tool.verifiers.eval]
+module = "long_context_needle"
+factory = "load_environment"

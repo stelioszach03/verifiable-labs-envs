@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "verifiable-labs-math-algebra-multiturn"
-version = "0.1.1"
+version = "0.1.2"
 description = "Multi-turn algebraic-simplification RL environment with SymPy-verified rewards, conformal coverage, and verifier feedback"
 readme = "README.md"
 requires-python = ">=3.11"

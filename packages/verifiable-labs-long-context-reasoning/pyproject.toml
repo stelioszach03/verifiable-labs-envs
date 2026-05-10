@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "verifiable-labs-long-context-reasoning"
-version = "0.1.1"
+version = "0.1.2"
 description = "Multi-hop chain-of-fact long-context reasoning RL environment with distractor needles and conformal coverage"
 readme = "README.md"
 requires-python = ">=3.11"

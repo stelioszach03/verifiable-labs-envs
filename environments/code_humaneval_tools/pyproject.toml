@@ -1,0 +1,22 @@
+[project]
+name = "code-humaneval-tools"
+description = "Tool-use HumanEval — code runner + test executor primitives."
+version = "0.1.2"
+requires-python = ">=3.11"
+dependencies = [
+    "verifiers>=0.1.12",
+    "verifiable-labs-envs>=0.1.0a2",
+]
+authors = [{ name = "Stelios Zacharioudakis" }]
+license = { text = "Apache-2.0" }
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["code_humaneval_tools"]
+
+[tool.verifiers.eval]
+module = "code_humaneval_tools"
+factory = "load_environment"
