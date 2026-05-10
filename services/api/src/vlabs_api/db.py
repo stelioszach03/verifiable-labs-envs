@@ -189,6 +189,12 @@ class UsageCounter(Base):
     reward_scores_count: Mapped[int] = mapped_column(
         BigInteger, nullable=False, default=0
     )
+    # Phase 30.E — counts /v1/process-reward-models/{id}/score against
+    # the per-tier process_reward_scores_per_month cap. Idempotent re-
+    # issues do NOT increment.
+    process_reward_scores_count: Mapped[int] = mapped_column(
+        BigInteger, nullable=False, default=0
+    )
 
 
 class AuditCall(Base):
@@ -654,6 +660,155 @@ class RewardModelRun(Base):
     )
 
 
+class ProcessRewardModel(Base):
+    """Distilled process reward model row (Phase 30.E).
+
+    PHASE_30_PLAN.md §6 schema. ``model_id`` is the locked
+    ``vlabs-prm-{family}-v{semver}`` shape (D12-B). ``base_rm_id`` is
+    the FK to the Phase 29 distilled outcome RM under the D13-B/C
+    shared-backbone path; NULL for D13-A independent serving.
+    ``step_granularity`` constrained to ``per_step | per_token |
+    per_stage``; v0.0.1 ships ``per_step`` only (D1-B).
+    ``step_conformal_quantiles`` is a JSONB dict keyed by step-position
+    bucket label (e.g. ``"range(0, 1)"``); ``aggregate_conformal_quantile``
+    is the trace-level scalar (D9-C). Both NULL until the calibration
+    step (30.F) lands.
+    """
+
+    __tablename__ = "process_reward_models"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    model_id: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    family: Mapped[str] = mapped_column(Text, nullable=False)
+    version: Mapped[str] = mapped_column(Text, nullable=False)
+    base_rm_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("reward_models.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    step_granularity: Mapped[str] = mapped_column(Text, nullable=False)
+    teacher_source: Mapped[str] = mapped_column(Text, nullable=False)
+    student_arch: Mapped[str] = mapped_column(Text, nullable=False)
+    training_method: Mapped[str] = mapped_column(Text, nullable=False)
+    dataset_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("dataset_jobs.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    checkpoint_uri: Mapped[str | None] = mapped_column(Text, nullable=True)
+    step_conformal_quantiles: Mapped[dict[str, Any] | None] = mapped_column(
+        JSONB, nullable=True
+    )
+    aggregate_conformal_quantile: Mapped[float | None] = mapped_column(
+        Float, nullable=True
+    )
+    status: Mapped[str] = mapped_column(
+        Text, nullable=False, default="training"
+    )
+    eval_metrics: Mapped[dict[str, Any] | None] = mapped_column(
+        JSONB, nullable=True
+    )
+    training_config: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=_now_utc
+    )
+    trained_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    retired_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('training','available','deprecated','retired')",
+            name="process_reward_models_status_check",
+        ),
+        CheckConstraint(
+            "step_granularity IN ('per_step','per_token','per_stage')",
+            name="process_reward_models_granularity_check",
+        ),
+        Index("process_reward_models_family_idx", "family", "created_at"),
+        Index("process_reward_models_status_idx", "status"),
+        Index("process_reward_models_base_rm_idx", "base_rm_id"),
+    )
+
+
+class ProcessRewardModelRun(Base):
+    """Per-call audit row written by
+    ``POST /v1/process-reward-models/{id}/score`` (Phase 30.E).
+
+    Mirrors the Phase 22 + 29 GDPR posture: prompt + trace are NEVER
+    persisted, only their SHA-256 hashes (D11 / R11). ``step_rewards``
+    + ``step_cis`` are JSONB arrays of floats and [low, high] pairs
+    respectively, length = ``step_count``. Customers can verify a row
+    matches their inputs by re-hashing locally; nobody else can
+    recover the text.
+    """
+
+    __tablename__ = "process_reward_model_runs"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    process_reward_model_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("process_reward_models.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    api_key_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("api_keys.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    prompt_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    trace_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    env_id: Mapped[str | None] = mapped_column(Text, nullable=True)
+    step_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    step_rewards: Mapped[list[float]] = mapped_column(JSONB, nullable=False)
+    step_cis: Mapped[list[list[float]]] = mapped_column(JSONB, nullable=False)
+    aggregate_reward: Mapped[float] = mapped_column(Float, nullable=False)
+    aggregate_ci_low: Mapped[float] = mapped_column(Float, nullable=False)
+    aggregate_ci_high: Mapped[float] = mapped_column(Float, nullable=False)
+    coverage_guarantee: Mapped[float] = mapped_column(
+        Float, nullable=False, default=0.9
+    )
+    cache_hit: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False
+    )
+    latency_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+    idempotency_key: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=_now_utc
+    )
+
+    __table_args__ = (
+        Index("process_reward_model_runs_user_idx", "user_id", "created_at"),
+        Index(
+            "process_reward_model_runs_model_idx",
+            "process_reward_model_id",
+            "created_at",
+        ),
+        Index(
+            "process_reward_model_runs_idempotency_idx",
+            "idempotency_key",
+            "user_id",
+            unique=True,
+            postgresql_where=text("idempotency_key IS NOT NULL"),
+        ),
+    )
+
+
 class StripeEvent(Base):
     __tablename__ = "stripe_events"
 
@@ -773,6 +928,8 @@ __all__ = [
     "MonitorAlert",
     "RewardModel",
     "RewardModelRun",
+    "ProcessRewardModel",
+    "ProcessRewardModelRun",
     "StripeEvent",
     "Subscription",
     "init_engine",

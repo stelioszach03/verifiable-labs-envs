@@ -232,6 +232,41 @@ class RewardModelInvalidRequest(APIError):
     title = "scoring request is malformed"
 
 
+class ProcessRewardModelNotFound(APIError):
+    """Phase 30.E — PRM model id not found or in 'training' status."""
+
+    status_code = 404
+    code = "process_reward_model_not_found"
+    title = "no process reward model with this id is available"
+
+
+class ProcessRewardModelRetired(APIError):
+    """Phase 30.E — PRM has been retired (status='retired')."""
+
+    status_code = 410
+    code = "process_reward_model_retired"
+    title = "this process reward model version is retired"
+
+
+class ProcessRewardInvalidTrace(APIError):
+    """Phase 30.E — malformed scoring request (empty prompt/trace,
+    too-large payload, segmentation produced zero steps, etc.)."""
+
+    status_code = 400
+    code = "process_reward_invalid_trace"
+    title = "process reward scoring request is malformed"
+
+
+class ProcessRewardTraceTooLong(APIError):
+    """Phase 30.E — segmented trace exceeds the per-call max_steps cap
+    (R15). Distinct from a too-large payload because the *step count*
+    after segmentation is the gate, not the byte length."""
+
+    status_code = 413
+    code = "process_reward_trace_too_long"
+    title = "process reward trace exceeds max-steps cap"
+
+
 class RateLimited(APIError):
     status_code = 429
     code = "rate_limited"
@@ -340,6 +375,10 @@ __all__ = [
     "RewardModelNotFound",
     "RewardModelRetired",
     "RewardModelInvalidRequest",
+    "ProcessRewardModelNotFound",
+    "ProcessRewardModelRetired",
+    "ProcessRewardInvalidTrace",
+    "ProcessRewardTraceTooLong",
     "RateLimited",
     "InvalidClerkToken",
     "WebhookSignatureInvalid",

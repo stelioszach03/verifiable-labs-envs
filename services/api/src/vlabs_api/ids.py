@@ -14,6 +14,7 @@ from vlabs_api.errors import (
     DatasetJobNotFound,
     MonitorNotFound,
     MonitorRunNotFound,
+    ProcessRewardModelNotFound,
     RewardModelNotFound,
 )
 
@@ -23,6 +24,7 @@ DATASET_PREFIX = "ds_"
 MONITOR_PREFIX = "mon_"
 MONITOR_RUN_PREFIX = "mr_"
 REWARD_MODEL_RUN_PREFIX = "rmr_"
+PROCESS_REWARD_RUN_PREFIX = "prr_"
 
 
 def encode_calibration_id(uid: uuid.UUID) -> str:
@@ -113,6 +115,32 @@ def parse_monitor_run_id(s: str) -> uuid.UUID:
         raise MonitorRunNotFound(detail=f"invalid monitor_run_id: {s!r}") from exc
 
 
+def encode_process_reward_run_id(uid: uuid.UUID) -> str:
+    """Phase 30.E — public ID for ``process_reward_model_runs`` rows.
+
+    Shape: ``prr_<32-char-hex>``. Surfaced as ``audit_id`` in
+    ``POST /v1/process-reward-models/{id}/score`` responses so
+    customers can later reference the run from
+    ``GET /v1/process-reward-models/{id}/evals``.
+    """
+    return f"{PROCESS_REWARD_RUN_PREFIX}{uid.hex}"
+
+
+def parse_process_reward_run_id(s: str) -> uuid.UUID:
+    """Phase 30.E — inverse of :func:`encode_process_reward_run_id`."""
+    raw = (
+        s[len(PROCESS_REWARD_RUN_PREFIX):]
+        if s.startswith(PROCESS_REWARD_RUN_PREFIX)
+        else s
+    )
+    try:
+        return uuid.UUID(raw)
+    except (ValueError, AttributeError) as exc:
+        raise ProcessRewardModelNotFound(
+            detail=f"invalid run_id: {s!r}"
+        ) from exc
+
+
 def encode_reward_model_run_id(uid: uuid.UUID) -> str:
     """Phase 29.E — public ID for ``reward_model_runs`` rows.
 
@@ -143,6 +171,7 @@ __all__ = [
     "MONITOR_PREFIX",
     "MONITOR_RUN_PREFIX",
     "REWARD_MODEL_RUN_PREFIX",
+    "PROCESS_REWARD_RUN_PREFIX",
     "encode_calibration_id",
     "parse_calibration_id",
     "encode_audit_id",
@@ -155,4 +184,6 @@ __all__ = [
     "parse_monitor_run_id",
     "encode_reward_model_run_id",
     "parse_reward_model_run_id",
+    "encode_process_reward_run_id",
+    "parse_process_reward_run_id",
 ]

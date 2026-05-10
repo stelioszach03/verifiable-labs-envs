@@ -637,6 +637,150 @@ class AdminDashboardResponse(BaseModel):
     billing_enabled: bool
 
 
+# ── Process reward model service (Phase 30.E) ────────────────────────
+
+
+ProcessRewardModelStatus = Literal[
+    "training", "available", "deprecated", "retired"
+]
+StepGranularity = Literal["per_step", "per_token", "per_stage"]
+
+
+class ProcessRewardModelEvalSummary(BaseModel):
+    """Compact per-PRM eval summary surfaced on the list endpoint."""
+
+    processbench_overall: float | None = None
+    bon_lift_vs_phase29: float | None = None
+    aggregate_calibration_coverage: float | None = None
+
+
+class ProcessRewardModelInfo(BaseModel):
+    """Full PRM record surfaced by GET /v1/process-reward-models/{id}."""
+
+    model_config = ConfigDict(protected_namespaces=())
+
+    model_id: str
+    name: str
+    family: str
+    version: str
+    base_rm_id: str | None = None
+    step_granularity: StepGranularity
+    teacher_source: str
+    student_arch: str
+    training_method: str
+    status: ProcessRewardModelStatus
+    aggregate_conformal_quantile: float | None = None
+    eval_summary: ProcessRewardModelEvalSummary = Field(
+        default_factory=ProcessRewardModelEvalSummary
+    )
+    created_at: datetime
+    trained_at: datetime | None = None
+    retired_at: datetime | None = None
+
+
+class ProcessRewardModelSummary(BaseModel):
+    """Compact view used in paginated listings."""
+
+    model_config = ConfigDict(protected_namespaces=())
+
+    model_id: str
+    family: str
+    version: str
+    status: ProcessRewardModelStatus
+    base_rm_id: str | None = None
+    step_granularity: StepGranularity
+    created_at: datetime
+    eval_summary: ProcessRewardModelEvalSummary = Field(
+        default_factory=ProcessRewardModelEvalSummary
+    )
+
+
+class ProcessRewardModelList(BaseModel):
+    items: list[ProcessRewardModelSummary]
+    total: int
+    limit: int
+    offset: int
+
+
+class ProcessRewardScoreRequest(BaseModel):
+    """``POST /v1/process-reward-models/{id}/score`` request body.
+
+    ``reasoning_trace`` accepts either a single string (the server
+    segments) or a pre-segmented list of step strings; the union is
+    typed loosely via :class:`Any` to keep Pydantic happy across
+    the two input shapes.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    prompt: str = Field(min_length=1)
+    reasoning_trace: str | list[str]
+    env_id: str | None = None
+    schema_version: str = "v0.1.0"
+    with_step_rationale: bool = False
+
+
+class ProcessRewardScoreResponse(BaseModel):
+    """``POST /v1/process-reward-models/{id}/score`` response body."""
+
+    model_config = ConfigDict(protected_namespaces=())
+
+    step_rewards: list[float]
+    step_confidence_intervals: list[tuple[float, float]]
+    aggregate_reward: float = Field(ge=0.0, le=1.0)
+    aggregate_confidence_interval: tuple[float, float]
+    coverage_guarantee: float = Field(ge=0.0, le=1.0)
+    step_count: int = Field(ge=1)
+    model_id: str
+    schema_version: str
+    cache_hit: bool = False
+    latency_ms: int = Field(ge=0)
+    audit_id: str
+    segmentation_warning: str | None = None
+
+
+class ProcessRewardScoreBatchItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    prompt: str = Field(min_length=1)
+    reasoning_trace: str | list[str]
+    env_id: str | None = None
+
+
+class ProcessRewardScoreBatchRequest(BaseModel):
+    """``POST /v1/process-reward-models/{id}/score/batch`` body. Up to
+    50 items per call (D7 — denser per-call shape than Phase 29's
+    100-item cap)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    items: list[ProcessRewardScoreBatchItem] = Field(min_length=1, max_length=50)
+    schema_version: str = "v0.1.0"
+
+
+class ProcessRewardScoreBatchResponse(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
+    items: list[ProcessRewardScoreResponse]
+    total: int
+    model_id: str
+    schema_version: str
+
+
+class ProcessRewardEvalsResponse(BaseModel):
+    """Full PRM eval card payload surfaced by
+    ``GET /v1/process-reward-models/{id}/evals``."""
+
+    model_config = ConfigDict(protected_namespaces=())
+
+    model_id: str
+    eval_summary: ProcessRewardModelEvalSummary
+    held_out_envs: dict[str, Any] = Field(default_factory=dict)
+    processbench: dict[str, Any] = Field(default_factory=dict)
+    bon: dict[str, Any] = Field(default_factory=dict)
+    calibration: dict[str, Any] = Field(default_factory=dict)
+
+
 # ── Reward model service (Phase 29.E) ────────────────────────────────
 
 
@@ -842,4 +986,16 @@ __all__ = [
     "RewardScoreBatchRequest",
     "RewardScoreBatchResponse",
     "RewardEvalsResponse",
+    "ProcessRewardModelStatus",
+    "StepGranularity",
+    "ProcessRewardModelEvalSummary",
+    "ProcessRewardModelInfo",
+    "ProcessRewardModelSummary",
+    "ProcessRewardModelList",
+    "ProcessRewardScoreRequest",
+    "ProcessRewardScoreResponse",
+    "ProcessRewardScoreBatchItem",
+    "ProcessRewardScoreBatchRequest",
+    "ProcessRewardScoreBatchResponse",
+    "ProcessRewardEvalsResponse",
 ]
