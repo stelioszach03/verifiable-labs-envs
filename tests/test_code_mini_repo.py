@@ -24,19 +24,6 @@ import sys
 
 import pytest
 
-# Sandbox-execution tests need a kernel that supports user-namespace
-# creation (unshare -rn); GitHub-hosted ubuntu-latest doesn't.
-# Skip the whole module when the primitive isn't usable so CI stays
-# green; local dev / WSL / privileged runners still exercise these.
-from verifiable_labs_envs.sandbox.code_execution_sandbox import (
-    _unshare_available as _sandbox_capable,
-)
-
-pytestmark = pytest.mark.skipif(
-    not _sandbox_capable(),
-    reason='sandbox unshare -rn primitive not usable on this host',
-)
-
 from verifiable_labs_envs.envs.code_mini_repo import (
     _TEMPLATES,
     DEFAULT_HYPERPARAMS,
@@ -55,10 +42,17 @@ from verifiable_labs_envs.envs.code_mini_repo import (
     parse_response,
     score_components,
 )
+from verifiable_labs_envs.sandbox.code_execution_sandbox import (
+    _unshare_available as _sandbox_capable,
+)
 
 pytestmark = pytest.mark.skipif(
-    sys.platform != "linux",
-    reason="code-mini-repo scoring requires the Linux sandbox primitive.",
+    sys.platform != "linux" or not _sandbox_capable(),
+    reason=(
+        "code-humaneval / code-mini-repo scoring requires the Linux "
+        "sandbox primitive (unshare -rn). GitHub-hosted ubuntu-latest "
+        "runners ship the binary but kernel rejects uid_map writes."
+    ),
 )
 
 
