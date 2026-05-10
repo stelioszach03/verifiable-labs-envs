@@ -28,7 +28,7 @@ classifiers = [
     "Topic :: Database",
 ]
 dependencies = [
-    "verifiable-labs-envs-core @ git+https://github.com/stelioszach03/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-envs-core",
+    "verifiable-labs-envs-core>=0.1.1",
     "numpy>=1.26",
 ]
 

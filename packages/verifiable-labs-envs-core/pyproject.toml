@@ -20,7 +20,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
-    "verifiable-labs-envs @ git+https://github.com/stelioszach03/verifiable-labs-envs.git@main",
+    "verifiable-labs-envs>=0.1.0a2",
 ]
 
 [project.urls]
