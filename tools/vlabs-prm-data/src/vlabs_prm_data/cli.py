@@ -278,6 +278,76 @@ def summary(
     typer.echo(json.dumps(trace_dataset_summary(rows), indent=2, sort_keys=True))
 
 
+@app.command("extract-processbench")
+def extract_processbench(
+    n: Annotated[
+        int,
+        typer.Option("--n", min=0, help="Number of ProcessBench traces to pull."),
+    ] = 700,
+    seed: Annotated[int, typer.Option("--seed", help="Sampling seed.")] = 0,
+    subset: Annotated[
+        str,
+        typer.Option(
+            "--subset",
+            help="ProcessBench subset filter (gsm8k / math / olympiadbench / "
+            "omnimath) or 'all' for the full mix.",
+        ),
+    ] = "all",
+    output: Annotated[
+        Path,
+        typer.Option("--output", "-o", help="JSONL output path."),
+    ] = Path("reports/process_reward/processbench.jsonl"),
+    no_synthetic_fallback: Annotated[
+        bool,
+        typer.Option(
+            "--no-synthetic-fallback",
+            help="Hard-fail if Qwen/ProcessBench is unreachable.",
+        ),
+    ] = False,
+) -> None:
+    """Pull traces from ``Qwen/ProcessBench`` (D6-A external slice).
+
+    Each row carries the ``ProcessBenchTrace`` shape::
+
+        {"problem": ..., "steps": [...], "first_error_step": int|None,
+         "subset": ..., "trace_id": ..., "source": "processbench"}
+
+    These traces feed the per-step PRM training path (Phase 30) — the
+    trainer scores each reasoning step against the labelled
+    ``first_error_step`` to learn intermediate-quality signal.
+    """
+    from verifiable_labs_envs.process_reward.eval import (
+        load_processbench_subset,
+    )
+
+    traces = load_processbench_subset(
+        n=int(n),
+        seed=int(seed),
+        subset=str(subset),
+        fallback_to_synthetic=not bool(no_synthetic_fallback),
+    )
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("w", encoding="utf-8") as fh:
+        for t in traces:
+            row = {
+                "problem": t.problem,
+                "steps": list(t.steps),
+                "first_error_step": t.first_error_step,
+                "subset": t.subset,
+                "trace_id": t.trace_id,
+                "source": "processbench",
+            }
+            fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+    by_subset: dict[str, int] = {}
+    for t in traces:
+        by_subset[t.subset] = by_subset.get(t.subset, 0) + 1
+    typer.echo(f"wrote {len(traces)} processbench traces → {output}")
+    typer.echo(
+        json.dumps({"n_traces": len(traces), "per_subset": by_subset}, indent=2)
+    )
+
+
 @app.command()
 def version() -> None:
     """Print the CLI version and exit."""
