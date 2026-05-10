@@ -18,7 +18,8 @@ from typing import Any
 import jwt
 from fastapi import Depends, Request
 from jwt import PyJWKClient
-from sqlalchemy import select
+from sqlalchemy import or_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from vlabs_api.config import get_settings
@@ -79,11 +80,25 @@ def _verify_jwt(token: str) -> dict[str, Any]:
 
 
 async def _resolve_user(session: AsyncSession, claims: dict[str, Any]) -> User:
+    """Look up — or atomically create — the User row for a Clerk ``sub``.
+
+    First-signup race: two concurrent requests for the same brand-new
+    Clerk user both miss the initial SELECT and try to INSERT, causing
+    a UNIQUE-constraint violation on ``clerk_user_id`` (or on ``email``
+    when two Clerk identities share an address). The naïve handler
+    surfaced as a 500 from /v1/keys on first dashboard load, which is
+    what the post-deploy validator caught (Phase 31.F closeout).
+
+    The fix is the standard "look-then-insert-then-look-again on
+    IntegrityError" pattern: if the INSERT loses the race, roll the
+    session back, re-SELECT by clerk_user_id (or email — both are
+    UNIQUE), and return whoever the winner row is.
+    """
     clerk_id = claims.get("sub")
     if not clerk_id:
         raise InvalidClerkToken(detail="JWT has no 'sub' claim")
-    res = await session.execute(select(User).where(User.clerk_user_id == clerk_id))
-    user = res.scalar_one_or_none()
+
+    user = await _select_user_for_clerk(session, clerk_id)
     if user is not None:
         return user
 
@@ -93,15 +108,46 @@ async def _resolve_user(session: AsyncSession, claims: dict[str, Any]) -> User:
         # to a stable synthetic placeholder so the user row exists. The
         # email gets backfilled by the next webhook or dashboard form.
         email = f"{clerk_id}@clerk.placeholder"
+
     user = User(
         email=email,
         name=claims.get("name") or claims.get("first_name"),
         clerk_user_id=clerk_id,
     )
     session.add(user)
-    await session.commit()
+    try:
+        await session.commit()
+    except IntegrityError:
+        # Concurrent first-signup race or the JWT's email matches an
+        # existing user. Roll the session back, look the winner up by
+        # either UNIQUE column, and return that row instead of
+        # bubbling a 500.
+        await session.rollback()
+        existing = await _select_user_for_clerk(session, clerk_id, email=email)
+        if existing is None:
+            # The IntegrityError wasn't on a column we recognise —
+            # re-raise so it surfaces as a 500 with the original cause
+            # rather than silently swallowing schema bugs.
+            raise
+        return existing
     await session.refresh(user)
     return user
+
+
+async def _select_user_for_clerk(
+    session: AsyncSession,
+    clerk_id: str,
+    email: str | None = None,
+) -> User | None:
+    """SELECT a User by clerk_user_id (preferred) or email (fallback)."""
+    if email is None:
+        stmt = select(User).where(User.clerk_user_id == clerk_id)
+    else:
+        stmt = select(User).where(
+            or_(User.clerk_user_id == clerk_id, User.email == email)
+        )
+    res = await session.execute(stmt)
+    return res.scalar_one_or_none()
 
 
 async def require_clerk_user(
