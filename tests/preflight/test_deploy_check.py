@@ -22,15 +22,26 @@ def _run_script(env: dict[str, str], *args: str) -> subprocess.CompletedProcess:
 
 def _base_env(**overrides: str) -> dict[str, str]:
     """Build an env dict with all required secrets present so we can
-    isolate which check we're exercising."""
+    isolate which check we're exercising. Names mirror the Pydantic
+    Settings + the deploy provisioner (Phase 1+2 alignment)."""
     env = {
         "PATH": "/usr/bin:/bin",
         "DATABASE_URL": "postgres://stub",
-        "REDIS_URL": "redis://stub",
-        "R2_ACCESS_KEY_ID": "stub",
-        "R2_SECRET_ACCESS_KEY": "stub",
-        "R2_BUCKET": "stub",
-        "RESEND_API_KEY": "stub",
+        "VLABS_API_KEY_HASH_PEPPER": "stub",
+        "UPSTASH_REDIS_REST_URL": "https://stub",
+        "UPSTASH_REDIS_REST_TOKEN": "stub",
+        "VLABS_R2_ACCOUNT_ID": "stub",
+        "VLABS_R2_ACCESS_KEY_ID": "stub",
+        "VLABS_R2_SECRET_ACCESS_KEY": "stub",
+        "VLABS_R2_BUCKET_NAME": "stub",
+        "VLABS_R2_PUBLIC_URL": "https://stub",
+        "VLABS_DATA_LLM_KEY_ENCRYPTION": "stub",
+        "VLABS_EMAIL_FROM": "stub@example.com",
+        "VLABS_EMAIL_API_KEY": "stub",
+        "CLERK_SECRET_KEY": "stub",
+        "CLERK_PUBLISHABLE_KEY": "stub",
+        "CLERK_JWT_ISSUER": "https://stub",
+        "CLERK_JWKS_URL": "https://stub",
     }
     env.update(overrides)
     return env

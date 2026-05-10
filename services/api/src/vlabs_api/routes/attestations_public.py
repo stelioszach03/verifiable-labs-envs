@@ -63,6 +63,29 @@ class PublicEndpointRateLimited(APIError):
     title = "verification endpoint rate limit exceeded for this IP"
 
 
+class PkiBackendUnavailable(APIError):
+    """503 Service Unavailable when the V-Certified CA backend cannot
+    initialise. In production this fires when the kms_hsm backend is
+    not yet wired (Phase 31.G hardening) and ``VLABS_LOCAL_FAKE_PKI``
+    is intentionally off — the in-memory fake CA refuses to start in
+    prod because its keys are non-persistent across restarts."""
+
+    status_code = 503
+    code = "pki_backend_unavailable"
+    title = "V-Certified CA backend not configured"
+
+
+def _try_get_backend():
+    """Best-effort PKI backend resolution. Returns ``None`` when the
+    backend is intentionally refused in production (kms_hsm not yet
+    available + VLABS_LOCAL_FAKE_PKI not set). Callers branch on None
+    to surface a clean 503 instead of a generic 500."""
+    try:
+        return get_default_backend()
+    except RuntimeError:
+        return None
+
+
 def _client_ip(request: Request) -> str:
     """Pull the verifier's IP from the request scope.
 
@@ -205,11 +228,21 @@ async def public_verify_by_cert(
     await _enforce_ip_rate_limit(request, key="verify-by-cert")
     row = await svc.get_by_cert_serial(session, cert_serial=cert_serial)
     cert_row = await svc.get_certificate(session, cert_serial=cert_serial)
+    backend = _try_get_backend()
+    if backend is None:
+        # CA chain isn't available in prod until 31.G ships kms_hsm.
+        # The leaf-cert PEM stored alongside the attestation row is
+        # still surfaced; verifiers without the CA chain can fall back
+        # to the public registry view at GET /v1/attestations/verify/
+        # {public_id}.
+        raise PkiBackendUnavailable(
+            detail="ca_certificate_pem unavailable; use verify/{public_id}"
+        )
     return AttestationPublicCertificate(
         public_id=row.public_id,
         cert_serial=cert_serial,
         certificate_pem=cert_row.certificate_pem if cert_row else None,
-        ca_certificate_pem=get_default_backend().ca_certificate_pem,
+        ca_certificate_pem=backend.ca_certificate_pem,
         issued_at=cert_row.issued_at if cert_row else None,
         revoked_at=cert_row.revoked_at if cert_row else None,
         attestation_status=row.status,
@@ -278,12 +311,22 @@ async def public_crl(
     session: AsyncSession = Depends(get_db),
 ) -> Response:
     await _enforce_ip_rate_limit(request, key="crl")
+    backend = _try_get_backend()
+    if backend is None:
+        # CRL signing requires the CA private key. In prod this fires
+        # until 31.G ships the kms_hsm backend; verifiers should treat
+        # the absence of a CRL as "no certificate revocations to apply"
+        # but the proper response is a clean 503 rather than a generic
+        # 500 from the underlying RuntimeError.
+        raise PkiBackendUnavailable(
+            detail="CRL signing not available; ca backend not configured"
+        )
     revoked_certs = await svc.list_revoked_certs(session)
     pairs = [
         (c.cert_serial, c.revoked_at or datetime.now(UTC))
         for c in revoked_certs
     ]
-    pem = build_crl_pem(revoked=pairs)
+    pem = build_crl_pem(revoked=pairs, backend=backend)
     return Response(
         content=pem,
         media_type="application/x-pem-file",

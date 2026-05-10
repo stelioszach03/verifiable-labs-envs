@@ -1,6 +1,13 @@
 # Multi-stage build for vlabs-api on Fly.io.
-# Stage 1: build wheels with all dependencies.
+# Stage 1: build the api wheel + the verifiable-labs-envs wheel from
+#          the in-repo source.
 # Stage 2: runtime image (slim, non-root, no build tooling).
+#
+# Build context: REPO ROOT (not services/api/). Invoke from the repo
+# root with:
+#   flyctl deploy --app vlabs-api \
+#                 --config services/api/fly.toml \
+#                 --dockerfile services/api/deploy/Dockerfile
 
 ARG PYTHON_VERSION=3.11
 
@@ -19,15 +26,31 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
-# README.md is required by hatchling for metadata validation
-# (pyproject.toml: readme = "README.md").
-COPY pyproject.toml README.md ./
-COPY src ./src
+RUN pip install --upgrade pip wheel build
 
-# Production image only needs runtime deps; the [dev] extra ships
-# pgserver + ruff + mypy which are tens of MB of wheels we never use.
-RUN pip install --upgrade pip wheel build \
-    && pip wheel --wheel-dir /wheels '.'
+# 1. Build the verifiable-labs-envs wheel WITHOUT pulling its full
+#    dependency tree (jax / scipy / scikit-image / matplotlib /
+#    pillow / datasets / openai / tqdm / matplotlib are only needed
+#    for env runtime — the api uses a thin slice covering
+#    process_reward.{dataset,inference,segmentation} +
+#    reward_distillation.stub_inference, all of which are
+#    pure-Python + numpy. The api's own deps already install numpy.).
+# LICENSE is required by hatchling because the root pyproject.toml
+# declares ``license = { file = "LICENSE" }``. README.md satisfies
+# the readme metadata field.
+COPY pyproject.toml README.md LICENSE ./sdk/
+COPY src ./sdk/src
+RUN cd sdk && pip wheel --no-deps --wheel-dir /wheels '.'
+
+# 2. Build the api wheel + its full transitive dependency tree.
+#    pip wheel resolves vlabs-calibrate from PyPI; verifiable-labs-envs
+#    is found in /wheels via --find-links.
+COPY services/api/pyproject.toml services/api/README.md ./api/
+COPY services/api/src ./api/src
+RUN cd api && pip wheel \
+        --find-links=/wheels \
+        --wheel-dir /wheels \
+        '.'
 
 # ── Runtime ────────────────────────────────────────────────────────────
 FROM python:${PYTHON_VERSION}-slim AS runtime
@@ -49,16 +72,21 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 COPY --from=builder /wheels /wheels
-COPY migrations ./migrations
-COPY alembic.ini ./alembic.ini
-COPY deploy/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY services/api/migrations ./migrations
+COPY services/api/alembic.ini ./alembic.ini
+COPY services/api/deploy/entrypoint.sh /usr/local/bin/entrypoint.sh
 
-# Install vlabs-api directly from the pre-built wheel by *name* (not '.').
-# Going through `'.'` would re-trigger pyproject.toml's hatchling build path,
-# but hatchling is in /wheels, not in the runtime env — and --no-index
-# blocks PyPI fetches. `vlabs-api` resolves to the wheel produced by the
-# builder stage, plus all its transitive deps which are also in /wheels.
+# Two-step install:
+#   - vlabs-api with full dep resolution from /wheels.
+#   - verifiable-labs-envs added with --no-deps so its env-runtime
+#     extras (jax / scipy / scikit-image / matplotlib / pillow /
+#     datasets / openai / tqdm) are NOT pulled in. The api's import
+#     surface only touches the pure-Python / numpy slice; lazy
+#     env-loading code paths (POST /v1/instance, POST /v1/score,
+#     POST /v1/datasets, monitor runs) will still need the heavy deps
+#     and are tracked as a follow-up image bake (Phase 32 hardening).
 RUN pip install --no-index --find-links=/wheels vlabs-api \
+    && pip install --no-index --find-links=/wheels --no-deps verifiable-labs-envs \
     && rm -rf /wheels \
     && chmod +x /usr/local/bin/entrypoint.sh \
     && chown -R vlabs:vlabs /app
