@@ -9,10 +9,7 @@ can't silently regress.
 """
 from __future__ import annotations
 
-import pytest
-
 from vlabs_api import storage
-
 
 # ── _ext_for_format unit tests ─────────────────────────────────────
 

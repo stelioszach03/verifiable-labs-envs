@@ -16,12 +16,10 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-import pytest
 from sqlalchemy import select
 
 from vlabs_api import clerk_auth
 from vlabs_api.db import APIKey, User
-
 
 # ── helpers ────────────────────────────────────────────────────────
 
