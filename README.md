@@ -19,6 +19,34 @@ Most AI eval tools test chatbots and apps. Verifiable Labs generates scientific 
 - 🔗 Training API (Phase 22) — [`POST /v1/instance`](docs/api-reference/instance.md), [`POST /v1/score`](docs/api-reference/score.md), [`GET /v1/score/audit`](docs/api-reference/score.md#audit-trail) for per-call calibrated rewards in your training loop.
 - 🔗 Synthetic-dataset API (Phase 23) — [`POST /v1/datasets`](docs/api-reference/datasets.md) generates calibrated `(prompt, completion, reward, components)` corpora asynchronously against your own LLM endpoint, in [Parquet or JSONL](docs/api-reference/dataset-formats.md).
 
+## License & Pricing
+
+The Verifiable Labs Python SDK is **Apache-2.0 free forever**.
+Production-ready math, no telemetry, no feature gates — see
+[LICENSE](LICENSE).
+
+Hosted services (reward-model API, premium environments,
+V-Certified attestations, custom environment development,
+self-hosted enterprise license) are paid surfaces detailed in
+[`docs/PRICING.md`](docs/PRICING.md). The internal strategy doc
+explaining the free-vs-paid boundary is
+[`docs/BUSINESS_MODEL.md`](docs/BUSINESS_MODEL.md).
+
+| Tier | Surface                              | Cost (placeholder)         |
+|------|--------------------------------------|----------------------------|
+| 0    | SDK + 3 reference envs                | $0 (Apache-2.0)            |
+| 1    | Hosted RM / PRM API                   | $0.10 / 1K calls           |
+| 2    | All 25 envs subscription              | $499 / month               |
+| 3    | V-Certified Bronze (annual)           | $4,999 / year              |
+| 4    | V-Certified Silver (annual)           | $24,999 / year             |
+| 5    | V-Certified Gold + custom envs        | $99,999 / year             |
+| 6    | Self-hosted enterprise license        | $250K+ / year              |
+
+> All paid tiers are in **test mode** until the Verifiable Labs Inc.
+> (Delaware C-corp) registration completes. Email
+> `sales@verifiable-labs.com` to be contacted when live billing
+> opens.
+
 ## Install
 
 ```bash
