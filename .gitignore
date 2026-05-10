@@ -141,6 +141,12 @@ LICENSE [0-9]
 reports/preflight/*.json
 reports/preflight/phase29_trainer_run/
 reports/preflight/phase30_trainer_run/
+
+# Internal-only directory. Contains planning docs, internal status
+# reports, debug logs, and the placeholder pricing / business model
+# notes. Never pushed to GitHub; kept on disk so the maintainer can
+# still reference them.
+.private/
 # Phase 29/30 v0.0.1 dataset artefacts live on HF Hub (Apache-2.0).
 # Don't bloat the git tree with the JSONL/parquet copies — only the
 # manifest.json (fingerprint + row counts) is tracked for provenance.

@@ -11,41 +11,24 @@
 
 Most AI eval tools test chatbots and apps. Verifiable Labs generates scientific environments with **objective rewards**, **calibrated uncertainty**, **procedural regeneration**, **classical baselines**, and **training-signal potential** — tasks that are continuous, uncertainty-sensitive, and impossible to solve by memorising static benchmark answers.
 
-> **Status:** v0.1.0-alpha (developer preview). 13 live environments across compressed sensing, super-resolution, medical CT/MRI, phase retrieval, and symbolic algebra. Hosted REST API + Python SDK + `verifiable` CLI shipped. The platform is open and rate-limited; treat the public endpoint as a developer playground until v0.2 (auth + Redis sessions). Full roadmap: [`docs/company/roadmap.md`](docs/company/roadmap.md).
+> **Status:** v0.1.0-alpha (developer preview). 25 live environments across compressed sensing, super-resolution, medical CT/MRI, phase retrieval, symbolic algebra, code execution, SQL, and long-context reasoning. Hosted REST API + Python SDK + `verifiable` CLI shipped. The public endpoint is open and rate-limited; treat it as a developer playground.
 
 - 🔗 Hugging Face leaderboard — https://huggingface.co/spaces/stelioszach03/scientific-rl-benchmark
-- 🔗 Prime Intellect Hub envs — [`sparse-fourier-recovery`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-multiturn), [`-tools`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-tools), [`mri-knee-reconstruction`](https://app.primeintellect.ai/dashboard/environments/stelioszach/mri-knee-reconstruction), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/mri-knee-reconstruction-multiturn), [`phase-retrieval`](https://app.primeintellect.ai/dashboard/environments/stelioszach/phase-retrieval), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/phase-retrieval-multiturn), [`super-resolution-div2k-x4`](https://app.primeintellect.ai/dashboard/environments/stelioszach/super-resolution-div2k-x4), [`lodopab-ct-simplified`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified-multiturn).
+- 🔗 Prime Intellect Hub — https://app.primeintellect.ai/dashboard/environments/stelioszach03 (25 envs published)
 - 🔗 Paper (preprint, OpenReview submission pending) — [`paper/main.pdf`](paper/main.pdf)
-- 🔗 Training API (Phase 22) — [`POST /v1/instance`](docs/api-reference/instance.md), [`POST /v1/score`](docs/api-reference/score.md), [`GET /v1/score/audit`](docs/api-reference/score.md#audit-trail) for per-call calibrated rewards in your training loop.
-- 🔗 Synthetic-dataset API (Phase 23) — [`POST /v1/datasets`](docs/api-reference/datasets.md) generates calibrated `(prompt, completion, reward, components)` corpora asynchronously against your own LLM endpoint, in [Parquet or JSONL](docs/api-reference/dataset-formats.md).
+- 🔗 Training API — [`POST /v1/instance`](docs/api-reference/instance.md), [`POST /v1/score`](docs/api-reference/score.md), [`GET /v1/score/audit`](docs/api-reference/score.md#audit-trail) for per-call calibrated rewards in your training loop.
+- 🔗 Synthetic-dataset API — [`POST /v1/datasets`](docs/api-reference/datasets.md) generates calibrated `(prompt, completion, reward, components)` corpora asynchronously against your own LLM endpoint, in [Parquet or JSONL](docs/api-reference/dataset-formats.md).
 
-## License & Pricing
+## License
 
-The Verifiable Labs Python SDK is **Apache-2.0 free forever**.
-Production-ready math, no telemetry, no feature gates — see
+The Verifiable Labs Python SDK is **Apache-2.0 free forever** —
+production-ready math, no telemetry, no feature gates. See
 [LICENSE](LICENSE).
 
-Hosted services (reward-model API, premium environments,
-V-Certified attestations, custom environment development,
-self-hosted enterprise license) are paid surfaces detailed in
-[`docs/PRICING.md`](docs/PRICING.md). The internal strategy doc
-explaining the free-vs-paid boundary is
-[`docs/BUSINESS_MODEL.md`](docs/BUSINESS_MODEL.md).
-
-| Tier | Surface                              | Cost (placeholder)         |
-|------|--------------------------------------|----------------------------|
-| 0    | SDK + 3 reference envs                | $0 (Apache-2.0)            |
-| 1    | Hosted RM / PRM API                   | $0.10 / 1K calls           |
-| 2    | All 25 envs subscription              | $499 / month               |
-| 3    | V-Certified Bronze (annual)           | $4,999 / year              |
-| 4    | V-Certified Silver (annual)           | $24,999 / year             |
-| 5    | V-Certified Gold + custom envs        | $99,999 / year             |
-| 6    | Self-hosted enterprise license        | $250K+ / year              |
-
-> All paid tiers are in **test mode** until the Verifiable Labs Inc.
-> (Delaware C-corp) registration completes. Email
-> `sales@verifiable-labs.com` to be contacted when live billing
-> opens.
+Commercial hosted services (reward-model API, managed environments,
+attestation programme, self-hosted enterprise) are available
+separately; reach the maintainer via the
+[contact page](docs/company/contact.md).
 
 ## Install
 
