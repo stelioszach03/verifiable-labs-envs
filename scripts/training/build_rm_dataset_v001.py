@@ -28,11 +28,9 @@ Usage::
 from __future__ import annotations
 
 import argparse
-import dataclasses
 import json
 import os
 import sys
-from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 

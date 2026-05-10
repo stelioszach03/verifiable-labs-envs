@@ -27,7 +27,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-
 DEFAULT_PROJECT = "verifiable-labs"
 
 
