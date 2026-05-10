@@ -202,8 +202,32 @@ def judge_steps(
         raise typer.Exit(code=2)
 
     api_key = resolve_api_key()
-    if force_stub or not is_phase30_collect_frontier_enabled():
-        typer.echo("using stub_step_judge_caller (offline / gates not met)")
+    # Same control-flow fix as Phase 29 (vlabs-reward-data judge): the
+    # is_phase30_collect_frontier_enabled() gate AND-s flag with key, so
+    # missing-key drops to stub silently. Inline the env-flag check so
+    # the abort branch is reachable; mirror the four-way ladder.
+    flag_raw = os.environ.get("VLABS_PHASE30_COLLECT_FRONTIER", "").strip().lower()
+    flag_set = flag_raw in {"1", "true", "yes", "on"}
+
+    if force_stub:
+        typer.echo("using stub_step_judge_caller (--force-stub)")
+        results = sample_per_step_judgments(
+            rows,
+            fraction=float(fraction),
+            judge_model=judge_model,
+            api_key="<stub>",
+            judge_caller=stub_step_judge_caller,
+            seed=int(seed),
+            max_steps=int(max_steps),
+        )
+    elif flag_set and not api_key:
+        typer.echo(
+            "ABORT: VLABS_PHASE30_COLLECT_FRONTIER=1 but no OPENROUTER_API_KEY.",
+            err=True,
+        )
+        raise typer.Exit(code=2)
+    elif not is_phase30_collect_frontier_enabled():
+        typer.echo("using stub_step_judge_caller (offline / gate not enabled)")
         results = sample_per_step_judgments(
             rows,
             fraction=float(fraction),
@@ -214,12 +238,6 @@ def judge_steps(
             max_steps=int(max_steps),
         )
     else:
-        if not api_key:
-            typer.echo(
-                "ABORT: VLABS_PHASE30_COLLECT_FRONTIER=1 but no API key.",
-                err=True,
-            )
-            raise typer.Exit(code=2)
         results = sample_per_step_judgments(
             rows,
             fraction=float(fraction),
