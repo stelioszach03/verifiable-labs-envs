@@ -23,6 +23,7 @@ import os
 import sys
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any
 
 DEFAULT_TIMEOUT = 10.0
 
@@ -208,28 +209,90 @@ def probe_openrouter(token: str, timeout: float = DEFAULT_TIMEOUT) -> ProviderRe
     return ProviderResult("openrouter", "ok", None, False)
 
 
+_ORACLE_GPU_LIMIT_NAMES: tuple[str, ...] = (
+    "bm-gpu2-2-count",          # 2× P100 (Pascal, legacy)
+    "bm-gpu3-8-count",          # 8× V100 (Volta)
+    "bm-gpu4-8-count",          # 8× A100 40 GB
+    "bm-gpu-a100-v2-count",     # 8× A100 80 GB BM
+    "bm-gpu-h100-8-count",      # 8× H100
+    "bm-gpu-l40s-4-count",      # 4× L40S
+    "vm-gpu-a10-1-count",       # 1× A10 24 GB
+    "vm-gpu-a10-2-count",       # 2× A10
+    "vm-gpu-a100-1-count",      # 1× A100 single-VM
+)
+
+
+def _oracle_gpu_quota_summary(
+    oci_module: Any,
+    config: dict[str, str],
+    timeout: float,
+) -> tuple[bool, str]:
+    """Query the OCI limits service for known GPU shape counts.
+
+    Returns ``(any_available, detail_string)``. ``any_available`` is
+    True iff at least one known GPU shape has ``available > 0`` in any
+    availability domain. The detail string lists the non-zero quotas
+    (when present) or is empty (when all zero).
+
+    Wrapped in a helper so tests can mock the limits client without
+    touching the auth path above it.
+    """
+    identity = oci_module.identity.IdentityClient(config)
+    identity.base_client.timeout = timeout
+    ads = identity.list_availability_domains(config["tenancy"]).data
+    limits_client = oci_module.limits.LimitsClient(config)
+    limits_client.base_client.timeout = timeout
+
+    found: dict[str, int] = {}
+    for limit_name in _ORACLE_GPU_LIMIT_NAMES:
+        for ad in ads:
+            try:
+                v = limits_client.get_resource_availability(
+                    service_name="compute",
+                    limit_name=limit_name,
+                    compartment_id=config["tenancy"],
+                    availability_domain=ad.name,
+                )
+                avail = int(v.data.available or 0)
+                if avail > 0:
+                    found[f"{limit_name}@{ad.name.split(':')[-1]}"] = avail
+            except oci_module.exceptions.ServiceError as exc:
+                # InvalidParameter = OCI doesn't recognize the shape for
+                # this region/tenancy. 404 = the limit isn't applicable.
+                # Both are "no quota" — keep iterating.
+                if exc.status in (400, 404):
+                    continue
+                # Other errors shouldn't block the auth-ok signal.
+                continue
+
+    if found:
+        return True, "GPU quota OK: " + str(found)
+    return False, (
+        "auth ok but ZERO GPU quota across known shapes — "
+        "file Service Limit Increase request via OCI Console "
+        "(see docs/operational/oracle-sli-request.md)"
+    )
+
+
 def probe_oracle(token: str, timeout: float = DEFAULT_TIMEOUT) -> ProviderResult:
     """Oracle Cloud Infrastructure (OCI) probe.
 
-    OCI auth is more complex than the other providers:
+    Two-stage check:
 
-      (a) **Real signed-request path** — if the ``oci`` Python SDK is
-          installed AND the 5 OCID/keypair env vars are present
-          (TENANCY_OCID, USER_OCID, FINGERPRINT, PRIVATE_KEY_PATH, REGION),
-          build an ``IdentityClient`` and hit ``get_user(user_ocid)``.
-          A 200 response means the keypair is valid and bound to a
-          real user; any 4xx → ``unauth``.
+      1. **Auth** — signed-request `get_user(user_ocid)` confirms the
+         private key + fingerprint + OCID quintet are valid. A 200
+         here means we CAN talk to OCI; nothing more.
 
-      (b) **Config-shape fallback** — if either ``oci`` lib is missing
-          OR not all OCID fields are set, do a presence + length check
-          and return ``ok`` (config-only) or ``unauth`` (missing).
-          Includes a ``detail`` string that flags the caller that
-          credentials weren't actually exercised against OCI's API.
+      2. **GPU quota** — query the limits service for known GPU shape
+         counts. A trial account with valid auth still has every GPU
+         quota at zero by default — the user has to file a Service
+         Limit Increase (SLI) request and wait 24-72 h. The probe
+         now distinguishes:
 
-    Note: this probe is registered with the ``ORACLE_CLI_AUTH_TOKEN``
-    env var, but the *real* signed-request path uses the OCID quintet.
-    The token-shaped check is purely a presence gate so the probe
-    fires when ANY oracle credential is configured.
+           gpu_available=True   → at least one GPU shape has avail>0
+           gpu_available=False  → auth OK but zero quota anywhere
+
+         This catches the "looked-fine-but-actually-no-GPU" trap.
     """
     del token  # not used directly — the real auth pulls OCID+keypair from env
 
@@ -284,11 +347,29 @@ def probe_oracle(token: str, timeout: float = DEFAULT_TIMEOUT) -> ProviderResult
         client = oci.identity.IdentityClient(config)
         client.base_client.timeout = timeout
         resp = client.get_user(user)
-        if resp.status == 200:
-            return ProviderResult("oracle", "ok", None, True)
-        return ProviderResult(
-            "oracle", "error", None, None, f"identity api http {resp.status}"
-        )
+        if resp.status != 200:
+            return ProviderResult(
+                "oracle", "error", None, None, f"identity api http {resp.status}"
+            )
+
+        # Auth OK — now check GPU quota. Without this distinction the
+        # probe lied for weeks: trial accounts with valid keypairs but
+        # zero GPU allowance still got reported as ``ok, gpu_available
+        # = True``, masking the SLI requirement.
+        try:
+            has_quota, detail = _oracle_gpu_quota_summary(oci, config, timeout)
+        except Exception as exc:  # noqa: BLE001
+            # Quota probe is best-effort: if it crashes (network blip,
+            # SDK quirk), fall back to "auth ok, gpu unknown" rather
+            # than turning the whole probe red.
+            return ProviderResult(
+                "oracle",
+                "ok",
+                None,
+                None,
+                f"auth ok; gpu quota probe failed: {type(exc).__name__}",
+            )
+        return ProviderResult("oracle", "ok", None, has_quota, detail)
     except Exception as exc:  # noqa: BLE001
         msg = str(exc).lower()
         if "authentication" in msg or "401" in msg or "not authorized" in msg:

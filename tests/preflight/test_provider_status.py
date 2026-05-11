@@ -5,6 +5,7 @@ import importlib.util
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -280,6 +281,137 @@ def test_oracle_registered_in_probes_dict(ps) -> None:
     env_var, func = ps.PROBES["oracle"]
     assert env_var == "ORACLE_TENANCY_OCID"
     assert func.__name__ == "probe_oracle"
+
+
+# ── _oracle_gpu_quota_summary unit tests ───────────────────────────
+
+
+def _make_fake_oci_module(*, available_per_limit: dict[str, int]) -> Any:
+    """Build a stand-in `oci` module that returns canned availability
+    numbers for each known GPU shape. Unknown limits → 404 service
+    error (= no quota), matching real OCI behaviour.
+    """
+    import sys
+    import types
+
+    fake = types.ModuleType("oci")
+
+    # exceptions namespace
+    exc_ns = types.SimpleNamespace()
+
+    class _SE(Exception):
+        def __init__(self, status: int, code: str = "X", message: str = "X"):
+            super().__init__(message)
+            self.status = status
+            self.code = code
+            self.message = message
+
+    exc_ns.ServiceError = _SE
+    fake.exceptions = exc_ns
+
+    # identity namespace
+    class _IDClient:
+        def __init__(self, _config):
+            class _BC:
+                timeout = None
+
+            self.base_client = _BC()
+
+        def list_availability_domains(self, _tenancy):
+            class _AD:
+                def __init__(self, name):
+                    self.name = name
+
+            class _R:
+                data = [_AD("OCID:AD-1"), _AD("OCID:AD-2")]
+
+            return _R()
+
+    identity_ns = types.SimpleNamespace(IdentityClient=_IDClient)
+    fake.identity = identity_ns
+
+    # limits namespace
+    class _LimitsClient:
+        def __init__(self, _config):
+            class _BC:
+                timeout = None
+
+            self.base_client = _BC()
+
+        def get_resource_availability(
+            self, service_name, limit_name, compartment_id, availability_domain
+        ):
+            if limit_name in available_per_limit:
+                avail = available_per_limit[limit_name]
+                class _D:
+                    def __init__(self, a):
+                        self.available = a
+
+                class _R:
+                    data = _D(avail)
+
+                return _R()
+            raise _SE(status=404, code="NotFound", message="limit not applicable")
+
+    limits_ns = types.SimpleNamespace(LimitsClient=_LimitsClient)
+    fake.limits = limits_ns
+    sys.modules["oci"] = fake
+    return fake
+
+
+def test_oracle_quota_summary_returns_false_when_all_zero(ps) -> None:
+    """The bug we just fixed: every GPU limit returns 0 → quota probe
+    must report ``has_quota=False`` with the SLI-required detail."""
+    fake = _make_fake_oci_module(
+        available_per_limit={
+            "bm-gpu3-8-count": 0,
+            "vm-gpu-a10-1-count": 0,
+        }
+    )
+    cfg = {"tenancy": "ocid1.tenancy.oc1..abc"}
+    has_quota, detail = ps._oracle_gpu_quota_summary(fake, cfg, timeout=10.0)
+    assert has_quota is False
+    assert "ZERO GPU quota" in detail
+    assert "Service Limit Increase" in detail
+
+
+def test_oracle_quota_summary_returns_true_when_any_shape_available(ps) -> None:
+    """First non-zero quota anywhere flips the boolean to True. The
+    detail must include the shape name + count so operators know which
+    SKU to launch."""
+    fake = _make_fake_oci_module(
+        available_per_limit={
+            "bm-gpu3-8-count": 0,
+            "vm-gpu-a10-1-count": 1,  # SLI approved!
+            "bm-gpu4-8-count": 0,
+        }
+    )
+    cfg = {"tenancy": "ocid1.tenancy.oc1..abc"}
+    has_quota, detail = ps._oracle_gpu_quota_summary(fake, cfg, timeout=10.0)
+    assert has_quota is True
+    assert "vm-gpu-a10-1-count" in detail
+    assert "AD-1" in detail
+
+
+def test_oracle_quota_summary_handles_unknown_limits_gracefully(ps) -> None:
+    """If OCI returns 404 / InvalidParameter for ALL probed shapes
+    (e.g., new region without any GPU SKUs registered), the helper
+    must still return cleanly with ``has_quota=False``, not raise."""
+    fake = _make_fake_oci_module(available_per_limit={})  # everything 404s
+    cfg = {"tenancy": "ocid1.tenancy.oc1..abc"}
+    has_quota, detail = ps._oracle_gpu_quota_summary(fake, cfg, timeout=10.0)
+    assert has_quota is False
+    assert "ZERO GPU quota" in detail
+
+
+def test_oracle_gpu_limit_names_constant_includes_a10_and_a100(ps) -> None:
+    """The constant we iterate over must include the shapes users
+    actually request via SLI. Pinning so a future cleanup doesn't
+    accidentally drop A10 or A100."""
+    names = ps._ORACLE_GPU_LIMIT_NAMES
+    assert "vm-gpu-a10-1-count" in names
+    assert any("a100" in n for n in names)
+    assert "bm-gpu3-8-count" in names  # V100 — covers existing accounts
 
 
 # ── probe_all + render ─────────────────────────────────────────────
