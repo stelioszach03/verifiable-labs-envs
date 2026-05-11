@@ -255,10 +255,15 @@ def test_probe_oracle_unauth_when_keypair_path_missing(
 
 def test_oracle_registered_in_probes_dict(ps) -> None:
     """Pin the registry — Oracle must be reachable via the standard
-    ``--only oracle`` CLI path (and via :func:`probe_all`)."""
+    ``--only oracle`` CLI path (and via :func:`probe_all`).
+
+    Gating on ``ORACLE_TENANCY_OCID`` (not the auth-token env var)
+    because OCID + signed keypair is the canonical OCI auth path and
+    the auth token is an opt-in alternative most users skip.
+    """
     assert "oracle" in ps.PROBES
     env_var, func = ps.PROBES["oracle"]
-    assert env_var == "ORACLE_CLI_AUTH_TOKEN"
+    assert env_var == "ORACLE_TENANCY_OCID"
     assert func.__name__ == "probe_oracle"
 
 
