@@ -152,6 +152,12 @@ ORACLE_TEN=$(prompt_for ORACLE_TENANCY_OCID "Oracle tenancy OCID")
 ORACLE_USR=$(prompt_for ORACLE_USER_OCID "Oracle user OCID")
 ORACLE_FP=$(prompt_for ORACLE_FINGERPRINT "Oracle API-key fingerprint")
 ORACLE_PEM=$(prompt_for ORACLE_PRIVATE_KEY_PATH "Oracle private-key path (e.g. ~/.oci/oci_api_key.pem)")
+# Region matters: OCI signature verification is region-strict and the
+# Console's "Configuration File Preview" includes the user's HOME
+# region. Defaulting to ``us-ashburn-1`` cost us an hour of debugging
+# when Stelios's tenancy was actually in ``us-chicago-1``. Always
+# prompt; never assume.
+ORACLE_REG=$(prompt_for ORACLE_REGION "Oracle home region (e.g. us-chicago-1, us-ashburn-1)")
 
 # ── optional secondary providers ──────────────────────────────────
 echo ""
@@ -185,6 +191,7 @@ trap 'rm -f "$TMP"' EXIT
     echo "ORACLE_USER_OCID=$ORACLE_USR"
     echo "ORACLE_FINGERPRINT=$ORACLE_FP"
     echo "ORACLE_PRIVATE_KEY_PATH=$ORACLE_PEM"
+    echo "ORACLE_REGION=$ORACLE_REG"
     echo ""
     echo "# === Optional secondary providers ==="
     echo "DIGITALOCEAN_API_TOKEN=$DO_TOKEN"
@@ -207,6 +214,7 @@ printf "    ORACLE_TENANCY_OCID         length=%d\n" "${#ORACLE_TEN}"
 printf "    ORACLE_USER_OCID            length=%d\n" "${#ORACLE_USR}"
 printf "    ORACLE_FINGERPRINT          length=%d\n" "${#ORACLE_FP}"
 printf "    ORACLE_PRIVATE_KEY_PATH     length=%d\n" "${#ORACLE_PEM}"
+printf "    ORACLE_REGION               value=%s\n" "${ORACLE_REG:-(empty)}"
 printf "    DIGITALOCEAN_API_TOKEN      length=%d\n" "${#DO_TOKEN}"
 printf "    RUNPOD_API_KEY              length=%d\n" "${#RUNPOD}"
 printf "    THUNDER_API_KEY             length=%d\n" "${#THUNDER}"
