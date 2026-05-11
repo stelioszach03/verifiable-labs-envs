@@ -172,6 +172,96 @@ def test_probe_openrouter_no_credit(ps, monkeypatch) -> None:
     assert r.balance_usd == 0.0
 
 
+# ── Oracle ────────────────────────────────────────────────────────
+
+
+def test_probe_oracle_unauth_when_ocid_fields_missing(
+    ps, monkeypatch
+) -> None:
+    """The OCID quintet is required; if any of the four key fields
+    is missing the probe must report unauth instead of attempting
+    to import ``oci`` or hit any network."""
+    for k in (
+        "ORACLE_TENANCY_OCID",
+        "ORACLE_USER_OCID",
+        "ORACLE_FINGERPRINT",
+        "ORACLE_PRIVATE_KEY_PATH",
+    ):
+        monkeypatch.delenv(k, raising=False)
+    r = ps.probe_oracle("any-token")
+    assert r.provider == "oracle"
+    assert r.status == "unauth"
+    assert "ORACLE_" in r.detail
+
+
+def test_probe_oracle_config_only_when_oci_sdk_missing(
+    ps, monkeypatch
+) -> None:
+    """All OCID fields present but ``oci`` sdk not installed → returns
+    ok with a 'config-shape' detail flagging that the credentials
+    weren't actually exercised. This keeps the preflight green for
+    machines that don't have the SDK installed yet."""
+    monkeypatch.setenv("ORACLE_TENANCY_OCID", "ocid1.tenancy.oc1..abc")
+    monkeypatch.setenv("ORACLE_USER_OCID", "ocid1.user.oc1..xyz")
+    monkeypatch.setenv("ORACLE_FINGERPRINT", "12:34:56:78:9a:bc:de:f0")
+    monkeypatch.setenv("ORACLE_PRIVATE_KEY_PATH", "/tmp/no_such_key.pem")
+
+    # Force ImportError on `import oci` by stubbing importlib.
+    import builtins
+
+    real_import = builtins.__import__
+
+    def _fail_oci(name, *args, **kwargs):
+        if name == "oci":
+            raise ImportError("oci not installed")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", _fail_oci)
+
+    r = ps.probe_oracle("any-token")
+    assert r.status == "ok"
+    assert "config-shape" in r.detail
+    assert r.gpu_available is True
+
+
+def test_probe_oracle_unauth_when_keypair_path_missing(
+    ps, monkeypatch, tmp_path
+) -> None:
+    """All env vars present, ``oci`` SDK present, but the keypair PEM
+    file doesn't exist on disk — probe must report unauth with a
+    'private key not found' detail rather than letting the SDK
+    raise an opaque error."""
+    monkeypatch.setenv("ORACLE_TENANCY_OCID", "ocid1.tenancy.oc1..abc")
+    monkeypatch.setenv("ORACLE_USER_OCID", "ocid1.user.oc1..xyz")
+    monkeypatch.setenv("ORACLE_FINGERPRINT", "12:34:56:78:9a:bc:de:f0")
+    monkeypatch.setenv(
+        "ORACLE_PRIVATE_KEY_PATH", str(tmp_path / "missing.pem")
+    )
+
+    # Provide a fake `oci` module so the real ImportError path is
+    # not taken (we want the keypair-missing branch).
+    import sys
+    import types
+
+    fake_oci = types.ModuleType("oci")
+    fake_oci.config = types.SimpleNamespace(validate_config=lambda c: None)
+    fake_oci.identity = types.SimpleNamespace(IdentityClient=lambda c: None)
+    monkeypatch.setitem(sys.modules, "oci", fake_oci)
+
+    r = ps.probe_oracle("any-token")
+    assert r.status == "unauth"
+    assert "private key not found" in r.detail
+
+
+def test_oracle_registered_in_probes_dict(ps) -> None:
+    """Pin the registry — Oracle must be reachable via the standard
+    ``--only oracle`` CLI path (and via :func:`probe_all`)."""
+    assert "oracle" in ps.PROBES
+    env_var, func = ps.PROBES["oracle"]
+    assert env_var == "ORACLE_CLI_AUTH_TOKEN"
+    assert func.__name__ == "probe_oracle"
+
+
 # ── probe_all + render ─────────────────────────────────────────────
 
 
