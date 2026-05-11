@@ -8,7 +8,12 @@ from verifiable_labs_envs.envs.tool_calling_debug import (
     build_user_prompt,
     parse_response,
 )
-from verifiable_labs_envs.envs.tool_calling_single import TOOL_SCHEMAS
+
+# ``TOOL_SCHEMAS`` from ``tool_calling_single`` is imported lazily
+# in get_tools_schema below — the matching NOTE in
+# adapters/math_algebra_tools.py documents why (eager top-level
+# import triggers a circular path that breaks Prime Intellect's
+# test_install_and_import on a fresh interpreter).
 from verifiable_labs_envs.solvers.llm_solver import EnvAdapter
 from verifiable_labs_envs.tool_primitives import schemas_for
 
@@ -31,6 +36,9 @@ class ToolCallingDebugAdapter(EnvAdapter):
         forwarded schema to that subset so the model picks from the
         same pool the trace was built against.
         """
+        # Lazy import — see module-top NOTE on the circular path.
+        from verifiable_labs_envs.envs.tool_calling_single import TOOL_SCHEMAS
+
         names = getattr(instance, "available_tools", None)
         if names:
             return schemas_for(names) or list(TOOL_SCHEMAS)

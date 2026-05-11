@@ -6,7 +6,7 @@ version = "0.1.3"
 requires-python = ">=3.11"
 dependencies = [
     "verifiers>=0.1.12",
-    "verifiable-labs-envs>=0.1.0a2",
+    "verifiable-labs-envs @ git+https://github.com/stelioszach03/verifiable-labs-envs.git@main",
 ]
 authors = [{ name = "Stelios Zacharioudakis" }]
 license = { text = "Apache-2.0" }
@@ -22,3 +22,7 @@ factory = "load_environment"
 
 [tool.hatch.build.targets.wheel]
 include = ["long_context_needle.py"]
+
+[tool.hatch.metadata]
+# Allow git+https direct reference to verifiable-labs-envs above.
+allow-direct-references = true
