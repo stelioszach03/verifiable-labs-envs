@@ -2,7 +2,7 @@
 name = "long-context-reasoning"
 tags = ["long-context", "reasoning", "rlvr"]
 description = "Multi-hop reasoning over long documents (>10k tokens)."
-version = "0.1.3"
+version = "0.1.4"
 requires-python = ">=3.11"
 dependencies = [
     "verifiers>=0.1.12",

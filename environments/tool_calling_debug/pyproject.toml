@@ -2,7 +2,7 @@
 name = "tool-calling-debug"
 tags = ["tool-use", "debugging", "rlvr"]
 description = "Debug-loop tool-calling — narrate-act-observe scaffolding."
-version = "0.1.3"
+version = "0.1.4"
 requires-python = ">=3.11"
 dependencies = [
     "verifiers>=0.1.12",

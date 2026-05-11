@@ -2,7 +2,7 @@
 name = "code-humaneval-multiturn"
 tags = ["code", "humaneval", "multiturn", "rlvr"]
 description = "Multi-turn HumanEval — failed tests feed back as hints."
-version = "0.1.3"
+version = "0.1.4"
 requires-python = ">=3.11"
 dependencies = [
     "verifiers>=0.1.12",
