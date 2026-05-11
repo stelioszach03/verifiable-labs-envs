@@ -38,9 +38,12 @@ def ps():
 
 
 def test_probe_vultr_ok(ps, monkeypatch) -> None:
+    """Vultr returns ``balance < 0`` for accounts in credit. The probe
+    reports the remaining credit as a positive float."""
     def _stub(url, headers, timeout):
         assert "vultr" in url
-        return 200, {"account": {"balance": 250.5}}
+        # -250.5 = $250.50 credit owed-to-the-user.
+        return 200, {"account": {"balance": -250.5}}
 
     monkeypatch.setattr(ps, "_http_get", _stub)
     r = ps.probe_vultr("token")
@@ -49,9 +52,21 @@ def test_probe_vultr_ok(ps, monkeypatch) -> None:
     assert r.balance_usd == 250.5
 
 
-def test_probe_vultr_no_credit(ps, monkeypatch) -> None:
+def test_probe_vultr_no_credit_on_zero_balance(ps, monkeypatch) -> None:
+    """Balance of zero = paid in full but no credit available."""
     def _stub(url, headers, timeout):
         return 200, {"account": {"balance": 0}}
+
+    monkeypatch.setattr(ps, "_http_get", _stub)
+    r = ps.probe_vultr("token")
+    assert r.status == "no_credit"
+    assert r.balance_usd == 0.0
+
+
+def test_probe_vultr_no_credit_when_debt_owed(ps, monkeypatch) -> None:
+    """Positive balance = user owes Vultr money — no credit for provisioning."""
+    def _stub(url, headers, timeout):
+        return 200, {"account": {"balance": 12.34}}
 
     monkeypatch.setattr(ps, "_http_get", _stub)
     r = ps.probe_vultr("token")

@@ -79,6 +79,20 @@ def _http_post(
 
 
 def probe_vultr(token: str, timeout: float = DEFAULT_TIMEOUT) -> ProviderResult:
+    """Vultr's accounting uses a SIGNED ``balance`` field:
+
+    - ``balance < 0``: user has credit. The absolute value is the
+      remaining USD credit. (Vultr models this as "negative debt" so
+      negative numbers === money the platform owes the user.)
+    - ``balance == 0``: account paid in full, no remaining credit.
+    - ``balance > 0``: user owes Vultr money (charges minus payments
+      exceed credit). No credit available for new provisioning.
+
+    The previous probe inverted this and reported ``no_credit`` for
+    accounts that actually had $255 of credit available. Now we
+    report ``balance_usd`` as the positive remaining-credit number
+    (signed in: ``-bal`` when ``bal < 0``).
+    """
     code, body = _http_get(
         "https://api.vultr.com/v2/account",
         {"Authorization": f"Bearer {token}"},
@@ -94,8 +108,10 @@ def probe_vultr(token: str, timeout: float = DEFAULT_TIMEOUT) -> ProviderResult:
     if bal is None:
         return ProviderResult("vultr", "error", None, None, "missing balance")
     bal = float(bal)
-    status = "ok" if bal > 0 else "no_credit"
-    return ProviderResult("vultr", status, bal, None)
+    # Negative = credit available; positive = debt owed → no credit.
+    remaining_credit = -bal if bal < 0 else 0.0
+    status = "ok" if remaining_credit > 0 else "no_credit"
+    return ProviderResult("vultr", status, remaining_credit, None)
 
 
 def probe_runpod(token: str, timeout: float = DEFAULT_TIMEOUT) -> ProviderResult:
