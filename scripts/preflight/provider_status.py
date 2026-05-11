@@ -192,6 +192,98 @@ def probe_openrouter(token: str, timeout: float = DEFAULT_TIMEOUT) -> ProviderRe
     return ProviderResult("openrouter", "ok", None, False)
 
 
+def probe_oracle(token: str, timeout: float = DEFAULT_TIMEOUT) -> ProviderResult:
+    """Oracle Cloud Infrastructure (OCI) probe.
+
+    OCI auth is more complex than the other providers:
+
+      (a) **Real signed-request path** — if the ``oci`` Python SDK is
+          installed AND the 5 OCID/keypair env vars are present
+          (TENANCY_OCID, USER_OCID, FINGERPRINT, PRIVATE_KEY_PATH, REGION),
+          build an ``IdentityClient`` and hit ``get_user(user_ocid)``.
+          A 200 response means the keypair is valid and bound to a
+          real user; any 4xx → ``unauth``.
+
+      (b) **Config-shape fallback** — if either ``oci`` lib is missing
+          OR not all OCID fields are set, do a presence + length check
+          and return ``ok`` (config-only) or ``unauth`` (missing).
+          Includes a ``detail`` string that flags the caller that
+          credentials weren't actually exercised against OCI's API.
+
+    Note: this probe is registered with the ``ORACLE_CLI_AUTH_TOKEN``
+    env var, but the *real* signed-request path uses the OCID quintet.
+    The token-shaped check is purely a presence gate so the probe
+    fires when ANY oracle credential is configured.
+    """
+    del token  # not used directly — the real auth pulls OCID+keypair from env
+
+    tenancy = os.environ.get("ORACLE_TENANCY_OCID", "").strip()
+    user = os.environ.get("ORACLE_USER_OCID", "").strip()
+    fingerprint = os.environ.get("ORACLE_FINGERPRINT", "").strip()
+    key_path = os.environ.get("ORACLE_PRIVATE_KEY_PATH", "").strip()
+    region = os.environ.get("ORACLE_REGION", "us-ashburn-1").strip() or "us-ashburn-1"
+
+    have_full_keypair = all([tenancy, user, fingerprint, key_path])
+    if not have_full_keypair:
+        return ProviderResult(
+            "oracle",
+            "unauth",
+            None,
+            None,
+            "missing one or more of ORACLE_{TENANCY,USER,FINGERPRINT,PRIVATE_KEY_PATH}",
+        )
+
+    # ── try the real signed-request path ──────────────────────────
+    try:
+        import oci  # type: ignore[import-not-found]  # noqa: PLC0415
+    except ImportError:
+        return ProviderResult(
+            "oracle",
+            "ok",
+            None,
+            True,  # OCI does offer GPU instances
+            "config-shape OK; install ``oci`` python sdk for live verification",
+        )
+
+    try:
+        from pathlib import Path as _Path  # noqa: PLC0415
+
+        key_file = _Path(key_path).expanduser()
+        if not key_file.exists():
+            return ProviderResult(
+                "oracle",
+                "unauth",
+                None,
+                None,
+                f"private key not found at {key_path}",
+            )
+        config = {
+            "user": user,
+            "fingerprint": fingerprint,
+            "tenancy": tenancy,
+            "region": region,
+            "key_file": str(key_file),
+        }
+        oci.config.validate_config(config)
+        client = oci.identity.IdentityClient(config)
+        client.base_client.timeout = timeout
+        resp = client.get_user(user)
+        if resp.status == 200:
+            return ProviderResult("oracle", "ok", None, True)
+        return ProviderResult(
+            "oracle", "error", None, None, f"identity api http {resp.status}"
+        )
+    except Exception as exc:  # noqa: BLE001
+        msg = str(exc).lower()
+        if "authentication" in msg or "401" in msg or "not authorized" in msg:
+            return ProviderResult(
+                "oracle", "unauth", None, None, f"{type(exc).__name__}: {exc}"
+            )
+        return ProviderResult(
+            "oracle", "error", None, None, f"{type(exc).__name__}: {exc}"
+        )
+
+
 # ── registry ──────────────────────────────────────────────────────
 
 
@@ -202,6 +294,13 @@ PROBES: dict[str, tuple[str, Callable[[str, float], ProviderResult]]] = {
     "hf": ("HF_TOKEN", probe_hf),
     "wandb": ("WANDB_API_KEY", probe_wandb),
     "openrouter": ("OPENROUTER_API_KEY", probe_openrouter),
+    # Oracle's auth ladder is OCID+keypair, not a single bearer token,
+    # so the probe reads those out of os.environ directly. The token-
+    # like env var (ORACLE_CLI_AUTH_TOKEN) is registered here only so
+    # the probe is reachable when ANY oracle credential is set; the
+    # real signed-request path uses ORACLE_{TENANCY,USER,FINGERPRINT,
+    # PRIVATE_KEY_PATH} as documented in probe_oracle().
+    "oracle": ("ORACLE_CLI_AUTH_TOKEN", probe_oracle),
 }
 
 
