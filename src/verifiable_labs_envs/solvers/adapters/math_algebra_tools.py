@@ -8,7 +8,14 @@ from __future__ import annotations
 
 from typing import Any
 
-from verifiable_labs_envs.envs.math_algebra_tools import TOOL_SCHEMAS
+# NOTE: ``TOOL_SCHEMAS`` is imported lazily inside ``get_tools_schema``
+# below — pulling it at module top creates a circular import path
+# (``envs.math_algebra_tools`` → ``solvers.llm_solver`` →
+# ``solvers.__init__`` → ``solvers.adapters.__init__`` → here → back to
+# ``envs.math_algebra_tools`` mid-load) that triggers
+# ``ImportError: cannot import name 'TOOL_SCHEMAS' from partially
+# initialized module`` in a fresh interpreter. Reproduced by the Prime
+# Intellect Hub test_install_and_import CI check.
 from verifiable_labs_envs.solvers.adapters.math_algebra import MathAlgebraLLMAdapter
 from verifiable_labs_envs.solvers.llm_solver import EnvAdapter
 
@@ -69,6 +76,9 @@ class MathAlgebraToolsAdapter(EnvAdapter):
     def get_tools_schema(self, instance: Any) -> list[dict[str, Any]] | None:
         """Forward the env's 4-primitive SymPy tool schema."""
         del instance  # the env exposes a static pool to every instance
+        # Lazy import — see module-top NOTE on circular path.
+        from verifiable_labs_envs.envs.math_algebra_tools import TOOL_SCHEMAS
+
         return list(TOOL_SCHEMAS)
 
 
