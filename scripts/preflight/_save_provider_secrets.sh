@@ -88,7 +88,22 @@ echo "Press Enter without typing to KEEP the previously-saved value."
 echo "Press Enter twice to leave a field empty (optional providers)."
 echo ""
 
-# Helper: read silently, fall back to existing on empty input
+# Helper: read silently, fall back to existing on empty input.
+#
+# IMPORTANT: every `echo` / `read -p` inside this function MUST be
+# redirected to /dev/tty, NOT stdout. The caller is
+# ``VAR=$(prompt_for ...)`` which captures stdout; if we ``echo`` the
+# blank-line nicety to stdout, that newline ends up PREPENDED to the
+# returned value. When the value is later written to the env file as
+# ``KEY=$VAR``, the line becomes ``KEY=\nvalue`` — bash's ``source``
+# then sees the value on the NEXT line and tries to execute it as a
+# command (yielding ``command not found`` / ``Permission denied`` on
+# the PEM path).
+#
+# For OCI fields, also auto-strip a leading ``prefix=`` (the OCI
+# Console's "Configuration File Preview" exports lines of the form
+# ``tenancy=ocid1.tenancy.oc1..XXXX`` — users frequently paste the
+# whole line by reflex).
 prompt_for() {
     local key="$1" label="$2" existing="${EXISTING[$key]}"
     local prompt
@@ -98,13 +113,35 @@ prompt_for() {
         prompt="  ${label}"
     fi
     local new_value
-    read -srp "$prompt > " new_value || new_value=""
-    echo
+    # ``read -srp`` writes the prompt to stderr by default, so the
+    # PROMPT text stays out of $(...) capture. But the trailing
+    # newline-after-input nicety needs an explicit redirect to tty.
+    read -srp "$prompt > " new_value </dev/tty 2>/dev/tty || new_value=""
+    echo >/dev/tty
+
+    local final_value
     if [ -z "$new_value" ]; then
-        printf '%s' "$existing"
+        final_value="$existing"
     else
-        printf '%s' "$new_value"
+        final_value="$new_value"
     fi
+
+    # Strip Windows CR (paste artifact from clipboard transitions
+    # through Windows host → WSL).
+    final_value="${final_value%$'\r'}"
+
+    # OCI prefix-strip: if user pasted a full config-file line like
+    # ``tenancy=ocid1...``, drop the ``<key>=`` prefix so the env var
+    # contains just the OCID value.
+    case "$key" in
+        ORACLE_TENANCY_OCID)     final_value="${final_value#tenancy=}" ;;
+        ORACLE_USER_OCID)        final_value="${final_value#user=}" ;;
+        ORACLE_FINGERPRINT)      final_value="${final_value#fingerprint=}" ;;
+        ORACLE_PRIVATE_KEY_PATH) final_value="${final_value#key_file=}" ;;
+        ORACLE_REGION)           final_value="${final_value#region=}" ;;
+    esac
+
+    printf '%s' "$final_value"
 }
 
 # ── primary required fields ───────────────────────────────────────

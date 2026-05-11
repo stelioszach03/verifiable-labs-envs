@@ -294,13 +294,14 @@ PROBES: dict[str, tuple[str, Callable[[str, float], ProviderResult]]] = {
     "hf": ("HF_TOKEN", probe_hf),
     "wandb": ("WANDB_API_KEY", probe_wandb),
     "openrouter": ("OPENROUTER_API_KEY", probe_openrouter),
-    # Oracle's auth ladder is OCID+keypair, not a single bearer token,
-    # so the probe reads those out of os.environ directly. The token-
-    # like env var (ORACLE_CLI_AUTH_TOKEN) is registered here only so
-    # the probe is reachable when ANY oracle credential is set; the
-    # real signed-request path uses ORACLE_{TENANCY,USER,FINGERPRINT,
-    # PRIVATE_KEY_PATH} as documented in probe_oracle().
-    "oracle": ("ORACLE_CLI_AUTH_TOKEN", probe_oracle),
+    # Oracle's auth ladder is OCID + signed keypair, not a single
+    # bearer token. The probe reads the 5 OCID env vars directly from
+    # os.environ. We gate on ``ORACLE_TENANCY_OCID`` (the most
+    # commonly-set OCID field) rather than ``ORACLE_CLI_AUTH_TOKEN``
+    # — auth tokens are an alternative path and most users skip them,
+    # whereas the OCID quintet is what every real-world OCI setup
+    # provides. The actual auth check happens inside probe_oracle().
+    "oracle": ("ORACLE_TENANCY_OCID", probe_oracle),
 }
 
 
