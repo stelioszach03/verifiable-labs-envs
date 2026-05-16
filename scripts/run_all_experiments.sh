@@ -30,7 +30,8 @@ EXPERIMENTS=(
     "E2"
     "E3"
     "E4"
-    "E5"
+    "E5a"
+    "E5b"
     "E6"
     "E7"
     "E8"
@@ -89,7 +90,10 @@ for exp in "${EXPERIMENTS[@]}"; do
     echo "+ Smoke test passed for $exp"
     record_state "$exp" "smoke-ok"
 
-    runner="${EXPERIMENTS_DIR}/run_${exp}.sh"
+    # Runner filenames use underscores even when the experiment id has
+    # hyphens (e.g. `phase18-redo` -> `run_phase18_redo.sh`). Convert.
+    runner_basename="run_${exp//-/_}.sh"
+    runner="${EXPERIMENTS_DIR}/${runner_basename}"
     if [[ ! -f "$runner" ]]; then
         echo "= No runner at ${runner} — pausing here. Author the runner then re-run."
         exit 0
