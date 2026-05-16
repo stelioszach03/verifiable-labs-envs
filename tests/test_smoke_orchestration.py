@@ -77,7 +77,7 @@ def test_registry_has_phase18_redo(smoke_mod) -> None:
 
 def test_registry_has_E1_through_E10(smoke_mod) -> None:
     keys = set(smoke_mod.EXPERIMENT_REGISTRY)
-    expected = {"E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E10"}
+    expected = {"E1", "E2", "E3", "E4", "E5a", "E5b", "E6", "E7", "E8", "E10"}
     missing = expected - keys
     assert not missing, f"missing experiments: {sorted(missing)}"
 
@@ -613,7 +613,7 @@ def test_orchestrator_lists_all_experiments() -> None:
     # Order matters: phase18-redo must come first.
     idx_p18 = body.find('"phase18-redo"')
     assert idx_p18 != -1
-    for exp in ("E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E10"):
+    for exp in ("E1", "E2", "E3", "E4", "E5a", "E5b", "E6", "E7", "E8", "E10"):
         idx = body.find(f'"{exp}"')
         assert idx != -1, f"orchestrator missing {exp}"
         assert idx > idx_p18, f"{exp} listed before phase18-redo"
@@ -629,8 +629,10 @@ def test_orchestrator_sets_safe_bash_options() -> None:
 def test_orchestrator_calls_smoke_then_runner() -> None:
     body = ORCHESTRATOR.read_text()
     # Must invoke the smoke script, then the runner per experiment.
+    # Runner basenames swap hyphens for underscores
+    # (e.g. `phase18-redo` -> `run_phase18_redo.sh`).
     assert "smoke_test_experiment.py" in body
-    assert "run_${exp}.sh" in body
+    assert "run_${exp//-/_}.sh" in body
 
 
 def test_orchestrator_records_done_state() -> None:
@@ -642,7 +644,7 @@ def test_orchestrator_records_done_state() -> None:
 
 @pytest.mark.parametrize(
     "exp",
-    ["phase18-redo", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E10"],
+    ["phase18-redo", "E1", "E2", "E3", "E4", "E5a", "E5b", "E6", "E7", "E8", "E10"],
 )
 def test_orchestrator_each_experiment_listed(exp) -> None:
     body = ORCHESTRATOR.read_text()
