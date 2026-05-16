@@ -25,6 +25,22 @@ trainer.train()
 
 Until then, callers in tests / CI use :func:`validate_dependencies`
 to confirm the toolchain is present.
+
+TRL 1.4 API notes (Phase 29.F / 30.F prep, May 2026)
+----------------------------------------------------
+TRL 1.4 ``GRPOConfig`` renamed two kwargs that the 30.C scaffold had
+been carrying under the older TRL surface:
+
+* ``max_prompt_length`` was **removed**; the prompt budget is now
+  rolled into ``vllm_max_model_length`` (single budget for prompt +
+  trace-completion in the colocate vLLM engine).
+* ``kl_coefficient`` was **renamed** to ``beta``. TRL 1.4 defaults
+  ``beta`` to ``0.0`` (KL term off); we keep the plan-stated ``0.04``
+  to retain KL regularisation on policy drift.
+
+Mirrors the 29.C rename applied to
+:mod:`vlabs_reward_train.trainer`; kept in lockstep so the two
+configs share the same TRL 1.4 surface.
 """
 from __future__ import annotations
 
@@ -53,12 +69,20 @@ DEFAULT_BATCH_SIZE: int = 8
 the effective per-step batch is still ~64-80."""
 
 DEFAULT_GRAD_ACCUM: int = 8
-DEFAULT_MAX_PROMPT_LENGTH: int = 2048
+DEFAULT_VLLM_MAX_MODEL_LENGTH: int = 6144
+"""TRL 1.4 + vLLM 0.21 single-budget replacement for the legacy
+``max_prompt_length``: total prompt + trace length the colocate vLLM
+engine must support. Plan calls for 2048 prompt + 4096 trace → 6144.
+"""
 DEFAULT_MAX_TRACE_LENGTH: int = 4096
 """Per :doc:`PHASE_30_PLAN.md` §8 — traces are longer than completions."""
 
 DEFAULT_NUM_GENERATIONS: int = 4
-DEFAULT_KL_COEFFICIENT: float = 0.04
+DEFAULT_BETA: float = 0.04
+"""TRL 1.4 rename of ``kl_coefficient`` → ``beta``. TRL 1.4 itself
+defaults to ``0.0`` (no KL penalty); we retain the plan-stated
+``0.04`` to keep policy-drift regularisation on by default.
+"""
 DEFAULT_BF16: bool = True
 DEFAULT_LORA_R: int = 16
 DEFAULT_LORA_ALPHA: int = 32
@@ -98,11 +122,11 @@ class PrmTrainingConfig:
     epochs: int = DEFAULT_EPOCHS
     batch_size: int = DEFAULT_BATCH_SIZE
     grad_accum: int = DEFAULT_GRAD_ACCUM
-    max_prompt_length: int = DEFAULT_MAX_PROMPT_LENGTH
+    vllm_max_model_length: int = DEFAULT_VLLM_MAX_MODEL_LENGTH
     max_trace_length: int = DEFAULT_MAX_TRACE_LENGTH
     max_steps_per_trace: int = DEFAULT_MAX_STEPS
     num_generations: int = DEFAULT_NUM_GENERATIONS
-    kl_coefficient: float = DEFAULT_KL_COEFFICIENT
+    beta: float = DEFAULT_BETA
     bf16: bool = DEFAULT_BF16
     seed: int = 0
     wandb_project: str = "vlabs-prm-distillation"
@@ -192,12 +216,20 @@ def validate_dependencies(
 
 
 def build_training_args(config: PrmTrainingConfig) -> dict[str, Any]:
-    """Build the keyword-arg dict for the TRL ``GRPOConfig`` constructor
+    """Build the keyword-arg dict for the TRL 1.4 ``GRPOConfig`` constructor
     (or whichever TRL trainer 30.F targets).
 
     Returned as a plain dict so it's serialisable + diffable in tests
     even when TRL isn't installed. The 30.F training step calls the
     real TRL config with ``GRPOConfig(**build_training_args(config))``.
+
+    Key shape (TRL 1.4):
+
+    * ``beta`` — KL coefficient (renamed from ``kl_coefficient``).
+    * ``vllm_max_model_length`` — single prompt+trace length budget
+      for the colocate vLLM engine (replaces ``max_prompt_length``).
+    * ``max_completion_length`` — generation-side cap on the trace,
+      sourced from ``config.max_trace_length``.
     """
     if not config.dataset_path:
         raise ValueError("dataset_path must be set on the PrmTrainingConfig")
@@ -223,10 +255,10 @@ def build_training_args(config: PrmTrainingConfig) -> dict[str, Any]:
         "num_train_epochs": config.epochs,
         "per_device_train_batch_size": config.batch_size,
         "gradient_accumulation_steps": config.grad_accum,
-        "max_prompt_length": config.max_prompt_length,
+        "vllm_max_model_length": config.vllm_max_model_length,
         "max_completion_length": config.max_trace_length,
         "num_generations": config.num_generations,
-        "kl_coefficient": config.kl_coefficient,
+        "beta": config.beta,
         "bf16": config.bf16,
         "seed": config.seed,
         "report_to": (
@@ -335,17 +367,17 @@ def per_step_outcome_tensor(rows: Sequence[ProcessRewardTraceRow]) -> Any:
 __all__ = [
     "DEFAULT_BASE_MODEL",
     "DEFAULT_BATCH_SIZE",
+    "DEFAULT_BETA",
     "DEFAULT_BF16",
     "DEFAULT_EPOCHS",
     "DEFAULT_GRAD_ACCUM",
-    "DEFAULT_KL_COEFFICIENT",
     "DEFAULT_LORA_ALPHA",
     "DEFAULT_LORA_DROPOUT",
     "DEFAULT_LORA_R",
     "DEFAULT_LR",
-    "DEFAULT_MAX_PROMPT_LENGTH",
     "DEFAULT_MAX_TRACE_LENGTH",
     "DEFAULT_NUM_GENERATIONS",
+    "DEFAULT_VLLM_MAX_MODEL_LENGTH",
     "REQUIRED_DEPS",
     "DependencyStatus",
     "GpuPathNotImplemented",

@@ -15,6 +15,23 @@ trainer.train()
 
 Until then, callers in tests / CI use :func:`validate_dependencies`
 to confirm the toolchain is present.
+
+TRL 1.4 API notes (Phase 29.F prep, May 2026)
+---------------------------------------------
+TRL 1.4 ``GRPOConfig`` renamed two kwargs that the 29.C scaffold had
+been carrying under the older TRL surface:
+
+* ``max_prompt_length`` was **removed**; the prompt budget is now
+  rolled into ``vllm_max_model_length`` (single budget for prompt +
+  completion in the colocate vLLM engine).
+* ``kl_coefficient`` was **renamed** to ``beta``. TRL 1.4 defaults
+  ``beta`` to ``0.0`` (KL term off); we keep the plan-stated ``0.04``
+  to retain KL regularisation on policy drift.
+
+The on-disk ``run_card.json`` / ``training_config.json`` therefore
+use the new field names — this is a hard schema break vs. earlier
+29.C run cards. There were no production run cards in 29.C, so
+nothing on disk needs migrating.
 """
 from __future__ import annotations
 
@@ -39,10 +56,19 @@ DEFAULT_LR: float = 2e-4
 DEFAULT_EPOCHS: int = 3
 DEFAULT_BATCH_SIZE: int = 16
 DEFAULT_GRAD_ACCUM: int = 4
-DEFAULT_MAX_PROMPT_LENGTH: int = 2048
+DEFAULT_VLLM_MAX_MODEL_LENGTH: int = 3072
+"""TRL 1.4 + vLLM 0.21 single-budget replacement for the legacy
+``max_prompt_length``: total prompt + completion length the colocate
+vLLM engine must support. The plan calls for 2048 prompt + 1024
+completion → 3072.
+"""
 DEFAULT_MAX_COMPLETION_LENGTH: int = 1024
 DEFAULT_NUM_GENERATIONS: int = 4
-DEFAULT_KL_COEFFICIENT: float = 0.04
+DEFAULT_BETA: float = 0.04
+"""TRL 1.4 rename of ``kl_coefficient`` → ``beta``. TRL 1.4 itself
+defaults to ``0.0`` (no KL penalty); we retain the plan-stated
+``0.04`` to keep policy-drift regularisation on by default.
+"""
 DEFAULT_BF16: bool = True
 
 REQUIRED_DEPS: tuple[str, ...] = (
@@ -73,10 +99,10 @@ class TrainingConfig:
     epochs: int = DEFAULT_EPOCHS
     batch_size: int = DEFAULT_BATCH_SIZE
     grad_accum: int = DEFAULT_GRAD_ACCUM
-    max_prompt_length: int = DEFAULT_MAX_PROMPT_LENGTH
+    vllm_max_model_length: int = DEFAULT_VLLM_MAX_MODEL_LENGTH
     max_completion_length: int = DEFAULT_MAX_COMPLETION_LENGTH
     num_generations: int = DEFAULT_NUM_GENERATIONS
-    kl_coefficient: float = DEFAULT_KL_COEFFICIENT
+    beta: float = DEFAULT_BETA
     bf16: bool = DEFAULT_BF16
     seed: int = 0
     wandb_project: str = "vlabs-reward-distillation"
@@ -149,11 +175,19 @@ def validate_dependencies(
 
 
 def build_training_args(config: TrainingConfig) -> dict[str, Any]:
-    """Build the keyword-arg dict for the TRL ``GRPOConfig`` constructor.
+    """Build the keyword-arg dict for the TRL 1.4 ``GRPOConfig`` constructor.
 
     Returned as a plain dict so it's serialisable + diff-able in tests
     even when TRL isn't installed. The 29.F training step calls
     ``GRPOConfig(**build_training_args(config))``.
+
+    Key shape (TRL 1.4):
+
+    * ``beta`` — KL coefficient (renamed from ``kl_coefficient``).
+    * ``vllm_max_model_length`` — single prompt+completion length
+      budget for the colocate vLLM engine (replaces
+      ``max_prompt_length``).
+    * ``max_completion_length`` — generation-side cap, unchanged.
     """
     if not config.dataset_path:
         raise ValueError("dataset_path must be set on the TrainingConfig")
@@ -170,10 +204,10 @@ def build_training_args(config: TrainingConfig) -> dict[str, Any]:
         "num_train_epochs": config.epochs,
         "per_device_train_batch_size": config.batch_size,
         "gradient_accumulation_steps": config.grad_accum,
-        "max_prompt_length": config.max_prompt_length,
+        "vllm_max_model_length": config.vllm_max_model_length,
         "max_completion_length": config.max_completion_length,
         "num_generations": config.num_generations,
-        "kl_coefficient": config.kl_coefficient,
+        "beta": config.beta,
         "bf16": config.bf16,
         "seed": config.seed,
         "report_to": (
@@ -225,14 +259,14 @@ def write_run_card(
 __all__ = [
     "DEFAULT_BASE_MODEL",
     "DEFAULT_BATCH_SIZE",
+    "DEFAULT_BETA",
     "DEFAULT_BF16",
     "DEFAULT_EPOCHS",
     "DEFAULT_GRAD_ACCUM",
-    "DEFAULT_KL_COEFFICIENT",
     "DEFAULT_LR",
     "DEFAULT_MAX_COMPLETION_LENGTH",
-    "DEFAULT_MAX_PROMPT_LENGTH",
     "DEFAULT_NUM_GENERATIONS",
+    "DEFAULT_VLLM_MAX_MODEL_LENGTH",
     "REQUIRED_DEPS",
     "DependencyStatus",
     "GpuPathNotImplemented",
