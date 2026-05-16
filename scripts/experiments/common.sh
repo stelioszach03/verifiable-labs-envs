@@ -40,6 +40,12 @@ export VLLM_MODE="${VLLM_MODE:-colocate}"
 export VLLM_GPU_MEMORY_UTILIZATION="${VLLM_GPU_MEMORY_UTILIZATION:-0.3}"
 export VLLM_TENSOR_PARALLEL_SIZE="${VLLM_TENSOR_PARALLEL_SIZE:-1}"
 
+# vLLM FlashInfer sampler has a bug on Blackwell sm120 (RTX 5090):
+# claims "SM 12.x requires CUDA 12.9" even though driver 580.x ships
+# CUDA 13.0. Disable until upstream vLLM fixes the compute-capability
+# check. Verified Phase-18 smoke passes with this set.
+export VLLM_USE_FLASHINFER_SAMPLER="${VLLM_USE_FLASHINFER_SAMPLER:-0}"
+
 # -------- sampling temperatures -------------------------------------------
 export TRAINING_TEMPERATURE="${TRAINING_TEMPERATURE:-0.5}"
 export INFERENCE_TEMPERATURE="${INFERENCE_TEMPERATURE:-1.0}"
