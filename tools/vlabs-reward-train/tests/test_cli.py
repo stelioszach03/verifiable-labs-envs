@@ -71,9 +71,48 @@ def test_dry_run_writes_run_card(tmp_path: Path) -> None:
     assert (out_dir / "run_card.json").exists()
 
 
-def test_train_command_aborts_on_missing_deps(tmp_path: Path) -> None:
-    """In CI without GPU deps, the train command exits 2 with an
-    "ABORT: missing dependencies" message."""
+def test_dry_run_carries_29f_flags(tmp_path: Path) -> None:
+    """Phase 29.F: vLLM + env + max-steps flags surface through to the
+    config and the resolved training_args dict."""
+    out_dir = tmp_path / "exp_29f"
+    result = runner.invoke(
+        app,
+        [
+            "dry-run",
+            "--dataset", str(tmp_path / "fake.jsonl"),
+            "--output-dir", str(out_dir),
+            "--max-steps", "10",
+            "--num-generations", "4",
+            "--env-id", "math-algebra",
+            "--vllm-gpu-memory-utilization", "0.4",
+            "--vllm-max-model-length", "2048",
+            "--beta", "0.05",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["config"]["max_steps"] == 10
+    assert payload["config"]["num_generations"] == 4
+    assert payload["config"]["env_id"] == "math-algebra"
+    assert payload["config"]["vllm_gpu_memory_utilization"] == 0.4
+    assert payload["config"]["vllm_max_model_length"] == 2048
+    assert payload["config"]["beta"] == 0.05
+    # training_args dict mirrors the rename:
+    args = payload["training_args"]
+    assert args["max_steps"] == 10
+    assert args["num_generations"] == 4
+    assert args["beta"] == 0.05
+    assert args["vllm_max_model_length"] == 2048
+
+
+def test_train_command_aborts_cleanly_on_unusable_invocation(
+    tmp_path: Path,
+) -> None:
+    """In Phase 29.F the ``train`` command exits with a non-zero
+    code (and an ABORT message on stderr) when either dependencies
+    are missing OR the dataset doesn't exist. We don't assert which
+    of the two — both are valid clean aborts. The test ensures the
+    CLI never accidentally proceeds to a doomed real run."""
     result = runner.invoke(
         app,
         [
@@ -82,11 +121,10 @@ def test_train_command_aborts_on_missing_deps(tmp_path: Path) -> None:
             "--output-dir", str(tmp_path / "exp"),
         ],
     )
-    # Exit code 2 = missing dependencies; 3 = GPU path not implemented.
-    # In CI without trl/peft we get exit 2.
-    assert result.exit_code in (2, 3)
-    if result.exit_code == 2:
-        assert "ABORT" in (result.stdout + result.stderr)
+    # 2 = missing deps, 4 = missing dataset. Either is acceptable.
+    assert result.exit_code in (2, 4), result.stdout + result.stderr
+    combined = result.stdout + result.stderr
+    assert "ABORT" in combined
 
 
 def test_checkpoints_command_empty_dir(tmp_path: Path) -> None:
