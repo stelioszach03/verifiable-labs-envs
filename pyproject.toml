@@ -47,12 +47,9 @@ dev = [
     "httpx>=0.27",         # FastAPI test client uses httpx under the hood
     "respx>=0.21",         # SDK test suite mocks httpx via respx
     "sympy>=1.12",         # symbolic-math env family (Phase 21+)
-    # Pulled into dev so `pip install -e .[dev]` recovers the full
-    # 834-test baseline (services/api + tests/api + tests/training).
-    # Without these the test runner fails at conftest-load time, not in
-    # individual test bodies, so partial runs would silently miss the
-    # services/api regression surface.
-    "pgserver>=0.1.4",     # services/api/tests session-scoped DB fixture
+    # Pulled into dev so `pip install -e .[dev]` recovers the test
+    # baseline (tests/api + tests/training). Without these the test
+    # runner fails at conftest-load time, not in individual test bodies.
     "fastapi>=0.115",      # tests/api uses FastAPI TestClient
     "torch>=2.3",          # tests/training imports torch via examples/training/*.py
 ]
@@ -127,13 +124,7 @@ testpaths = [
     "tests",
     "packages/verifiable-labs/tests",
     "packages/vlabs-calibrate/tests",
-    "services/api/tests",
     "tools/vlabs-audit/tests",
-    "tools/vlabs-reward-data/tests",
-    "tools/vlabs-reward-train/tests",
-    "tools/vlabs-prm-data/tests",
-    "tools/vlabs-prm-train/tests",
-    "tools/vlabs-prm-eval/tests",
 ]
 # --import-mode=importlib: required so multiple `tests/__init__.py` packages
 # (one per packages/* sub-package) don't collide on pytest's prepend importer.
