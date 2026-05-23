@@ -41,7 +41,7 @@ import sys
 import time
 import traceback
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -73,7 +73,7 @@ PER_INSTANCE_TIMEOUT_S = 90.0
 # ---------------------------------------------------------------------------
 def log(msg: str) -> None:
     """Plain timestamped log to stdout — captured by the calling shell."""
-    ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
+    ts = datetime.now(UTC).strftime("%H:%M:%S")
     print(f"[{ts}] {msg}", flush=True)
 
 
@@ -227,7 +227,7 @@ def run_smoke(
         "env_id": env_id,
         "model": model,
         "n_instances": n_instances,
-        "started_at": datetime.now(timezone.utc).isoformat(),
+        "started_at": datetime.now(UTC).isoformat(),
         "checks": [],
         "generations": [],
         "ok": False,
@@ -315,7 +315,7 @@ def run_smoke(
     # ---- 4. Parse + score each completion ----
     with section("parse + score"):
         gens: list[dict[str, Any]] = []
-        for i, (instance, out) in enumerate(zip(instances, outputs)):
+        for i, (instance, out) in enumerate(zip(instances, outputs, strict=False)):
             completion_text = out.outputs[0].text if out.outputs else ""
             pred_dict, parse_status = parse_completion(completion_text, k=k, n=n)
 
@@ -392,7 +392,7 @@ def run_smoke(
     result["min_reward"] = min(rewards) if rewards else 0.0
     result["max_reward"] = max(rewards) if rewards else 0.0
     result["peak_vram_gb"] = peak_vram_gb
-    result["finished_at"] = datetime.now(timezone.utc).isoformat()
+    result["finished_at"] = datetime.now(UTC).isoformat()
 
     log("")
     log("aggregate:")
@@ -545,7 +545,7 @@ def main(argv: list[str] | None = None) -> int:
             "env_id": args.env,
             "model": args.model,
             "n_instances": args.n,
-            "started_at": datetime.now(timezone.utc).isoformat(),
+            "started_at": datetime.now(UTC).isoformat(),
             "exit_code": EXIT_SETUP_FAIL,
             "ok": False,
             "summary": f"Unhandled exception: {tb.strip().splitlines()[-1]}",
@@ -556,7 +556,7 @@ def main(argv: list[str] | None = None) -> int:
             "min_reward": 0.0,
             "max_reward": 0.0,
             "peak_vram_gb": 0.0,
-            "finished_at": datetime.now(timezone.utc).isoformat(),
+            "finished_at": datetime.now(UTC).isoformat(),
         }
 
     args.result_json.parent.mkdir(parents=True, exist_ok=True)
