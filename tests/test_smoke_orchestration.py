@@ -16,12 +16,9 @@ from __future__ import annotations
 
 import importlib.util
 import json
-import os
-import subprocess
 import sys
 import types
 from pathlib import Path
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -89,7 +86,7 @@ def test_registry_does_not_include_E9(smoke_mod) -> None:
 
 def test_registry_specs_are_frozen(smoke_mod) -> None:
     spec = smoke_mod.EXPERIMENT_REGISTRY["E1"]
-    with pytest.raises(Exception):
+    with pytest.raises(Exception):  # noqa: B017 — any mutation should raise; underlying type may vary
         spec.min_vram_gb = 99.0  # type: ignore[misc]
 
 
@@ -105,9 +102,9 @@ def test_registry_specs_have_required_fields(smoke_mod, exp_id) -> None:
 
 
 def test_allowed_experiments_sorted_tuple(smoke_mod) -> None:
-    assert smoke_mod.ALLOWED_EXPERIMENTS == tuple(
+    assert tuple(
         sorted(smoke_mod.EXPERIMENT_REGISTRY)
-    )
+    ) == smoke_mod.ALLOWED_EXPERIMENTS
     assert isinstance(smoke_mod.ALLOWED_EXPERIMENTS, tuple)
 
 
