@@ -13,13 +13,10 @@ here.
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
-from typing import Optional
+from typing import Annotated
 
 import typer
-from typing_extensions import Annotated
-
 from verifiable_labs_envs.formal_spec.gate import Tolerances
 
 from .gate import evaluate_gate
@@ -59,7 +56,7 @@ def gate(
         "--new", "-N", help="Path to the candidate-checkpoint eval card (JSON).",
         exists=True, dir_okay=False, readable=True,
     )],
-    metrics_map: Annotated[Optional[Path], typer.Option(
+    metrics_map: Annotated[Path | None, typer.Option(
         "--metrics-map",
         help="Optional JSON file overriding DEFAULT_METRICS_MAP "
              "(vgs_weights, regression_rules).",
@@ -83,16 +80,16 @@ def gate(
     eps_l: Annotated[float, typer.Option(
         "--eps-l", help="Allowed latency increase (seconds/audit).", min=0.0,
     )] = 0.5,
-    cost_old: Annotated[Optional[float], typer.Option(
+    cost_old: Annotated[float | None, typer.Option(
         "--cost-old", help="Override old-card cost if not present in JSON.",
     )] = None,
-    cost_new: Annotated[Optional[float], typer.Option(
+    cost_new: Annotated[float | None, typer.Option(
         "--cost-new", help="Override new-card cost if not present in JSON.",
     )] = None,
-    latency_old: Annotated[Optional[float], typer.Option(
+    latency_old: Annotated[float | None, typer.Option(
         "--latency-old", help="Override old-card latency if not present in JSON.",
     )] = None,
-    latency_new: Annotated[Optional[float], typer.Option(
+    latency_new: Annotated[float | None, typer.Option(
         "--latency-new", help="Override new-card latency if not present in JSON.",
     )] = None,
 ) -> None:

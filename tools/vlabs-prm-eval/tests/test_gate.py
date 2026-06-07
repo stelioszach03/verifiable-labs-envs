@@ -17,14 +17,6 @@ from pathlib import Path
 
 import pytest
 from typer.testing import CliRunner
-
-from vlabs_prm_eval.cli import app
-from vlabs_prm_eval.gate import (
-    DEFAULT_METRICS_MAP,
-    EvalCard,
-    card_to_metrics,
-    evaluate_gate,
-)
 from verifiable_labs_envs.formal_spec.gate import (
     REASON_CALIBRATION_DROPPED,
     REASON_COST_EXCEEDED,
@@ -34,6 +26,14 @@ from verifiable_labs_envs.formal_spec.gate import (
     REASON_REGRESSION_FLAG_SET,
     REASON_VGS_GAIN_BELOW_TAU,
     Tolerances,
+)
+
+from vlabs_prm_eval.cli import app
+from vlabs_prm_eval.gate import (
+    DEFAULT_METRICS_MAP,
+    EvalCard,
+    card_to_metrics,
+    evaluate_gate,
 )
 
 FIXTURES = Path(__file__).parent / "fixtures"

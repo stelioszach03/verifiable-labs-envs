@@ -8,9 +8,7 @@ Mirrors theorems in ``formal/VerifiableLabsFormal/ModelRouting.lean``:
 
 from __future__ import annotations
 
-import math
-
-from hypothesis import assume, given, settings
+from hypothesis import assume, given
 from hypothesis import strategies as st
 
 from verifiable_labs_envs.formal_spec.formulas import (
@@ -36,7 +34,7 @@ def panel_of_models(draw, min_n=2, max_n=8):
             max_size=n,
         )
     )
-    return list(zip(ids, utilities))
+    return list(zip(ids, utilities, strict=True))
 
 
 # =====================================================================

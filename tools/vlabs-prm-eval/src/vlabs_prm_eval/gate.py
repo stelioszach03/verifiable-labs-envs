@@ -26,10 +26,10 @@ via the CLI's ``--metrics-map <path>`` flag.
 from __future__ import annotations
 
 import json
-import sys
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 from verifiable_labs_envs.formal_spec.gate import (
     GateDecision,
@@ -37,7 +37,6 @@ from verifiable_labs_envs.formal_spec.gate import (
     Tolerances,
     accept_update,
 )
-
 
 # ---------------------------------------------------------------------
 # Default eval-card → ModelMetrics weights
@@ -67,7 +66,7 @@ class EvalCard:
     raw: Mapping[str, Any]
 
     @classmethod
-    def load(cls, path: str | Path) -> "EvalCard":
+    def load(cls, path: str | Path) -> EvalCard:
         with open(path, encoding="utf-8") as f:
             data = json.load(f)
         if not isinstance(data, dict):
