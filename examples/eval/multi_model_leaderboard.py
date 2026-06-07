@@ -31,9 +31,7 @@ import argparse
 import json
 import os
 import statistics
-import sys
 import time
-import traceback
 from pathlib import Path
 from typing import Any
 
@@ -253,10 +251,10 @@ def run_episode(
         try:
             prediction = parse_with_tags(text, instance, adapter)
             format_valid = 1
-        except LLMSolverError as e:
+        except LLMSolverError:
             failure_type = "format_error"
             prediction = None
-        except Exception as e:  # noqa: BLE001
+        except Exception:  # noqa: BLE001
             failure_type = "adapter_exception"
             prediction = None
 
@@ -271,7 +269,7 @@ def run_episode(
                     **{f"meta.{k}": float(v) for k, v in meta.items()
                        if isinstance(v, (int, float))},
                 }
-            except Exception as e:  # noqa: BLE001
+            except Exception:  # noqa: BLE001
                 failure_type = "score_error"
 
     return {
@@ -539,7 +537,7 @@ def main() -> int:
             max_tokens=args.max_tokens, temperature=args.temperature,
             out_path=out_dir / "preflight_estimate.json",
         )
-        print(f"\n=== Estimate vs budget ===")
+        print("\n=== Estimate vs budget ===")
         print(f"  likely: ${result['likely']:.2f}")
         print(f"  min:    ${result['min']:.2f}")
         print(f"  max:    ${result['max']:.2f}")
@@ -547,7 +545,7 @@ def main() -> int:
         if result["max"] > args.budget_usd:
             print(f"  ⚠️  worst-case ${result['max']:.2f} EXCEEDS budget ${args.budget_usd:.2f}")
         if result["likely"] > args.budget_usd:
-            print(f"  ⚠️  LIKELY exceeds budget; reduce --n-seeds or drop a Tier-3 model")
+            print("  ⚠️  LIKELY exceeds budget; reduce --n-seeds or drop a Tier-3 model")
         return 0
 
     # Launch path.
@@ -562,7 +560,7 @@ def main() -> int:
         temperature=args.temperature, out_dir=out_dir,
         budget_usd=args.budget_usd,
     )
-    print(f"\n=== DONE ===")
+    print("\n=== DONE ===")
     print(f"  episodes_completed: {final['n_done']} / {final['n_total']}")
     print(f"  cumulative_cost:    ${final['cumulative_usd']:.3f}")
     print(f"  aborted_on_budget:  {final['aborted']}")

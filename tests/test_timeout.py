@@ -73,7 +73,7 @@ def _run_cli(args: list[str]) -> int:
 
 
 def _read_traces(path: Path) -> list[dict]:
-    return [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
+    return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
 
 
 def test_sleep_agent_times_out_continue_on_error(
