@@ -1,0 +1,15 @@
+{
+  "model_id": "qwen-2.5-1.5b-grpo-expensive",
+  "processbench_overall": 0.75,
+  "mean_held_out_env_metric": 0.70,
+  "bon_accuracy": 0.72,
+  "coverage": 0.90,
+  "held_out_envs": {
+    "sparse-fourier-recovery": 0.70,
+    "kalman-filter-tuning": 0.70,
+    "ode-residual": 0.70
+  },
+  "invariance_violation_rate": 0.10,
+  "cost": 7.0,
+  "latency": 1.0
+}

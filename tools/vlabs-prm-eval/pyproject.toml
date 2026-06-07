@@ -1,0 +1,62 @@
+[build-system]
+requires = ["hatchling>=1.24,<1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "vlabs-prm-eval"
+version = "0.0.1"
+description = "Verifiable Labs process-reward-model eval card tooling (checkpoint promotion gate, etc.)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Stelios Zacharioudakis", email = "sdi2200243@di.uoa.gr" },
+]
+keywords = [
+    "process-reward-models",
+    "checkpoint-promotion",
+    "self-improvement-gate",
+    "verifiable-labs",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Typing :: Typed",
+]
+dependencies = [
+    "typer>=0.12",
+    # The gate subcommand reuses the formally-verified Python mirror
+    # of AcceptUpdate from the main package; pin loosely so dev installs
+    # work against the editable monorepo checkout.
+    "verifiable-labs-envs",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.5",
+]
+
+[project.scripts]
+vlabs-prm-eval = "vlabs_prm_eval.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/vlabs_prm_eval"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers --import-mode=importlib"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = [
+    "E501",
+    "B008",  # Typer's Annotated[..., Option(...)] uses defaults
+]
