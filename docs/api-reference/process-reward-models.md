@@ -18,6 +18,8 @@ calibrated reward sequence + per-step conformal intervals + an
 aggregate score — the same Layer 1 moat that backs `/v1/score` and
 `/v1/reward-models/*`, extended to step granularity.
 
+> The split-conformal coverage guarantee behind our calibrated reward intervals is machine-verified in Lean 4 (sorry-free, standard axioms only). The Python implementation is property-tested against the formal specification. See [`formal/VerifiableLabsFormal/ConformalCoverage.lean`](../../formal/VerifiableLabsFormal/ConformalCoverage.lean).
+
 ## Endpoint surface
 
 | Method | Path                                                          | Purpose                                          |

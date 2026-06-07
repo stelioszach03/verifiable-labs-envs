@@ -16,6 +16,8 @@ emits a calibrated scalar reward in `[0, 1]` plus a 90 % conformal
 confidence interval (D10-A) — the same Layer 1 moat that backs
 [`/v1/score`](score.md), extended one layer down.
 
+> The split-conformal coverage guarantee behind our calibrated reward intervals is machine-verified in Lean 4 (sorry-free, standard axioms only). The Python implementation is property-tested against the formal specification. See [`formal/VerifiableLabsFormal/ConformalCoverage.lean`](../../formal/VerifiableLabsFormal/ConformalCoverage.lean).
+
 ## Endpoint surface
 
 | Method | Path                                              | Purpose                                          |

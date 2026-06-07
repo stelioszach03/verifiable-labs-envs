@@ -169,6 +169,12 @@ Frontier reasoning models are trained with verifiable rewards (RLVR). Today's RL
 2. The **reward** is a weighted sum of reconstruction quality (PSNR, SSIM, or task-appropriate metric) and **conformal-prediction coverage** — models are rewarded for honest posterior width, not overconfident point estimates.
 3. Measurements are **procedurally regenerated per evaluation call**, so fixed-string memorization is structurally impossible.
 
+## Formally verified guarantees
+
+The split-conformal coverage guarantee behind our calibrated reward intervals is machine-verified in Lean 4 (sorry-free, standard axioms only). The Python implementation is property-tested against the formal specification.
+
+See [`formal/`](formal/) for the 8-module Lean 4 project (export from Aristotle, Harmonic AI) covering calibrated reward bounds, conformal coverage, adaptive difficulty stability, verifier invariance, model-routing optimality, the composed pipeline theorem, and the 7-condition self-improvement gate. The Python mirror lives in [`src/verifiable_labs_envs/formal_spec/`](src/verifiable_labs_envs/formal_spec/); property-based parity tests in [`tests/formal_spec/`](tests/formal_spec/) exercise the bounds, monotonicity, and gate predicates over `hypothesis` strategies.
+
 ## Environments (25 live)
 
 | # | Environment | Domain | Forward operator / problem | Classical baseline / verifier |
