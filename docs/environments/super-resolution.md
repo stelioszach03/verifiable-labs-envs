@@ -51,4 +51,4 @@ CT might be limited by problem size, not problem type.
 
 ## Source
 
-[`src/verifiable_labs_envs/envs/super_resolution.py`](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/src/verifiable_labs_envs/envs/super_resolution.py).
+[`src/verifiable_labs_envs/envs/super_resolution.py`](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/src/verifiable_labs_envs/envs/super_resolution.py).

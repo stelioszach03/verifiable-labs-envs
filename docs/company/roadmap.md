@@ -74,7 +74,7 @@ Speculative; subject to v0.2 outcomes.
 ## Contributing
 
 Open issues and pull requests welcome at
-[github.com/stelioszach03/verifiable-labs-envs](https://github.com/stelioszach03/verifiable-labs-envs).
+[github.com/verifiablelabs/verifiable-labs-envs](https://github.com/verifiablelabs/verifiable-labs-envs).
 For new envs, follow [Tutorials → Creating a custom env](../tutorials/creating-custom-env.md);
 the validator at `scripts/validate_env.py` is the merge gate.
 

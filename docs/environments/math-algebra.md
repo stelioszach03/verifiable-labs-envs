@@ -81,7 +81,7 @@ scaling curve interpretable when sweeping model sizes.
 
 ## Source
 
-[`src/verifiable_labs_envs/envs/math_algebra.py`](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/src/verifiable_labs_envs/envs/math_algebra.py).
+[`src/verifiable_labs_envs/envs/math_algebra.py`](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/src/verifiable_labs_envs/envs/math_algebra.py).
 
 ## See also
 

@@ -2,7 +2,7 @@
 
 Hosted Evaluation API, **v0.1.0-alpha**. Base URL:
 `https://api.verifiable-labs.com` (placeholder — see
-[deploy/api/README.md](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/deploy/api/README.md)
+[deploy/api/README.md](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/deploy/api/README.md)
 for current live URL).
 
 OpenAPI UI auto-generated at `{{base}}/docs`; this page is a
@@ -195,6 +195,6 @@ HTTP/1.1 200 OK
 
 ## Source
 
-[`src/verifiable_labs_api/`](https://github.com/stelioszach03/verifiable-labs-envs/tree/main/src/verifiable_labs_api).
+[`src/verifiable_labs_api/`](https://github.com/verifiablelabs/verifiable-labs-envs/tree/main/src/verifiable_labs_api).
 The deployment IaC (Render, Fly.io, Docker) is at
-[`deploy/api/`](https://github.com/stelioszach03/verifiable-labs-envs/tree/main/deploy/api).
+[`deploy/api/`](https://github.com/verifiablelabs/verifiable-labs-envs/tree/main/deploy/api).

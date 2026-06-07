@@ -19,9 +19,9 @@ forward operator can be queried.
 
 ## Where to find it
 
-- **PDF.** [`paper/main.pdf`](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/paper/main.pdf)
+- **PDF.** [`paper/main.pdf`](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/paper/main.pdf)
   in the repo.
-- **Source.** [`paper/`](https://github.com/stelioszach03/verifiable-labs-envs/tree/main/paper) —
+- **Source.** [`paper/`](https://github.com/verifiablelabs/verifiable-labs-envs/tree/main/paper) —
   LaTeX, all figure-generation code, `Makefile` for clean rebuilds.
 - **OpenReview.** Submitted; venue and ID pending. Update this page
   on acceptance.
@@ -68,6 +68,6 @@ cd paper && make
   author = {Zacharioudakis, Stelios},
   year   = {2026},
   note   = {OpenReview preprint draft v1.0},
-  url    = {https://github.com/stelioszach03/verifiable-labs-envs/blob/main/paper/main.pdf}
+  url    = {https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/paper/main.pdf}
 }
 ```

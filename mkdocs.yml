@@ -3,7 +3,7 @@ site_description: >
   Reinforcement-learning environments for scientific reasoning —
   conformal-calibrated rewards on physics-grounded inverse problems.
 site_url: https://docs.verifiable-labs.com
-repo_url: https://github.com/stelioszach03/verifiable-labs-envs
+repo_url: https://github.com/verifiablelabs/verifiable-labs-envs
 repo_name: stelioszach03/verifiable-labs-envs
 edit_uri: edit/main/docs/
 
@@ -110,5 +110,5 @@ nav:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/stelioszach03/verifiable-labs-envs
+      link: https://github.com/verifiablelabs/verifiable-labs-envs
   generator: false

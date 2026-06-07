@@ -12,7 +12,7 @@ Installing it gives you:
 
 From GitHub (subdirectory):
 ```
-pip install "git+https://github.com/stelioszach03/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-math-algebra"
+pip install "git+https://github.com/verifiablelabs/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-math-algebra"
 ```
 
 Once published to the Prime Intellect Environments Hub:

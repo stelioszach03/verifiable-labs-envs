@@ -182,7 +182,7 @@ async def _run_all(
         base_url="https://openrouter.ai/api/v1",
         api_key=__import__("os").environ["OPENROUTER_API_KEY"],
         default_headers={
-            "HTTP-Referer": "https://github.com/stelioszach03/verifiable-labs-envs",
+            "HTTP-Referer": "https://github.com/verifiablelabs/verifiable-labs-envs",
             "X-Title": "verifiable-labs-envs",
         },
         max_retries=3,

@@ -66,7 +66,7 @@ def _py_body(mod_name: str, monorepo_mod: str, tagline: str) -> str:
     return f'''"""{tagline}
 
 Prime Intellect Hub wrapper around ``verifiable_labs_envs.envs.{monorepo_mod}``.
-The monorepo at https://github.com/stelioszach03/verifiable-labs-envs is the
+The monorepo at https://github.com/verifiablelabs/verifiable-labs-envs is the
 source of truth; this file is a thin re-export so the env can be installed
 and discovered via the Prime Intellect Environments Hub.
 """
@@ -101,7 +101,7 @@ dependencies = [
     # `>=0.1.13` would reject dev releases even with pip --pre. The
     # widened pin lets Hub consumers install from stable releases.
     "verifiers>=0.1.12",
-    "verifiable-labs-envs @ git+https://github.com/stelioszach03/verifiable-labs-envs.git@main",
+    "verifiable-labs-envs @ git+https://github.com/verifiablelabs/verifiable-labs-envs.git@main",
 ]
 
 [build-system]
@@ -128,7 +128,7 @@ def _readme(env_id: str, monorepo_mod: str, tagline: str) -> str:
 
 {tagline}
 
-Verifiable Labs Scientific-RL environment. Published as a thin wrapper around the monorepo at https://github.com/stelioszach03/verifiable-labs-envs — the wrapper pulls the monorepo as a Git dependency so the full source of truth (rewards, forward operators, LLM adapter, conformal calibration) stays in one place.
+Verifiable Labs Scientific-RL environment. Published as a thin wrapper around the monorepo at https://github.com/verifiablelabs/verifiable-labs-envs — the wrapper pulls the monorepo as a Git dependency so the full source of truth (rewards, forward operators, LLM adapter, conformal calibration) stays in one place.
 
 ## Install
 

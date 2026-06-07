@@ -107,5 +107,5 @@ know which benchmark a given report was scored on.
 ## See also
 
 - [API reference → CLI](../api-reference/cli.md) — full CLI options
-- [`templates/compliance-report/README.md`](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/templates/compliance-report/README.md) —
+- [`templates/compliance-report/README.md`](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/templates/compliance-report/README.md) —
   template internals

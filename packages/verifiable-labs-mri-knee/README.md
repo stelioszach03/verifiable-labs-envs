@@ -11,7 +11,7 @@ v1 synthesizes ground truth from `skimage.data` public-domain images (resized to
 ## Install
 
 ```bash
-pip install "verifiable-labs-mri-knee @ git+https://github.com/stelioszach03/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-mri-knee"
+pip install "verifiable-labs-mri-knee @ git+https://github.com/verifiablelabs/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-mri-knee"
 ```
 
 Prime Intellect Hub:

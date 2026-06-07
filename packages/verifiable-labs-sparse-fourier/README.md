@@ -11,7 +11,7 @@ This is a thin wrapper over the monorepo `verifiable-labs-envs`. Installing it g
 
 From GitHub (subdirectory):
 ```
-pip install "git+https://github.com/stelioszach03/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-sparse-fourier"
+pip install "git+https://github.com/verifiablelabs/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-sparse-fourier"
 ```
 
 Once published to the Prime Intellect Environments Hub:
@@ -31,4 +31,4 @@ print(out["reward"], out["components"])
 ```
 
 Full documentation of rewards, forward operators, and scoring lives in the monorepo at
-`https://github.com/stelioszach03/verifiable-labs-envs`.
+`https://github.com/verifiablelabs/verifiable-labs-envs`.

@@ -33,8 +33,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/stelioszach03/verifiable-labs-envs"
-Issues = "https://github.com/stelioszach03/verifiable-labs-envs/issues"
+Homepage = "https://github.com/verifiablelabs/verifiable-labs-envs"
+Issues = "https://github.com/verifiablelabs/verifiable-labs-envs/issues"
 
 # Verifiers-compatible entry point so `prime env install verifiable-labs-math-algebra` /
 # the Prime Intellect Hub can discover load_environment() automatically.

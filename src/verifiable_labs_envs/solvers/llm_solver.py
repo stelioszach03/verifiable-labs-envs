@@ -128,7 +128,7 @@ class OpenRouterSolver(LLMSolver):
     that want to skip silently should check ``HAS_OPENROUTER_KEY`` first.
     """
 
-    REFERER = "https://github.com/stelioszach03/verifiable-labs-envs"
+    REFERER = "https://github.com/verifiablelabs/verifiable-labs-envs"
     TITLE = "verifiable-labs-envs"
 
     def __init__(

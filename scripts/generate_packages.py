@@ -65,12 +65,12 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
-    "verifiable-labs-envs @ git+https://github.com/stelioszach03/verifiable-labs-envs.git@main",
+    "verifiable-labs-envs @ git+https://github.com/verifiablelabs/verifiable-labs-envs.git@main",
 ]
 
 [project.urls]
-Homepage = "https://github.com/stelioszach03/verifiable-labs-envs"
-Issues = "https://github.com/stelioszach03/verifiable-labs-envs/issues"
+Homepage = "https://github.com/verifiablelabs/verifiable-labs-envs"
+Issues = "https://github.com/verifiablelabs/verifiable-labs-envs/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/verifiable_labs_envs_core"]
@@ -133,7 +133,7 @@ from verifiable_labs_envs_core import (
 
 From source:
 ```
-pip install git+https://github.com/stelioszach03/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-envs-core
+pip install git+https://github.com/verifiablelabs/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-envs-core
 ```
 
 Once published to Prime Intellect Environments Hub:
@@ -166,12 +166,12 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
-    "verifiable-labs-envs-core @ git+https://github.com/stelioszach03/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-envs-core",
+    "verifiable-labs-envs-core @ git+https://github.com/verifiablelabs/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-envs-core",
 ]
 
 [project.urls]
-Homepage = "https://github.com/stelioszach03/verifiable-labs-envs"
-Issues = "https://github.com/stelioszach03/verifiable-labs-envs/issues"
+Homepage = "https://github.com/verifiablelabs/verifiable-labs-envs"
+Issues = "https://github.com/verifiablelabs/verifiable-labs-envs/issues"
 
 # Verifiers-compatible entry point so `prime env install {pypi}` / the
 # Prime Intellect Hub can discover load_environment() automatically.
@@ -224,7 +224,7 @@ This is a thin wrapper over the monorepo `verifiable-labs-envs`. Installing it g
 
 From GitHub (subdirectory):
 ```
-pip install "git+https://github.com/stelioszach03/verifiable-labs-envs.git@main#subdirectory=packages/{pypi}"
+pip install "git+https://github.com/verifiablelabs/verifiable-labs-envs.git@main#subdirectory=packages/{pypi}"
 ```
 
 Once published to the Prime Intellect Environments Hub:
@@ -244,12 +244,12 @@ print(out["reward"], out["components"])
 ```
 
 Full documentation of rewards, forward operators, and scoring lives in the monorepo at
-`https://github.com/stelioszach03/verifiable-labs-envs`.
+`https://github.com/verifiablelabs/verifiable-labs-envs`.
 """
 
 
 LICENSE_REF = """Apache License 2.0. See the LICENSE file at the monorepo root:
-https://github.com/stelioszach03/verifiable-labs-envs/blob/main/LICENSE
+https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/LICENSE
 """
 
 

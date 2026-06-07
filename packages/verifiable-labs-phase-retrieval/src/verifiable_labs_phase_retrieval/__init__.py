@@ -2,7 +2,7 @@
 
 Phase retrieval from magnitude-only Fourier measurements with Gerchberg-Saxton
 baseline + conformal σ̂. Thin re-export over ``verifiable_labs_envs.envs``; the
-monorepo at https://github.com/stelioszach03/verifiable-labs-envs is the source
+monorepo at https://github.com/verifiablelabs/verifiable-labs-envs is the source
 of truth.
 """
 from verifiable_labs_envs.envs.phase_retrieval import (

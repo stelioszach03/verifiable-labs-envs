@@ -19,6 +19,6 @@ env = load_environment()
 ## Source
 
 The monorepo is the source of truth:
-https://github.com/stelioszach03/verifiable-labs-envs
+https://github.com/verifiablelabs/verifiable-labs-envs
 
 License: Apache-2.0
