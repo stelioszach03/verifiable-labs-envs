@@ -1,6 +1,14 @@
-"""Verifiable Labs process-reward eval CLI (Phase 30.D)."""
-from __future__ import annotations
+"""vlabs-prm-eval — process-reward-model eval card tooling.
 
-__version__ = "0.0.1"
+Current commands:
 
-__all__ = ["__version__"]
+* ``vlabs-prm-eval gate`` — checkpoint promotion gate. Reads two eval
+  cards (old / new), maps each onto ``ModelMetrics``, evaluates the
+  7-condition ``AcceptUpdate`` predicate from
+  ``formal/VerifiableLabsFormal/SelfImprovementGate.lean`` via the
+  Python mirror in ``verifiable_labs_envs.formal_spec.gate``, and exits
+  0/1 accordingly.
+
+The PRM eval-card schema is defined in ``vlabs_prm_eval.gate`` (see
+``EvalCard`` + ``DEFAULT_METRICS_MAP``).
+"""

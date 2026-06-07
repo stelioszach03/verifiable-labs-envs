@@ -8,6 +8,8 @@ adapter, scores it, and persists an audit row. Returns the reward,
 conformal interval, coverage guarantee, audit ID, and per-component
 breakdown.
 
+> The split-conformal coverage guarantee behind our calibrated reward intervals is machine-verified in Lean 4 (sorry-free, standard axioms only). The Python implementation is property-tested against the formal specification. See [`formal/VerifiableLabsFormal/ConformalCoverage.lean`](../../formal/VerifiableLabsFormal/ConformalCoverage.lean).
+
 ## Auth
 
 `X-Vlabs-Key` header (data plane). Counts against the per-tier

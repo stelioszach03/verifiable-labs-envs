@@ -28,7 +28,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Install monorepo + API + SDK + vlabs-calibrate + vlabs-api + vlabs-audit
+      - name: Install monorepo + API + SDK + vlabs-calibrate + vlabs-audit + vlabs-prm-eval
         run: |
           python -m pip install --upgrade pip
           # Monorepo with dev + api extras (api required for the SDK
@@ -38,21 +38,11 @@ jobs:
           pip install -e packages/verifiable-labs
           # Editable calibrate so packages/vlabs-calibrate/tests are runnable.
           pip install -e packages/vlabs-calibrate
-          # Editable hosted API so services/api/tests are runnable.
-          # The dev extra brings in pgserver, which downloads its own
-          # self-contained Postgres binary on first run.
-          pip install -e "services/api[dev]"
           # Editable audit tool so tools/vlabs-audit/tests are runnable.
           pip install -e "tools/vlabs-audit[dev]"
-          # Phase 29 / 30 dataset + training tooling — pytest collects
-          # tests from these dirs (see pyproject.toml testpaths), so the
-          # editable installs are required for ModuleNotFoundError to
-          # stay quiet at collection time.
-          pip install -e tools/vlabs-reward-data
-          pip install -e tools/vlabs-reward-train
-          pip install -e tools/vlabs-prm-data
-          pip install -e tools/vlabs-prm-train
-          pip install -e tools/vlabs-prm-eval
+          # Editable prm-eval tool so tools/vlabs-prm-eval/tests are runnable
+          # (Phase FV — wraps the formally verified AcceptUpdate gate).
+          pip install -e "tools/vlabs-prm-eval[dev]"
 
       - name: Install tectonic (Linux only — vlabs-audit LaTeX integration)
         if: runner.os == 'Linux'
@@ -71,8 +61,8 @@ jobs:
           ruff check src tests benchmarks examples scripts \
                      packages/verifiable-labs/src packages/verifiable-labs/tests \
                      packages/vlabs-calibrate/src packages/vlabs-calibrate/tests \
-                     services/api/src services/api/tests \
-                     tools/vlabs-audit/src tools/vlabs-audit/tests
+                     tools/vlabs-audit/src tools/vlabs-audit/tests \
+                     tools/vlabs-prm-eval/src tools/vlabs-prm-eval/tests
 
       - name: Run tests
         run: pytest
