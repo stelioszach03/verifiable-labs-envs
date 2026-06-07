@@ -4,6 +4,8 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](pyproject.toml)
 [![PyPI](https://img.shields.io/pypi/v/verifiable-labs?label=pypi%3Averifiable-labs&color=4c1)](https://pypi.org/project/verifiable-labs/)
+[![Zenodo DOI](https://img.shields.io/badge/Zenodo%20DOI-10.5281%2Fzenodo.19786415-blue)](https://doi.org/10.5281/zenodo.19786415)
+[![Website](https://img.shields.io/badge/website-verifiable--labs.com-blueviolet)](https://verifiable-labs.com)
 
 > Verifiable Labs is the contamination-proof RL evaluation substrate for AI labs training scientific agents. Procedurally generated environments, classical-solver ground truth, conformal-calibrated rewards.
 
@@ -359,7 +361,9 @@ Clean discrimination across model tiers and clean rank-ordering against the expe
 
 Reproduce with `python benchmarks/run_llm_benchmark.py --preset paid-full`. See [`results/llm_benchmark.md`](results/llm_benchmark.md) for the full analysis and [`results/llm_benchmark.csv`](results/llm_benchmark.csv) for per-call raw data.
 
-## Install
+## Install from source (developers)
+
+> Need the package only? See the [PyPI install at the top](#install) instead.
 
 ### Full monorepo (developers + research use)
 
@@ -434,7 +438,9 @@ env = load_environment()
 out = env.run_baseline(seed=0)
 ```
 
-## Quickstart
+## Python API quickstart (local mode)
+
+> See also the [SDK quickstart](#sdk-quickstart) further up for the hosted-API client.
 
 ```python
 from verifiable_labs_envs import load_environment
@@ -480,10 +486,33 @@ cd leaderboard && pip install -r requirements.txt && python app.py
 
 HF Spaces deploy pending `HF_TOKEN` setup; see [`docs/LEADERBOARD.md`](docs/LEADERBOARD.md) for the exact deploy command.
 
+## Citation
+
+If you use Verifiable Labs in academic work, please cite:
+
+```bibtex
+@software{verifiable_labs_2026,
+  author       = {Zacharioudakis, Stelios},
+  title        = {Verifiable Labs: contamination-proof RL environments
+                  with conformal-calibrated rewards},
+  year         = {2026},
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.19786415},
+  url          = {https://doi.org/10.5281/zenodo.19786415}
+}
+```
+
+## Contact
+
+| | |
+|---|---|
+| Website | https://verifiable-labs.com |
+| General / press | hello@verifiable-labs.com |
+| Security disclosures | security@verifiable-labs.com |
+| Issues / contributions | [GitHub Issues](https://github.com/stelioszach03/verifiable-labs-envs/issues) |
+
 ## Author
 
-Stelios Zacharioudakis — finishing BSc CS at the University of Athens (NKUA). Research on calibrated astronomical inverse imaging.
+Stelios Zacharioudakis — finishing BSc CS at the University of Athens (NKUA). Research on calibrated astronomical inverse imaging. Operating Verifiable Labs as a pre-incorporation working group; formal incorporation planned post-traction.
 
-## License
-
-Apache 2.0. See `LICENSE`.
+See the [License](#license) section near the top for the full Apache-2.0 + commercial-services breakdown.
