@@ -17,7 +17,7 @@ from __future__ import annotations
 import math
 
 import pytest
-from hypothesis import assume, given, settings
+from hypothesis import given
 from hypothesis import strategies as st
 
 from verifiable_labs_envs.formal_spec.formulas import difficulty_update

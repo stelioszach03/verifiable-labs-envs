@@ -10,16 +10,11 @@ Mirrors ``formal/VerifiableLabsFormal/SelfImprovementGate.lean``:
 
 from __future__ import annotations
 
-import math
-import random
-
 import pytest
-from hypothesis import assume, given, settings
+from hypothesis import given
 from hypothesis import strategies as st
 
 from verifiable_labs_envs.formal_spec.gate import (
-    GateDecision,
-    ModelMetrics,
     REASON_CALIBRATION_DROPPED,
     REASON_COST_EXCEEDED,
     REASON_HACK_RISK_EXCEEDED,
@@ -27,6 +22,7 @@ from verifiable_labs_envs.formal_spec.gate import (
     REASON_OOD_DROPPED,
     REASON_REGRESSION_FLAG_SET,
     REASON_VGS_GAIN_BELOW_TAU,
+    ModelMetrics,
     Tolerances,
     accept_update,
 )

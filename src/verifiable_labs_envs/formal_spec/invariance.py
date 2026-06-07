@@ -20,8 +20,9 @@ harness, and the production calibration pipeline treats H accordingly.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Callable, Hashable, Iterable, Mapping, Sequence, TypeVar
+from collections.abc import Callable, Iterable, Mapping, Sequence
+from dataclasses import dataclass
+from typing import TypeVar
 
 X = TypeVar("X")
 A = TypeVar("A")

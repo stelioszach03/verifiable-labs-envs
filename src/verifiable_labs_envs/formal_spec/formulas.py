@@ -18,8 +18,8 @@ Lean-proved invariants.
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Iterable, Optional, Sequence
 
 
 # ---------------------------------------------------------------------
@@ -87,7 +87,7 @@ def vgs(
     d: float,
     h: float,
     k: float,
-    l: float,
+    lat: float,
     lam: float,
     mu: float,
     nu: float,
@@ -101,17 +101,18 @@ def vgs(
 
     Args:
         g, c, r, d: quality terms, each in [0, 1].
-        h, k, l:    penalty terms, each in [0, 1].
+        h, k, lat:  penalty terms (Lean's H, K, L — ``lat`` for latency,
+                    avoids ambiguous bare ``l``). Each in [0, 1].
         lam, mu, nu: penalty weights, each ≥ 0.
 
     Raises:
         ValueError: if any input violates its domain hypothesis.
     """
-    for name, x in (("g", g), ("c", c), ("r", r), ("d", d), ("h", h), ("k", k), ("l", l)):
+    for name, x in (("g", g), ("c", c), ("r", r), ("d", d), ("h", h), ("k", k), ("lat", lat)):
         _check_unit(name, x)
     for name, x in (("lam", lam), ("mu", mu), ("nu", nu)):
         _check_nonneg(name, x)
-    return g * c * r * d - lam * h - mu * k - nu * l
+    return g * c * r * d - lam * h - mu * k - nu * lat
 
 
 # ---------------------------------------------------------------------
@@ -195,7 +196,7 @@ class _Candidate:
 
 
 def select_model(
-    candidates: Sequence[tuple[str, float] | "_Candidate"],
+    candidates: Sequence[tuple[str, float] | _Candidate],
 ) -> str:
     """Return the model ``id`` maximising routing utility.
 

@@ -22,15 +22,15 @@ Lean cross-reference:
 
 from .formulas import (
     calibrated_reward,
-    vgs,
     difficulty_update,
     routing_utility,
     select_model,
+    vgs,
 )
 from .gate import (
+    GateDecision,
     ModelMetrics,
     Tolerances,
-    GateDecision,
     accept_update,
 )
 from .invariance import (

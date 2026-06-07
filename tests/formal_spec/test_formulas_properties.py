@@ -8,10 +8,8 @@ mirrored by each test are recorded in the docstring.
 
 from __future__ import annotations
 
-import math
-
 import pytest
-from hypothesis import assume, given, settings
+from hypothesis import assume, given
 from hypothesis import strategies as st
 
 from verifiable_labs_envs.formal_spec.formulas import (
@@ -20,7 +18,6 @@ from verifiable_labs_envs.formal_spec.formulas import (
     select_model,
     vgs,
 )
-
 
 # ---------------------------------------------------------------------
 # Strategies
@@ -95,12 +92,12 @@ def test_calibrated_reward_domain_errors(bad_input):
 # =====================================================================
 @given(
     g=unit_floats, c=unit_floats, r=unit_floats, d=unit_floats,
-    h=unit_floats, k=unit_floats, l=unit_floats,
+    h=unit_floats, k=unit_floats, lat=unit_floats,
     lam=nonneg_floats, mu=nonneg_floats, nu=nonneg_floats,
 )
-def test_vgs_bounded(g, c, r, d, h, k, l, lam, mu, nu):
+def test_vgs_bounded(g, c, r, d, h, k, lat, lam, mu, nu):
     """Mirrors ``VGS_bounded`` (VGS ∈ [−(λ+μ+ν), 1])."""
-    score = vgs(g, c, r, d, h, k, l, lam, mu, nu)
+    score = vgs(g, c, r, d, h, k, lat, lam, mu, nu)
     assert score >= -(lam + mu + nu) - TOL
     assert score <= 1.0 + TOL
 
@@ -108,26 +105,26 @@ def test_vgs_bounded(g, c, r, d, h, k, l, lam, mu, nu):
 @given(
     g1=unit_floats, g2=unit_floats,
     c=unit_floats, r=unit_floats, d=unit_floats,
-    h=unit_floats, k=unit_floats, l=unit_floats,
+    h=unit_floats, k=unit_floats, lat=unit_floats,
     lam=nonneg_floats, mu=nonneg_floats, nu=nonneg_floats,
 )
-def test_vgs_mono_G(g1, g2, c, r, d, h, k, l, lam, mu, nu):
+def test_vgs_mono_G(g1, g2, c, r, d, h, k, lat, lam, mu, nu):
     """Mirrors ``VGS_mono_G``."""
     assume(g1 <= g2)
-    a = vgs(g1, c, r, d, h, k, l, lam, mu, nu)
-    b = vgs(g2, c, r, d, h, k, l, lam, mu, nu)
+    a = vgs(g1, c, r, d, h, k, lat, lam, mu, nu)
+    b = vgs(g2, c, r, d, h, k, lat, lam, mu, nu)
     assert a <= b + TOL
 
 
 @given(
     g=unit_floats, c=unit_floats, r=unit_floats, d=unit_floats,
-    h1=unit_floats, h2=unit_floats, k=unit_floats, l=unit_floats,
+    h1=unit_floats, h2=unit_floats, k=unit_floats, lat=unit_floats,
     lam=nonneg_floats, mu=nonneg_floats, nu=nonneg_floats,
 )
-def test_vgs_anti_H(g, c, r, d, h1, h2, k, l, lam, mu, nu):
+def test_vgs_anti_H(g, c, r, d, h1, h2, k, lat, lam, mu, nu):
     """Mirrors ``VGS_anti_H``."""
     assume(h1 <= h2)
-    assert vgs(g, c, r, d, h2, k, l, lam, mu, nu) <= vgs(g, c, r, d, h1, k, l, lam, mu, nu) + TOL
+    assert vgs(g, c, r, d, h2, k, lat, lam, mu, nu) <= vgs(g, c, r, d, h1, k, lat, lam, mu, nu) + TOL
 
 
 @given(
@@ -136,14 +133,14 @@ def test_vgs_anti_H(g, c, r, d, h1, h2, k, l, lam, mu, nu):
     c=st.floats(min_value=0.05, max_value=1.0, allow_nan=False, allow_infinity=False),
     r=st.floats(min_value=0.05, max_value=1.0, allow_nan=False, allow_infinity=False),
     d=st.floats(min_value=0.05, max_value=1.0, allow_nan=False, allow_infinity=False),
-    h=unit_floats, k=unit_floats, l=unit_floats,
+    h=unit_floats, k=unit_floats, lat=unit_floats,
     lam=nonneg_floats, mu=nonneg_floats, nu=nonneg_floats,
 )
-def test_vgs_strict_mono_G(g1, g2, c, r, d, h, k, l, lam, mu, nu):
+def test_vgs_strict_mono_G(g1, g2, c, r, d, h, k, lat, lam, mu, nu):
     """Mirrors ``VGS_strict_mono_G`` (C,R,D > 0 ∧ G₁ < G₂ ⇒ VGS(G₁) < VGS(G₂))."""
     assume(g2 - g1 > 1e-3)
-    a = vgs(g1, c, r, d, h, k, l, lam, mu, nu)
-    b = vgs(g2, c, r, d, h, k, l, lam, mu, nu)
+    a = vgs(g1, c, r, d, h, k, lat, lam, mu, nu)
+    b = vgs(g2, c, r, d, h, k, lat, lam, mu, nu)
     assert a < b
 
 
