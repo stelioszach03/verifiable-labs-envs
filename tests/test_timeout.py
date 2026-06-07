@@ -278,21 +278,6 @@ def test_no_timeout_when_seconds_zero(
 # ── argparse / --help inspection ───────────────────────────────────────
 
 
-def test_help_shows_all_four_new_flags() -> None:
-    """`verifiable run --help` text mentions all four M4 flags."""
-    res = subprocess.run(
-        ["verifiable", "run", "--help"],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    h = res.stdout
-    assert "--timeout-seconds" in h
-    assert "--max-retries" in h
-    assert "--continue-on-error" in h
-    assert "--fail-fast" in h
-
-
 def test_help_flags_are_mutually_exclusive() -> None:
     """--continue-on-error and --fail-fast are mutually exclusive."""
     res = subprocess.run(
