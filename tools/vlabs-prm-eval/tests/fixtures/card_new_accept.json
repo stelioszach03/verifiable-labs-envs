@@ -1,0 +1,15 @@
+{
+  "model_id": "qwen-2.5-1.5b-grpo-accept",
+  "processbench_overall": 0.80,
+  "mean_held_out_env_metric": 0.75,
+  "bon_accuracy": 0.72,
+  "coverage": 0.91,
+  "held_out_envs": {
+    "sparse-fourier-recovery": 0.75,
+    "kalman-filter-tuning": 0.75,
+    "ode-residual": 0.75
+  },
+  "invariance_violation_rate": 0.08,
+  "cost": 1.0,
+  "latency": 1.0
+}
