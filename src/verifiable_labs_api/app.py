@@ -107,7 +107,7 @@ def create_app(
             "REST wrapper around the Verifiable Labs scientific RL "
             "environments. **v0.1.0-alpha** — public + rate-limited; "
             "no authentication. See "
-            "https://github.com/stelioszach03/verifiable-labs-envs."
+            "https://github.com/verifiablelabs/verifiable-labs-envs."
         ),
         lifespan=lifespan,
     )

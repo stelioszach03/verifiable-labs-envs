@@ -1,6 +1,6 @@
 # Verifiable Labs
 
-[![CI](https://github.com/stelioszach03/verifiable-labs-envs/actions/workflows/ci.yml/badge.svg)](https://github.com/stelioszach03/verifiable-labs-envs/actions/workflows/ci.yml)
+[![CI](https://github.com/verifiablelabs/verifiable-labs-envs/actions/workflows/ci.yml/badge.svg)](https://github.com/verifiablelabs/verifiable-labs-envs/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](pyproject.toml)
 [![PyPI](https://img.shields.io/pypi/v/verifiable-labs?label=pypi%3Averifiable-labs&color=4c1)](https://pypi.org/project/verifiable-labs/)
@@ -54,7 +54,7 @@ The `verifiable-labs` PyPI package pulls in the heavy `verifiable-labs-envs` aut
 The full developer loop, from clone to a Markdown report a YC reviewer can read.
 
 ```bash
-git clone https://github.com/stelioszach03/verifiable-labs-envs.git
+git clone https://github.com/verifiablelabs/verifiable-labs-envs.git
 cd verifiable-labs-envs
 pip install -e ".[dev]"
 
@@ -374,7 +374,7 @@ Reproduce with `python benchmarks/run_llm_benchmark.py --preset paid-full`. See 
 ### Full monorepo (developers + research use)
 
 ```bash
-git clone https://github.com/stelioszach03/verifiable-labs-envs
+git clone https://github.com/verifiablelabs/verifiable-labs-envs
 cd verifiable-labs-envs
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"          # add ",api" to also install the FastAPI server
@@ -431,7 +431,7 @@ prime env install stelioszach/sparse-fourier-recovery
 ### Single environment via GitHub subdirectory
 
 ```bash
-pip install "git+https://github.com/stelioszach03/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-sparse-fourier"
+pip install "git+https://github.com/verifiablelabs/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-sparse-fourier"
 # or: verifiable-labs-sparse-fourier-multiturn, -tools, super-resolution,
 #     lodopab-ct, lodopab-ct-multiturn, envs-core
 ```
@@ -515,7 +515,7 @@ If you use Verifiable Labs in academic work, please cite:
 | Website | https://verifiable-labs.com |
 | General / press | hello@verifiable-labs.com |
 | Security disclosures | security@verifiable-labs.com |
-| Issues / contributions | [GitHub Issues](https://github.com/stelioszach03/verifiable-labs-envs/issues) |
+| Issues / contributions | [GitHub Issues](https://github.com/verifiablelabs/verifiable-labs-envs/issues) |
 
 ## Author
 

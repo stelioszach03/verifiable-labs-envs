@@ -25,7 +25,7 @@ on the final parsed `answer`, identical to
 ## Install
 
 ```
-pip install "git+https://github.com/stelioszach03/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-math-algebra-tools"
+pip install "git+https://github.com/verifiablelabs/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-math-algebra-tools"
 ```
 
 ## Use

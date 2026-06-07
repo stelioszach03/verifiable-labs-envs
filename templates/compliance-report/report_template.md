@@ -159,7 +159,7 @@ The following ${n_envs} environments contributed to this report:
 ${env_list}
 
 Each environment is documented under `docs/environments/<env_id>.md`
-in the [verifiable-labs-envs](https://github.com/stelioszach03/verifiable-labs-envs)
+in the [verifiable-labs-envs](https://github.com/verifiablelabs/verifiable-labs-envs)
 repository.
 
 ### 7.2 Source data

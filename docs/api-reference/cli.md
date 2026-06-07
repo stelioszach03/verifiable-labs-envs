@@ -90,7 +90,7 @@ python benchmarks/run_v2_benchmark.py --models <model-list> --seeds <count>
 ```
 
 Reproduces the `results/complete_matrix_*.csv` files. Used to refresh
-the leaderboard. Read [`benchmarks/run_v2_benchmark.py`](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/benchmarks/run_v2_benchmark.py)
+the leaderboard. Read [`benchmarks/run_v2_benchmark.py`](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/benchmarks/run_v2_benchmark.py)
 before running — the defaults exercise all 10 envs across 5 models
 and consume ~$5 on OpenRouter at current pricing.
 

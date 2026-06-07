@@ -143,7 +143,7 @@ async def _run_all(args, models, env_ids, csv_path: Path):
         base_url="https://openrouter.ai/api/v1",
         api_key=os.environ["OPENROUTER_API_KEY"],
         default_headers={
-            "HTTP-Referer": "https://github.com/stelioszach03/verifiable-labs-envs",
+            "HTTP-Referer": "https://github.com/verifiablelabs/verifiable-labs-envs",
             "X-Title": "verifiable-labs-envs-meta-benchmark-v3",
         },
         max_retries=3, timeout=args.timeout_s,

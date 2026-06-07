@@ -18,8 +18,8 @@ Labs as a Y Combinator S26 application.
 ## Project channels
 
 - **Issues + bug reports:**
-  [github.com/stelioszach03/verifiable-labs-envs/issues](https://github.com/stelioszach03/verifiable-labs-envs/issues)
-- **Pull requests welcome:** see [`CONTRIBUTING`](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/README.md#contributing)
+  [github.com/verifiablelabs/verifiable-labs-envs/issues](https://github.com/verifiablelabs/verifiable-labs-envs/issues)
+- **Pull requests welcome:** see [`CONTRIBUTING`](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/README.md#contributing)
   in the repo README. New envs follow [Creating a custom env](../tutorials/creating-custom-env.md).
 - **Discussions:** GitHub Discussions on the same repo, or email for
   longer conversations.

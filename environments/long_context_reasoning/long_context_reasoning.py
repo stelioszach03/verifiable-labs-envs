@@ -1,7 +1,7 @@
 """Multi-hop reasoning over long documents (>10k tokens).
 
 Prime Intellect Hub wrapper around ``verifiable_labs_envs.envs.long_context_reasoning``.
-The monorepo at https://github.com/stelioszach03/verifiable-labs-envs is the
+The monorepo at https://github.com/verifiablelabs/verifiable-labs-envs is the
 source of truth; this file is a thin re-export so the env can be installed
 and discovered via the Prime Intellect Environments Hub.
 """

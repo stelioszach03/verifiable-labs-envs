@@ -11,7 +11,7 @@ Because `|F(-x)| = |F(x)|`, recovery is unique only up to a global sign flip. Th
 ## Install
 
 ```bash
-pip install "verifiable-labs-phase-retrieval @ git+https://github.com/stelioszach03/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-phase-retrieval"
+pip install "verifiable-labs-phase-retrieval @ git+https://github.com/verifiablelabs/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-phase-retrieval"
 ```
 
 Via Prime Intellect Hub (once public):

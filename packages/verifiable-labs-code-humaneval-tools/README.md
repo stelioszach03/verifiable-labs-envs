@@ -25,4 +25,4 @@ pip install verifiable-labs-code-humaneval-tools
 ```
 
 Source of truth + full docs:
-https://github.com/stelioszach03/verifiable-labs-envs
+https://github.com/verifiablelabs/verifiable-labs-envs

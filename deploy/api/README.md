@@ -47,7 +47,7 @@ is no parallel image to maintain.
 `render.yaml` is a Blueprint manifest. From the Render dashboard:
 
 1. New → Blueprint.
-2. Point at `https://github.com/stelioszach03/verifiable-labs-envs`.
+2. Point at `https://github.com/verifiablelabs/verifiable-labs-envs`.
 3. Render auto-detects `deploy/api/render.yaml`.
 4. Wait for the first build (~5 min).
 5. Default URL: `https://verifiable-labs-api.onrender.com`.

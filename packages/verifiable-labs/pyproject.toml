@@ -66,8 +66,8 @@ verifiable = "verifiable_labs.cli:main"
 
 [project.urls]
 Homepage = "https://verifiable-labs.com"
-Source = "https://github.com/stelioszach03/verifiable-labs-envs/tree/main/packages/verifiable-labs"
-Issues = "https://github.com/stelioszach03/verifiable-labs-envs/issues"
+Source = "https://github.com/verifiablelabs/verifiable-labs-envs/tree/main/packages/verifiable-labs"
+Issues = "https://github.com/verifiablelabs/verifiable-labs-envs/issues"
 Documentation = "https://verifiable-labs.com/docs/"
 
 [tool.hatch.build.targets.wheel]

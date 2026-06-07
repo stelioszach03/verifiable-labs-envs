@@ -62,4 +62,4 @@ fastMRI distributions but ship empty until the user opts in.
 
 ## Source
 
-[`src/verifiable_labs_envs/envs/mri_knee.py`](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/src/verifiable_labs_envs/envs/mri_knee.py).
+[`src/verifiable_labs_envs/envs/mri_knee.py`](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/src/verifiable_labs_envs/envs/mri_knee.py).

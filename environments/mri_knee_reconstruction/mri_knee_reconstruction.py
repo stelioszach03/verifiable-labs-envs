@@ -1,7 +1,7 @@
 """MRI knee reconstruction from 4x-undersampled Cartesian k-space with zero-filled-IFFT baseline and conformal σ̂.
 
 Prime Intellect Hub wrapper around ``verifiable_labs_envs.envs.mri_knee``.
-The monorepo at https://github.com/stelioszach03/verifiable-labs-envs is the
+The monorepo at https://github.com/verifiablelabs/verifiable-labs-envs is the
 source of truth; this file is a thin re-export so the env can be installed
 and discovered via the Prime Intellect Environments Hub.
 """

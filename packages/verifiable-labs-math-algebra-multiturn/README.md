@@ -18,7 +18,7 @@ penalty `(1 − 0.05 · (n_turns − 1))` capped at `0.10`, so 3 turns scores
 ## Install
 
 ```
-pip install "git+https://github.com/stelioszach03/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-math-algebra-multiturn"
+pip install "git+https://github.com/verifiablelabs/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-math-algebra-multiturn"
 ```
 
 ## Use

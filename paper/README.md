@@ -87,6 +87,6 @@ model-API calls without AI intermediation.
 
 ## Repository
 
-- Code + envs: https://github.com/stelioszach03/verifiable-labs-envs
+- Code + envs: https://github.com/verifiablelabs/verifiable-labs-envs
 - Environments Hub (flagship env page; Prime Intellect does not expose author-list pages publicly — full ten-env list on the leaderboard below): https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery
 - Leaderboard Space: https://huggingface.co/spaces/stelioszach03/scientific-rl-benchmark

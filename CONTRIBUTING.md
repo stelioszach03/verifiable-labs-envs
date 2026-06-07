@@ -5,7 +5,7 @@ Thanks for your interest in `verifiable-labs-envs`. This project is in alpha and
 ## Quick setup
 
 ```bash
-git clone https://github.com/stelioszach03/verifiable-labs-envs.git
+git clone https://github.com/verifiablelabs/verifiable-labs-envs.git
 cd verifiable-labs-envs
 
 python3.11 -m venv .venv

@@ -4,7 +4,7 @@
 physics-grounded inverse problems with **conformal-calibrated rewards**
 and **procedurally regenerated** instances.
 
-[![Status: alpha](https://img.shields.io/badge/status-v0.1.0--alpha-orange)](https://github.com/stelioszach03/verifiable-labs-envs)
+[![Status: alpha](https://img.shields.io/badge/status-v0.1.0--alpha-orange)](https://github.com/verifiablelabs/verifiable-labs-envs)
 [![Hosted API](https://img.shields.io/badge/hosted_API-Tier_1-blue)](api-reference/rest-api.md)
 [![Python SDK](https://img.shields.io/badge/pypi-verifiable--labs-green)](api-reference/python-sdk.md)
 

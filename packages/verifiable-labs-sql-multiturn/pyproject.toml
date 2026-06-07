@@ -34,8 +34,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/stelioszach03/verifiable-labs-envs"
-Issues = "https://github.com/stelioszach03/verifiable-labs-envs/issues"
+Homepage = "https://github.com/verifiablelabs/verifiable-labs-envs"
+Issues = "https://github.com/verifiablelabs/verifiable-labs-envs/issues"
 
 [project.entry-points."verifiers.environments"]
 sql-multiturn = "verifiable_labs_sql_multiturn:load_environment"
