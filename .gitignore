@@ -193,3 +193,19 @@ scripts/publish/PYPI_SUPPORT_EMAIL.txt
 # per-checkpoint comparison drivers). Live on the private-backup
 # branch only.
 examples/training/
+
+# Phase RC follow-up: Next.js build artefacts. services/landing/ is no
+# longer in the public tree (open-core split moved it to the
+# verifiable-labs-website repo), but `.next/` + `node_modules/` may
+# still appear from local builds against pre-split checkouts.
+.next/
+node_modules/
+
+# Phase RC follow-up: services/ is fully owned by other repos post-split
+# (services/api -> private; services/landing -> verifiable-labs-website).
+# Local checkouts that predate the split may carry leftover build
+# artefacts (.vercel/, .next/, tsbuildinfo, next-env.d.ts, ...).
+# This branch never tracks anything under services/; ignoring the whole
+# tree keeps `git status` quiet without touching the private branch
+# (gitignore patterns never affect already-tracked files).
+services/
