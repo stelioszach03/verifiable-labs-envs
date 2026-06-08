@@ -467,6 +467,29 @@ Walkthrough across all three environments:
 python examples/quickstart.py
 ```
 
+## Quickstart: train with GRPO
+
+[`examples/quickstart_grpo.py`](examples/quickstart_grpo.py) is a
+minimal end-to-end loop that points TRL's `GRPOTrainer` at
+`sparse-fourier-recovery`. The reward function wraps the env's
+`score()`, so any RL stack that accepts a Python callable for rewards
+plugs in the same way.
+
+```bash
+pip install "trl>=0.12" "transformers>=4.45" accelerate
+python examples/quickstart_grpo.py --dry-run        # validate the loop
+python examples/quickstart_grpo.py --max-steps 10   # 10-step smoke
+python examples/quickstart_grpo.py --max-steps 500  # full run
+```
+
+Defaults fit a free Colab T4 (Qwen 0.5B). The measurable GRPO gain on
+this config is **format compliance** — mean reward climbs from ~0
+(parse failures) toward the ~0.35 zero-solution baseline as the model
+learns to emit valid `{"x_hat": [n floats]}` JSON. The ~0.93 OMP
+classical-baseline number elsewhere on this page is a specialised-
+solver ceiling, not a 0.5B target. See the file's top docstring for
+the temperature-≤-0.5 rationale on strict-JSON envs.
+
 ## Contamination resistance
 
 Every environment in this repo is structurally resistant to the three attacks that have hollowed out static text benchmarks: train-set leakage, answer-string matching, and distribution creep. Full analysis in [`docs/CONTAMINATION.md`](docs/CONTAMINATION.md). Headline numbers:
