@@ -276,18 +276,32 @@ class _ScriptedAdapter:
 from typing import Any  # noqa: E402  (placed below the test stubs for grouping)
 
 
-def test_run_rollout_returns_canonical_dict():
+@pytest.fixture(scope="module")
+def shared_rollout():
+    """One canonical [bad, gold, gold] 3-turn rollout shared by the three
+    tests below that assert DIFFERENT properties of the SAME run.
+
+    Each rollout spawns a sandboxed pytest subprocess per turn (~7 s);
+    sharing collapses 3 × ~7 s into one (audit finding P-1). The
+    penalty test keeps its own gold×3 rollout (base_reward must be
+    exactly 1.0 on every turn) and the max_turns-override test needs
+    different rollout params, so neither can share.
+    """
     inst = generate_instance(seed=0)
-    gold = inst.gold_solution
     solver = _ScriptedSolver(
         [
-            json.dumps({"code": "def x(): return 0", "confidence": 0.3}),
-            json.dumps({"code": "def x(): return 0", "confidence": 0.4}),
-            json.dumps({"code": gold, "confidence": 0.9}),
+            json.dumps({"code": "def x(): return None", "confidence": 0.1}),
+            json.dumps({"code": inst.gold_solution, "confidence": 0.8}),
+            json.dumps({"code": inst.gold_solution, "confidence": 0.9}),
         ]
     )
-    env = CodeHumanevalMultiturnEnv(conformal_quantile=0.5)
+    env = CodeHumanevalMultiturnEnv(conformal_quantile=0.5, max_turns=3)
     out = env.run_rollout(solver, inst, adapter=_ScriptedAdapter())
+    return inst, solver, out
+
+
+def test_run_rollout_returns_canonical_dict(shared_rollout):
+    _inst, _solver, out = shared_rollout
     assert "reward" in out
     assert "components" in out
     assert "meta" in out
@@ -314,17 +328,8 @@ def test_run_rollout_applies_turn_penalty():
     assert out["reward"] == pytest.approx(0.9, abs=0.01)
 
 
-def test_run_rollout_history_grows_per_turn():
-    inst = generate_instance(seed=0)
-    solver = _ScriptedSolver(
-        [
-            json.dumps({"code": "def x(): return None", "confidence": 0.1}),
-            json.dumps({"code": inst.gold_solution, "confidence": 0.8}),
-            json.dumps({"code": inst.gold_solution, "confidence": 0.9}),
-        ]
-    )
-    env = CodeHumanevalMultiturnEnv(conformal_quantile=0.5, max_turns=3)
-    env.run_rollout(solver, inst, adapter=_ScriptedAdapter())
+def test_run_rollout_history_grows_per_turn(shared_rollout):
+    _inst, solver, _out = shared_rollout
     # 3 calls to complete_turns; the third call's history must contain
     # the assistant + feedback messages from turns 1 and 2.
     third_call_history = solver.history_log[-1]
@@ -347,17 +352,8 @@ def test_run_rollout_respects_max_turns_override():
     assert out["meta"]["max_turns"] == 2
 
 
-def test_run_rollout_records_per_turn_components():
-    inst = generate_instance(seed=0)
-    solver = _ScriptedSolver(
-        [
-            json.dumps({"code": "def x(): return None", "confidence": 0.1}),
-            json.dumps({"code": inst.gold_solution, "confidence": 0.9}),
-            json.dumps({"code": inst.gold_solution, "confidence": 0.9}),
-        ]
-    )
-    env = CodeHumanevalMultiturnEnv(conformal_quantile=0.5)
-    out = env.run_rollout(solver, inst, adapter=_ScriptedAdapter())
+def test_run_rollout_records_per_turn_components(shared_rollout):
+    _inst, _solver, out = shared_rollout
     components = out["meta"]["turn_components"]
     assert len(components) == 3
     for c in components:

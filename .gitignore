@@ -109,10 +109,22 @@ Icon
 *.swp
 *.swo
 
-# Secrets
+# Secrets — wide net: nothing credential-shaped may ever be tracked.
 .env
-.env.local
+.env.*
+secrets.*
+credentials.*
+.netrc
 *.key
+*.pem
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+id_ecdsa*
+.aws/
+.gcp/
+.azure/
 
 # iCloud Drive duplicate-resolution artifacts
 * 2.*
