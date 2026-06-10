@@ -15,7 +15,7 @@ Most AI eval tools test chatbots and apps. Verifiable Labs generates scientific 
 
 > **Status:** v0.1.0-alpha (developer preview). 25 live environments across compressed sensing, super-resolution, medical CT/MRI, phase retrieval, symbolic algebra, code execution, SQL, and long-context reasoning. Hosted REST API + Python SDK + `verifiable` CLI shipped. The public endpoint is open and rate-limited; treat it as a developer playground.
 
-- 🔗 Hugging Face leaderboard — https://huggingface.co/spaces/stelioszach03/scientific-rl-benchmark
+- 🔗 Hugging Face leaderboard — https://huggingface.co/spaces/verifiablelabs/scientific-rl-benchmark
 - 🔗 Prime Intellect Hub — https://app.primeintellect.ai/dashboard/environments/stelioszach03 (25 envs published)
 - 🔗 Paper (preprint, OpenReview submission pending) — [`paper/main.pdf`](paper/main.pdf)
 - 🔗 Training API — [`POST /v1/instance`](docs/api-reference/instance.md), [`POST /v1/score`](docs/api-reference/score.md), [`GET /v1/score/audit`](docs/api-reference/score.md#audit-trail) for per-call calibrated rewards in your training loop.
