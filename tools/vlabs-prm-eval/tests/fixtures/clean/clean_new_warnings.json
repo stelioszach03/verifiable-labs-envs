@@ -1,0 +1,10 @@
+{
+  "model_id": "qwen-2.5-1.5b-grpo-clean-warnings",
+  "vgs": 0.8,
+  "public_score": 0.86,
+  "hidden_score": 0.79,
+  "ood_score": 0.72,
+  "cost": 1.0,
+  "latency": 1.0,
+  "regression": false
+}
