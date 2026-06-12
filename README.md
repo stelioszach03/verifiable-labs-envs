@@ -1,5 +1,14 @@
 # Verifiable Labs
 
+> **Open-core split in progress.** The SDK contracts (run modes, provider
+> interface, schemas, clean-gate CLI) now also live in
+> [vlabs-sdk](https://github.com/verifiablelabs/vlabs-sdk), and the Lean 4
+> formal track + property-test mirror in
+> [vlabs-formal](https://github.com/verifiablelabs/vlabs-formal); see
+> [vlabs-examples](https://github.com/verifiablelabs/vlabs-examples) for
+> runnable demos. This repository remains canonical for the 25
+> environments and the training stack until the split flips.
+
 [![CI](https://github.com/verifiablelabs/verifiable-labs-envs/actions/workflows/ci.yml/badge.svg)](https://github.com/verifiablelabs/verifiable-labs-envs/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](pyproject.toml)
