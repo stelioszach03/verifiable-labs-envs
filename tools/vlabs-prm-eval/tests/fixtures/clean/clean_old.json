@@ -1,0 +1,14 @@
+{
+  "model_id": "qwen-2.5-1.5b-base-clean",
+  "vgs": 0.70,
+  "contamination_risk": 0.10,
+  "clean_vgs": 0.50,
+  "public_score": 0.80,
+  "hidden_score": 0.70,
+  "ood_score": 0.70,
+  "hack_risk": 0.10,
+  "calibration": 0.90,
+  "cost": 1.0,
+  "latency": 1.0,
+  "regression": false
+}
