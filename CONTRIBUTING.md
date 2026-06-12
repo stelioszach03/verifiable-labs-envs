@@ -5,7 +5,7 @@ Thanks for your interest in `verifiable-labs-envs`. This project is in alpha and
 ## Quick setup
 
 ```bash
-git clone https://github.com/stelioszach03/verifiable-labs-envs.git
+git clone https://github.com/verifiablelabs/verifiable-labs-envs.git
 cd verifiable-labs-envs
 
 python3.11 -m venv .venv
@@ -23,6 +23,27 @@ pip install -e ".[dev,api,baselines,docs]"
 ```
 
 > **macOS note:** if your repo lives under `~/Documents` (iCloud Drive), put the venv outside of iCloud (e.g. `~/.venvs/verifiable-labs`) to avoid duplicate-resolution artifacts. See `docs/MACOS_ICLOUD_VENV.md`.
+
+### Why the editable install matters for the CLI
+
+`pip install -e ".[dev]"` is **required** for the `verifiable` CLI to discover environments added after the most recent published wheel. The CLI resolves env names through `verifiable_labs_envs._REGISTRY`, which is read from whatever copy of the package Python imports — without an editable install, that's the cached PyPI wheel (currently `0.1.0a1`, pinned at the 10 inverse-problem envs).
+
+If you skip the editable install and try to run a newly added env (for example, one of the Phase 21 symbolic-math envs), you'll see:
+
+```bash
+$ verifiable run --env math-algebra --model claude-haiku-4.5
+Error: unknown environment 'math-algebra'.
+Run `verifiable list` to see all 10 envs.
+```
+
+This is **expected** — the CLI is correctly reporting the cached registry. To unblock, install the monorepo editable from your working tree:
+
+```bash
+pip install -e ".[dev]"
+verifiable envs   # should now list all 13 envs
+```
+
+`pytest` does not have this problem: tests read sources directly via the repo `conftest.py` and `--import-mode=importlib`, so `pytest -q` exercises the new envs even without an editable install. Only the CLI surface (which goes through normal Python imports) needs the editable bridge.
 
 ## Running tests and lint
 

@@ -1,0 +1,39 @@
+# Substring fixtures for test_latex.py snapshot checks.
+# One marker per line. Comments start with '#' and are ignored.
+
+# Document scaffolding
+\documentclass{vlabs_report}
+\setvlabsaudit{
+\makevlabscover{
+\tableofcontents
+\begin{document}
+\end{document}
+
+# Section headers (one per Jinja section template)
+\section{Executive Summary}
+\section{Methodology}
+\section{Results}
+\section{Recommendations}
+\section{Appendix}
+
+# Methodology stays honest
+What this audit does \emph{not} measure
+leiconformal2018
+
+# Results section embeds figures
+coverage_calibration.pdf
+score_breakdown.pdf
+cost_per_correct.pdf
+
+# Appendix carries reproducibility metadata
+Audit id
+Reproducibility metadata
+\begin{verbatim}
+
+# Booktabs in tables
+\toprule
+\midrule
+\bottomrule
+
+# Hyperref-friendly cite
+@misc{verifiable-labs-audit-

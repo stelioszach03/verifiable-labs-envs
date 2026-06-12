@@ -7,16 +7,28 @@ non-NaN reward smoke test (no gradient update).
 """
 from __future__ import annotations
 
-# Import the C.4 script as a module to test its public surface.
-import importlib.util as _il
 import json
 import random
 from pathlib import Path
 
 import pytest
 
-# Skip entire module if trl/torch not available (CI runners).
-pytest.importorskip("trl", reason="trl/torch required")
+# ``examples/training/train_multienv_grpo.py`` does an unconditional
+# ``from transformers import …`` at module level (the script is the
+# canonical entry-point for the GRPO Colab job and assumes the full
+# training stack is installed). The test runner needs to import it
+# during collection, so on a leaner environment that hasn't installed
+# transformers we skip the module rather than blowing up the whole
+# pytest collection step.
+pytest.importorskip(
+    "transformers",
+    reason="train_multienv_grpo.py requires transformers; "
+    "install the training extras to run these tests",
+)
+pytest.importorskip("torch")
+
+# Import the C.4 script as a module to test its public surface.
+import importlib.util as _il
 
 _SCRIPT_PATH = Path(__file__).resolve().parents[2] / "examples" / "training" / "train_multienv_grpo.py"
 _spec = _il.spec_from_file_location("train_multienv_grpo", _SCRIPT_PATH)
@@ -24,7 +36,7 @@ _mod = _il.module_from_spec(_spec)
 assert _spec.loader is not None
 _spec.loader.exec_module(_mod)
 
-from verifiable_labs_envs.training import (  # noqa: E402
+from verifiable_labs_envs.training import (  # noqa: E402 — importorskip guards
     make_reward_fn_multienv,
     validate_env_schema,
 )

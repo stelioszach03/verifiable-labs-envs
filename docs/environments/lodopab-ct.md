@@ -68,4 +68,4 @@ heavy.
 
 ## Source
 
-[`src/verifiable_labs_envs/envs/lodopab_ct.py`](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/src/verifiable_labs_envs/envs/lodopab_ct.py).
+[`src/verifiable_labs_envs/envs/lodopab_ct.py`](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/src/verifiable_labs_envs/envs/lodopab_ct.py).

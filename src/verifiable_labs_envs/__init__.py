@@ -13,6 +13,25 @@ _REGISTRY: dict[str, str] = {
     "phase-retrieval-multiturn": "verifiable_labs_envs.envs.phase_retrieval_multiturn",
     "mri-knee-reconstruction": "verifiable_labs_envs.envs.mri_knee",
     "mri-knee-reconstruction-multiturn": "verifiable_labs_envs.envs.mri_knee_multiturn",
+    "math-algebra": "verifiable_labs_envs.envs.math_algebra",
+    "math-algebra-multiturn": "verifiable_labs_envs.envs.math_algebra_multiturn",
+    "math-algebra-tools": "verifiable_labs_envs.envs.math_algebra_tools",
+    # Phase 24 — code-execution env family.
+    "code-humaneval": "verifiable_labs_envs.envs.code_humaneval",
+    "code-humaneval-multiturn": "verifiable_labs_envs.envs.code_humaneval_multiturn",
+    "code-humaneval-tools": "verifiable_labs_envs.envs.code_humaneval_tools",
+    "code-mini-repo": "verifiable_labs_envs.envs.code_mini_repo",
+    # Phase 25 — tool-calling env family.
+    "tool-calling-single": "verifiable_labs_envs.envs.tool_calling_single",
+    "tool-calling-multiturn": "verifiable_labs_envs.envs.tool_calling_multiturn",
+    "tool-calling-debug": "verifiable_labs_envs.envs.tool_calling_debug",
+    # Phase 26 — sql env family.
+    "sql-single-turn": "verifiable_labs_envs.envs.sql_single_turn",
+    "sql-multiturn": "verifiable_labs_envs.envs.sql_multiturn",
+    # Phase 27 — long-context env family.
+    "long-context-needle": "verifiable_labs_envs.envs.long_context_needle",
+    "long-context-synthesis": "verifiable_labs_envs.envs.long_context_synthesis",
+    "long-context-reasoning": "verifiable_labs_envs.envs.long_context_reasoning",
 }
 
 

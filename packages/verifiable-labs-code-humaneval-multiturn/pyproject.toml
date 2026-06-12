@@ -1,0 +1,47 @@
+[build-system]
+requires = ["hatchling>=1.24,<1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "verifiable-labs-code-humaneval-multiturn"
+version = "0.1.2"
+description = "Multi-turn procedural code-execution RL environment with test-feedback rollouts and conformal coverage"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Stelios Zacharioudakis" }]
+keywords = [
+    "reinforcement-learning",
+    "rlvr",
+    "evaluation",
+    "code-execution",
+    "humaneval",
+    "multi-turn",
+    "verifiable-labs",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = [
+    "verifiable-labs-envs-core>=0.1.1",
+    "numpy>=1.26",
+]
+
+[project.urls]
+Homepage = "https://github.com/verifiablelabs/verifiable-labs-envs"
+Issues = "https://github.com/verifiablelabs/verifiable-labs-envs/issues"
+
+# Verifiers-compatible entry point so `prime env install
+# verifiable-labs-code-humaneval-multiturn` / the Prime Intellect Hub
+# can discover load_environment() automatically.
+[project.entry-points."verifiers.environments"]
+code-humaneval-multiturn = "verifiable_labs_code_humaneval_multiturn:load_environment"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/verifiable_labs_code_humaneval_multiturn"]

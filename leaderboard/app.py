@@ -44,6 +44,10 @@ ENV_ORDER = [
     "phase-retrieval-multiturn",
     "mri-knee-reconstruction",
     "mri-knee-reconstruction-multiturn",
+    # Added Phase 21 (symbolic-math family):
+    "math-algebra",
+    "math-algebra-multiturn",
+    "math-algebra-tools",
 ]
 ENV_LABEL = {
     "sparse-fourier-recovery": "SparseF",
@@ -56,6 +60,9 @@ ENV_LABEL = {
     "phase-retrieval-multiturn": "PhaseRet-MT",
     "mri-knee-reconstruction": "MRI",
     "mri-knee-reconstruction-multiturn": "MRI-MT",
+    "math-algebra": "MathAlg",
+    "math-algebra-multiturn": "MathAlg-MT",
+    "math-algebra-tools": "MathAlg-Tools",
 }
 
 
@@ -163,7 +170,7 @@ honest per-entry uncertainty estimates.
 Every call regenerates the measurement from the seed. There's no fixed
 `(y, x*)` pair an adversary can memorise. Details + per-env effective
 instance counts in
-[CONTAMINATION.md](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/docs/CONTAMINATION.md).
+[CONTAMINATION.md](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/docs/CONTAMINATION.md).
 
 ## Multi-turn envs
 
@@ -182,7 +189,7 @@ OMP answer directly; any model called it once and copied the output. That
 was an *oracle-delegation artifact*, caught and removed in v0.3. A
 regression test asserts no single primitive can produce a reward above
 the empty-answer floor. Full reconciliation:
-[sparse_fourier_reconciliation.md](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/results/sparse_fourier_reconciliation.md).
+[sparse_fourier_reconciliation.md](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/results/sparse_fourier_reconciliation.md).
 
 ## Sprint-giga envs (added 2026-04-24)
 
@@ -196,8 +203,8 @@ the empty-answer floor. Full reconciliation:
 
 ## References
 
-- [conformal.md](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/docs/conformal.md)
-- [METHODOLOGY.md](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/docs/METHODOLOGY.md)
+- [conformal.md](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/docs/conformal.md)
+- [METHODOLOGY.md](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/docs/METHODOLOGY.md)
 - RLVR miscalibration: arXiv:2509.21882, arXiv:2510.00915.
 """
 
@@ -208,7 +215,7 @@ def build_app() -> gr.Blocks:
             "# Verifiable Labs — Scientific RL Environments leaderboard\n\n"
             "Physics-grounded RL environments for inverse problems, with "
             "conformal-calibrated rewards and procedural measurement "
-            "regeneration. [GitHub](https://github.com/stelioszach03/verifiable-labs-envs)."
+            "regeneration. [GitHub](https://github.com/verifiablelabs/verifiable-labs-envs)."
         )
         with gr.Tabs():
             with gr.Tab("Overview"):

@@ -1,14 +1,14 @@
 [build-system]
-requires = ["hatchling>=1.24"]
+requires = ["hatchling>=1.24,<1.27"]
 build-backend = "hatchling.build"
 
 [project]
 name = "verifiable-labs-phase-retrieval"
-version = "1.0.0"
+version = "1.0.1"
 description = "Phase retrieval from magnitude-only Fourier measurements with Gerchberg-Saxton baseline + conformal σ̂."
 readme = "README.md"
 requires-python = ">=3.11"
-license = { file = "LICENSE" }
+license = { text = "Apache-2.0" }
 authors = [{ name = "Stelios Zacharioudakis" }]
 keywords = ["reinforcement-learning", "inverse-problems", "rlvr", "phase-retrieval", "coherent-diffraction", "crystallography", "scientific-ml"]
 classifiers = [
@@ -20,12 +20,12 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
-    "verifiable-labs-envs-core @ git+https://github.com/stelioszach03/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-envs-core",
+    "verifiable-labs-envs-core>=0.1.1",
 ]
 
 [project.urls]
-Homepage = "https://github.com/stelioszach03/verifiable-labs-envs"
-Issues = "https://github.com/stelioszach03/verifiable-labs-envs/issues"
+Homepage = "https://github.com/verifiablelabs/verifiable-labs-envs"
+Issues = "https://github.com/verifiablelabs/verifiable-labs-envs/issues"
 
 [project.entry-points."verifiers.environments"]
 phase-retrieval = "verifiable_labs_phase_retrieval:load_environment"

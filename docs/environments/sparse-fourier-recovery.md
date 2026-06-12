@@ -68,7 +68,7 @@ informative (zero residual means the answer is exact).
 
 ## Source
 
-[`src/verifiable_labs_envs/envs/sparse_fourier.py`](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/src/verifiable_labs_envs/envs/sparse_fourier.py).
+[`src/verifiable_labs_envs/envs/sparse_fourier.py`](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/src/verifiable_labs_envs/envs/sparse_fourier.py).
 
 ## See also
 

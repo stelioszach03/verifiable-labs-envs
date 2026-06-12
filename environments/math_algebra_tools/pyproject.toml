@@ -1,0 +1,28 @@
+[project]
+name = "math-algebra-tools"
+tags = ["math", "sympy", "tool-use", "rlvr"]
+description = "Tool-use algebra simplification — primitive SymPy operations."
+version = "0.1.4"
+requires-python = ">=3.11"
+dependencies = [
+    "verifiers>=0.1.12",
+    "verifiable-labs-envs @ git+https://github.com/verifiablelabs/verifiable-labs-envs.git@main",
+]
+authors = [{ name = "Stelios Zacharioudakis" }]
+license = { text = "Apache-2.0" }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+[tool.verifiers.eval]
+module = "math_algebra_tools"
+factory = "load_environment"
+
+[tool.hatch.build.targets.wheel]
+include = ["math_algebra_tools.py"]
+
+[tool.hatch.metadata]
+# Allow git+https direct reference to verifiable-labs-envs above.
+allow-direct-references = true

@@ -16,7 +16,7 @@ from verifiable_labs_envs_core import (
 
 From source:
 ```
-pip install git+https://github.com/stelioszach03/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-envs-core
+pip install git+https://github.com/verifiablelabs/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-envs-core
 ```
 
 Once published to Prime Intellect Environments Hub:

@@ -1,6 +1,6 @@
 """Verifiable Labs env wrapper: mri-knee-reconstruction.
 
-Thin re-export over the monorepo at https://github.com/stelioszach03/verifiable-labs-envs.
+Thin re-export over the monorepo at https://github.com/verifiablelabs/verifiable-labs-envs.
 """
 from verifiable_labs_envs.envs.mri_knee import (
     load_environment as _load_environment_base,

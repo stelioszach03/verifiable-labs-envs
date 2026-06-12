@@ -1,0 +1,28 @@
+[project]
+name = "code-humaneval-tools"
+tags = ["code", "humaneval", "tool-use", "rlvr"]
+description = "Tool-use HumanEval — code runner + test executor primitives."
+version = "0.1.4"
+requires-python = ">=3.11"
+dependencies = [
+    "verifiers>=0.1.12",
+    "verifiable-labs-envs @ git+https://github.com/verifiablelabs/verifiable-labs-envs.git@main",
+]
+authors = [{ name = "Stelios Zacharioudakis" }]
+license = { text = "Apache-2.0" }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+[tool.verifiers.eval]
+module = "code_humaneval_tools"
+factory = "load_environment"
+
+[tool.hatch.build.targets.wheel]
+include = ["code_humaneval_tools.py"]
+
+[tool.hatch.metadata]
+# Allow git+https direct reference to verifiable-labs-envs above.
+allow-direct-references = true

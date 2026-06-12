@@ -4,13 +4,13 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+import openai  # noqa: E402  — imported after .env hydration on next line.
+
 ENV_PATH = Path(__file__).resolve().parents[2] / ".env"
 for line in ENV_PATH.read_text().splitlines():
     if "=" in line and not line.strip().startswith("#"):
         k, v = line.strip().split("=", 1)
         os.environ.setdefault(k, v)
-
-import openai  # noqa: E402
 
 client = openai.OpenAI(
     api_key=os.environ["OPENROUTER_API_KEY"],

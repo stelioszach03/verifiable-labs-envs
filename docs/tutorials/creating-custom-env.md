@@ -123,7 +123,7 @@ Output (filled-in env):
 ```
 
 If any check fails the validator exits non-zero with a specific
-remediation. See [`scripts/validate_env.py`](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/scripts/validate_env.py)
+remediation. See [`scripts/validate_env.py`](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/scripts/validate_env.py)
 for the exact assertions.
 
 ## Step 7 — register in the platform
@@ -156,6 +156,6 @@ the temptation to overclaim difficulty or generality.
   why the validator enforces `EFFECTIVE_INSTANCES > 1e15`.
 - [Concepts → Conformal rewards](../concepts/conformal-rewards.md) —
   what the calibration check is verifying.
-- [`templates/inverse-problem/README.md`](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/templates/inverse-problem/README.md) —
+- [`templates/inverse-problem/README.md`](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/templates/inverse-problem/README.md) —
   five concrete env ideas (holographic 3D, EM tomography, seismic
   FWI, inverse rendering, protein distogram).

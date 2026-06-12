@@ -33,6 +33,25 @@ _DOMAIN: dict[str, str] = {
     "phase-retrieval-multiturn": "coherent-diffraction",
     "mri-knee-reconstruction": "medical-imaging-mri",
     "mri-knee-reconstruction-multiturn": "medical-imaging-mri",
+    "math-algebra": "symbolic-algebra",
+    "math-algebra-multiturn": "symbolic-algebra",
+    "math-algebra-tools": "symbolic-algebra",
+    # Phase 24 — code-execution env family.
+    "code-humaneval": "code-execution",
+    "code-humaneval-multiturn": "code-execution",
+    "code-humaneval-tools": "code-execution",
+    "code-mini-repo": "code-execution",
+    # Phase 25 — tool-calling env family.
+    "tool-calling-single": "tool-calling",
+    "tool-calling-multiturn": "tool-calling",
+    "tool-calling-debug": "tool-calling",
+    # Phase 26 — sql env family.
+    "sql-single-turn": "text-to-sql",
+    "sql-multiturn": "text-to-sql",
+    # Phase 27 — long-context env family.
+    "long-context-needle": "long-context-retrieval",
+    "long-context-synthesis": "long-context-synthesis",
+    "long-context-reasoning": "long-context-reasoning",
 }
 
 
@@ -66,6 +85,63 @@ _DESCRIPTIONS: dict[str, str] = {
     "mri-knee-reconstruction-multiturn":
         "Three-turn MRI knee reconstruction with k-space residual "
         "feedback.",
+    "math-algebra":
+        "Single-turn symbolic-algebra simplification (expand, factor, "
+        "collect-like-terms) with SymPy-verified rewards and conformal "
+        "coverage; threaded simplify timeout.",
+    "math-algebra-multiturn":
+        "Three-turn symbolic-algebra dialogue with verifier feedback at "
+        "the format / parse / equivalence layer; gold expression never "
+        "revealed to the solver.",
+    "math-algebra-tools":
+        "Tool-use symbolic-algebra env exposing sympy_simplify, "
+        "sympy_expand, sympy_solve, sympy_substitute primitives; "
+        "model composes them to reach the answer.",
+    "code-humaneval":
+        "Single-turn procedural code-execution env across 12 templates "
+        "(lists, strings, dicts, ints, trees, graphs); sandboxed pytest "
+        "scoring under D5 rlimits and `unshare -rn` network isolation.",
+    "code-humaneval-multiturn":
+        "Three-turn dialogue variant of code-humaneval; visible-test "
+        "pass counts feed back between turns, hidden tests held out.",
+    "code-humaneval-tools":
+        "Tool-use code-execution env exposing read_file, write_file, "
+        "run_test primitives; model iterates on a per-call workspace.",
+    "code-mini-repo":
+        "Repo-scale synthetic code-execution env: 3-file mini-repos "
+        "(bug-fix, feature-add, refactor-preserve) with multi-file edits.",
+    "tool-calling-single":
+        "Single-pass procedural tool-calling env across 10 templates "
+        "(arithmetic, search-and-email, file-concat, multi-search, "
+        "outbox-audit) with mock primitives and D2-C composite reward.",
+    "tool-calling-multiturn":
+        "Multi-turn tool-calling env with verifier-feedback rollouts "
+        "and per-extra-turn penalty (cap 10%); same template lattice "
+        "as tool-calling-single.",
+    "tool-calling-debug":
+        "Trace-debug tool-calling env: each instance ships a partial "
+        "tool-call trajectory plus the workspace snapshot it produced; "
+        "the model continues from that point.",
+    "sql-single-turn":
+        "Single-turn text-to-SQL env across 8 procedural schema "
+        "templates (filter, aggregate, join, subquery, CTE, date "
+        "arithmetic) with SQLite sandbox + result-set comparator.",
+    "sql-multiturn":
+        "Three-turn dialogue variant of sql-single-turn; verifier "
+        "feedback echoes parse status + row-count diagnostics, gold "
+        "result-set held out (R10).",
+    "long-context-needle":
+        "Single-turn needle-in-haystack env: 10 procedural topic "
+        "templates over 4 K - 128 K token corpora; substring + "
+        "case-insensitive match against the gold needle token (D3-A).",
+    "long-context-synthesis":
+        "Three-turn multi-needle synthesis env (3-5 needles per "
+        "instance, D4-B); SQuAD-style token-F1 scoring with bucketed "
+        "F1 feedback between turns. Gold answer held out (R10).",
+    "long-context-reasoning":
+        "Single-turn multi-hop chain-of-fact reasoning with distractor "
+        "needles (D4-C); 3 templates (chain_two_hop, chain_three_hop, "
+        "arithmetic_over_facts); substring or numeric-tolerance match.",
 }
 
 

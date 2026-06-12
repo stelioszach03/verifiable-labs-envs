@@ -1,0 +1,62 @@
+{
+  "envs": [
+    "math-algebra-tools",
+    "code-humaneval-tools",
+    "tool-calling-single",
+    "tool-calling-multiturn",
+    "tool-calling-debug"
+  ],
+  "harness_fix_commit": "309fe80",
+  "model": "anthropic/claude-haiku-4.5",
+  "n_per_env": 10,
+  "results": {
+    "code-humaneval-tools": {
+      "anomaly_cleared_v2": false,
+      "cost_usd": 0.0132984,
+      "format_valid": "0/10",
+      "mean_reward": 0.0,
+      "n": 10,
+      "parse_valid": "0/10",
+      "std_reward": 0.0
+    },
+    "math-algebra-tools": {
+      "anomaly_cleared_v2": true,
+      "cost_usd": 0.0159832,
+      "format_valid": "10/10",
+      "mean_reward": 0.1,
+      "n": 10,
+      "parse_valid": "0/10",
+      "std_reward": 0.0
+    },
+    "tool-calling-debug": {
+      "anomaly_cleared_v2": true,
+      "cost_usd": 0.014846400000000001,
+      "format_valid": "10/10",
+      "mean_reward": 0.30000000000000004,
+      "n": 10,
+      "parse_valid": "10/10",
+      "std_reward": 0.0
+    },
+    "tool-calling-multiturn": {
+      "anomaly_cleared_v2": true,
+      "cost_usd": 0.012273599999999999,
+      "format_valid": "10/10",
+      "mean_reward": 0.30000000000000004,
+      "n": 10,
+      "parse_valid": "10/10",
+      "std_reward": 0.0
+    },
+    "tool-calling-single": {
+      "anomaly_cleared_v2": true,
+      "cost_usd": 0.011845600000000001,
+      "format_valid": "10/10",
+      "mean_reward": 0.30000000000000004,
+      "n": 10,
+      "parse_valid": "10/10",
+      "std_reward": 0.0
+    }
+  },
+  "seed_start": 1000,
+  "timestamp_utc": "2026-05-09T15:58:52Z",
+  "total_cost_usd": 0.06824720000000001
+}

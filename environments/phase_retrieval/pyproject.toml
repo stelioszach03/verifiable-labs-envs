@@ -1,8 +1,8 @@
 [project]
 name = "phase-retrieval"
+tags = ["scientific-reasoning", "phase-retrieval", "inverse-problems", "rlvr"]
 description = "Phase retrieval from magnitude-only Fourier measurements with Gerchberg-Saxton baseline and conformal σ̂."
-tags = ["scientific-reasoning", "inverse-problems", "rlvr", "conformal", "eval"]
-version = "1.0.0"
+version = "1.0.2"
 requires-python = ">=3.11"
 dependencies = [
     # verifiers>=0.1.12 (not >=0.1.13): the 0.1.13 line is dev-only at
@@ -11,7 +11,7 @@ dependencies = [
     # widened pin lets Hub consumers install from stable releases. See
     # docs/PRIME_INTELLECT_VERIFICATION.md for the reproducer.
     "verifiers>=0.1.12",
-    "verifiable-labs-envs @ git+https://github.com/stelioszach03/verifiable-labs-envs.git@main",
+    "verifiable-labs-envs @ git+https://github.com/verifiablelabs/verifiable-labs-envs.git@main",
 ]
 
 [build-system]
@@ -30,3 +30,6 @@ include = ["phase_retrieval.py", "pyproject.toml"]
 [tool.verifiers.eval]
 num_examples = 5
 rollouts_per_example = 3
+
+[tool.hatch.build.targets.wheel]
+include = ["phase_retrieval.py"]

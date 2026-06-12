@@ -1,7 +1,35 @@
 """Per-environment LLM adapters. Importing this package registers all of them."""
+from verifiable_labs_envs.solvers.adapters.code_humaneval import (
+    CodeHumanevalLLMAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.code_humaneval_multiturn import (
+    CodeHumanevalMultiturnAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.code_humaneval_tools import (
+    CodeHumanevalToolsAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.code_mini_repo import (
+    CodeMiniRepoAdapter,
+)
 from verifiable_labs_envs.solvers.adapters.lodopab_ct import LodopabCtLLMAdapter
 from verifiable_labs_envs.solvers.adapters.lodopab_ct_multiturn import (
     LodopabCtMultiturnAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.long_context_needle import (
+    LongContextNeedleAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.long_context_reasoning import (
+    LongContextReasoningAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.long_context_synthesis import (
+    LongContextSynthesisAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.math_algebra import MathAlgebraLLMAdapter
+from verifiable_labs_envs.solvers.adapters.math_algebra_multiturn import (
+    MathAlgebraMultiturnAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.math_algebra_tools import (
+    MathAlgebraToolsAdapter,
 )
 from verifiable_labs_envs.solvers.adapters.mri_knee import MRIKneeLLMAdapter
 from verifiable_labs_envs.solvers.adapters.mri_knee_multiturn import (
@@ -20,7 +48,22 @@ from verifiable_labs_envs.solvers.adapters.sparse_fourier_multiturn import (
 from verifiable_labs_envs.solvers.adapters.sparse_fourier_tools import (
     SparseFourierToolsAdapter,
 )
+from verifiable_labs_envs.solvers.adapters.sql_multiturn import (
+    SqlMultiturnAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.sql_single_turn import (
+    SqlSingleTurnAdapter,
+)
 from verifiable_labs_envs.solvers.adapters.super_resolution import SuperResolutionLLMAdapter
+from verifiable_labs_envs.solvers.adapters.tool_calling_debug import (
+    ToolCallingDebugAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.tool_calling_multiturn import (
+    ToolCallingMultiturnAdapter,
+)
+from verifiable_labs_envs.solvers.adapters.tool_calling_single import (
+    ToolCallingSingleAdapter,
+)
 from verifiable_labs_envs.solvers.llm_solver import register_adapter
 
 register_adapter(SparseFourierLLMAdapter())
@@ -33,6 +76,25 @@ register_adapter(PhaseRetrievalLLMAdapter())
 register_adapter(PhaseRetrievalMultiturnAdapter())
 register_adapter(MRIKneeLLMAdapter())
 register_adapter(MRIKneeMultiturnAdapter())
+register_adapter(MathAlgebraLLMAdapter())
+register_adapter(MathAlgebraMultiturnAdapter())
+register_adapter(MathAlgebraToolsAdapter())
+# Phase 24 — code-execution env family.
+register_adapter(CodeHumanevalLLMAdapter())
+register_adapter(CodeHumanevalMultiturnAdapter())
+register_adapter(CodeHumanevalToolsAdapter())
+register_adapter(CodeMiniRepoAdapter())
+# Phase 25 — tool-calling env family.
+register_adapter(ToolCallingSingleAdapter())
+register_adapter(ToolCallingMultiturnAdapter())
+register_adapter(ToolCallingDebugAdapter())
+# Phase 26 — sql env family.
+register_adapter(SqlSingleTurnAdapter())
+register_adapter(SqlMultiturnAdapter())
+# Phase 27 — long-context env family.
+register_adapter(LongContextNeedleAdapter())
+register_adapter(LongContextSynthesisAdapter())
+register_adapter(LongContextReasoningAdapter())
 
 __all__ = [
     "SparseFourierLLMAdapter",
@@ -45,4 +107,19 @@ __all__ = [
     "PhaseRetrievalMultiturnAdapter",
     "MRIKneeLLMAdapter",
     "MRIKneeMultiturnAdapter",
+    "MathAlgebraLLMAdapter",
+    "MathAlgebraMultiturnAdapter",
+    "MathAlgebraToolsAdapter",
+    "CodeHumanevalLLMAdapter",
+    "CodeHumanevalMultiturnAdapter",
+    "CodeHumanevalToolsAdapter",
+    "CodeMiniRepoAdapter",
+    "ToolCallingSingleAdapter",
+    "ToolCallingMultiturnAdapter",
+    "ToolCallingDebugAdapter",
+    "SqlSingleTurnAdapter",
+    "SqlMultiturnAdapter",
+    "LongContextNeedleAdapter",
+    "LongContextSynthesisAdapter",
+    "LongContextReasoningAdapter",
 ]

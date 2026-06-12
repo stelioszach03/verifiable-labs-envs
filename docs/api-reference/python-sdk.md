@@ -107,7 +107,7 @@ is preserved on `.response` for advanced introspection.
 ## Testing against a real API in CI
 
 The SDK ships an integration test
-([`packages/verifiable-labs/tests/test_integration.py`](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/packages/verifiable-labs/tests/test_integration.py))
+([`packages/verifiable-labs/tests/test_integration.py`](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/packages/verifiable-labs/tests/test_integration.py))
 that spins up a live `uvicorn` instance from `verifiable_labs_api.app`
 and runs the SDK against it. Skipped when the API extras aren't
 installed.
@@ -117,4 +117,4 @@ suite for examples.
 
 ## Source
 
-[`packages/verifiable-labs/`](https://github.com/stelioszach03/verifiable-labs-envs/tree/main/packages/verifiable-labs).
+[`packages/verifiable-labs/`](https://github.com/verifiablelabs/verifiable-labs-envs/tree/main/packages/verifiable-labs).

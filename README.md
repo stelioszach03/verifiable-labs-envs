@@ -1,9 +1,11 @@
 # Verifiable Labs
 
-[![CI](https://github.com/stelioszach03/verifiable-labs-envs/actions/workflows/ci.yml/badge.svg)](https://github.com/stelioszach03/verifiable-labs-envs/actions/workflows/ci.yml)
+[![CI](https://github.com/verifiablelabs/verifiable-labs-envs/actions/workflows/ci.yml/badge.svg)](https://github.com/verifiablelabs/verifiable-labs-envs/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](pyproject.toml)
 [![PyPI](https://img.shields.io/pypi/v/verifiable-labs?label=pypi%3Averifiable-labs&color=4c1)](https://pypi.org/project/verifiable-labs/)
+[![Zenodo DOI](https://img.shields.io/badge/Zenodo%20DOI-10.5281%2Fzenodo.19786415-blue)](https://doi.org/10.5281/zenodo.19786415)
+[![Website](https://img.shields.io/badge/website-verifiable--labs.com-blueviolet)](https://verifiable-labs.com)
 
 > Verifiable Labs is the contamination-proof RL evaluation substrate for AI labs training scientific agents. Procedurally generated environments, classical-solver ground truth, conformal-calibrated rewards.
 
@@ -11,11 +13,24 @@
 
 Most AI eval tools test chatbots and apps. Verifiable Labs generates scientific environments with **objective rewards**, **calibrated uncertainty**, **procedural regeneration**, **classical baselines**, and **training-signal potential** — tasks that are continuous, uncertainty-sensitive, and impossible to solve by memorising static benchmark answers.
 
-> **Status:** v0.1.0-alpha (developer preview). 10 live environments across compressed sensing, super-resolution, medical CT/MRI, and phase retrieval. Hosted REST API + Python SDK + `verifiable` CLI shipped. The platform is open and rate-limited; treat the public endpoint as a developer playground until v0.2 (auth + Redis sessions). Full roadmap: [`docs/company/roadmap.md`](docs/company/roadmap.md).
+> **Status:** v0.1.0-alpha (developer preview). 25 live environments across compressed sensing, super-resolution, medical CT/MRI, phase retrieval, symbolic algebra, code execution, SQL, and long-context reasoning. Hosted REST API + Python SDK + `verifiable` CLI shipped. The public endpoint is open and rate-limited; treat it as a developer playground.
 
-- 🔗 Hugging Face leaderboard — https://huggingface.co/spaces/stelioszach03/scientific-rl-benchmark
-- 🔗 Prime Intellect Hub envs — [`sparse-fourier-recovery`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-multiturn), [`-tools`](https://app.primeintellect.ai/dashboard/environments/stelioszach/sparse-fourier-recovery-tools), [`mri-knee-reconstruction`](https://app.primeintellect.ai/dashboard/environments/stelioszach/mri-knee-reconstruction), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/mri-knee-reconstruction-multiturn), [`phase-retrieval`](https://app.primeintellect.ai/dashboard/environments/stelioszach/phase-retrieval), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/phase-retrieval-multiturn), [`super-resolution-div2k-x4`](https://app.primeintellect.ai/dashboard/environments/stelioszach/super-resolution-div2k-x4), [`lodopab-ct-simplified`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified), [`-multiturn`](https://app.primeintellect.ai/dashboard/environments/stelioszach/lodopab-ct-simplified-multiturn).
+- 🔗 Hugging Face leaderboard — https://huggingface.co/spaces/verifiablelabs/scientific-rl-benchmark
+- 🔗 Prime Intellect Hub — https://app.primeintellect.ai/dashboard/environments/stelioszach03 (25 envs published)
 - 🔗 Paper (preprint, OpenReview submission pending) — [`paper/main.pdf`](paper/main.pdf)
+- 🔗 Training API — [`POST /v1/instance`](docs/api-reference/instance.md), [`POST /v1/score`](docs/api-reference/score.md), [`GET /v1/score/audit`](docs/api-reference/score.md#audit-trail) for per-call calibrated rewards in your training loop.
+- 🔗 Synthetic-dataset API — [`POST /v1/datasets`](docs/api-reference/datasets.md) generates calibrated `(prompt, completion, reward, components)` corpora asynchronously against your own LLM endpoint, in [Parquet or JSONL](docs/api-reference/dataset-formats.md).
+
+## License
+
+The Verifiable Labs Python SDK is **Apache-2.0 free forever** —
+production-ready math, no telemetry, no feature gates. See
+[LICENSE](LICENSE).
+
+Commercial hosted services (reward-model API, managed environments,
+attestation programme, self-hosted enterprise) are available
+separately; reach the maintainer via the
+[contact page](docs/company/contact.md).
 
 ## Install
 
@@ -24,7 +39,7 @@ pip install verifiable-labs
 
 # Verify
 verifiable --version          # → verifiable-labs 0.1.0a4
-verifiable list               # → 10 environments
+verifiable list               # → 25 environments
 
 # Run a benchmark
 export OPENROUTER_API_KEY=sk-or-...
@@ -39,11 +54,11 @@ The `verifiable-labs` PyPI package pulls in the heavy `verifiable-labs-envs` aut
 The full developer loop, from clone to a Markdown report a YC reviewer can read.
 
 ```bash
-git clone https://github.com/stelioszach03/verifiable-labs-envs.git
+git clone https://github.com/verifiablelabs/verifiable-labs-envs.git
 cd verifiable-labs-envs
 pip install -e ".[dev]"
 
-# 1. List the 10 envs.
+# 1. List the 25 envs.
 verifiable envs
 
 # 2. Run a zero-amplitude agent on sparse-Fourier (3 episodes, no API key needed).
@@ -127,10 +142,12 @@ Examples: [`examples/agents/`](examples/agents).
 
 | | shipped | planned |
 |---|---|---|
-| **environments** | 10 envs across 5 domains | 5 new envs (holographic 3D, EM tomography, seismic FWI, inverse rendering, protein distogram) — v0.2 |
-| **API** | `/v1/{health, environments, sessions, leaderboard}` (open, rate-limited) | per-user auth, Redis-backed sessions — v0.2 |
+| **environments** | 25 envs across 10 domains (env-catalogue track closed at 27.E; subsequent work prioritises customer-validated demand) | demand-driven additions only — v0.2 |
+| **API** | `/v1/{health, environments, sessions, leaderboard}` + auth-gated `/v1/{calibrate, instance, score, datasets, monitors}` (Phase 22-28) | per-user auth, Redis-backed sessions — v0.2 |
+| **continuous monitoring** | `/v1/monitors` — register a model endpoint, schedule audits (daily/weekly/monthly), get email/Slack alerts on regressed conformal coverage or paired-bootstrap reward drops (Phase 28) | Stripe metered billing post-incorporation |
 | **SDK** | sync + async clients on PyPI as `verifiable-labs` (re-exports `load_environment` for local mode) | optional slim install — Tier-1 polish |
 | **CLI** | `envs · run · compare · report · init-env · validate-env` | static viewer / dashboard — v0.3 stretch |
+| **audit reports** | [`vlabs-audit`](tools/vlabs-audit/README.md) — single command turns any frontier model into a LaTeX/PDF capability report ([sample](reports/sample_anonymized.pdf)) | multi-model side-by-side — v0.0.2 |
 | **training signal** | prompt-search proof in [`notebooks/training_proof.ipynb`](notebooks/training_proof.ipynb), heuristic search in [`examples/training_signal_demo.py`](examples/training_signal_demo.py) | TRL / vLLM bindings — v0.2 |
 | **compliance** | aggregate report template + PDF generator | real attestation system — v0.3 speculative |
 
@@ -154,9 +171,15 @@ Frontier reasoning models are trained with verifiable rewards (RLVR). Today's RL
 2. The **reward** is a weighted sum of reconstruction quality (PSNR, SSIM, or task-appropriate metric) and **conformal-prediction coverage** — models are rewarded for honest posterior width, not overconfident point estimates.
 3. Measurements are **procedurally regenerated per evaluation call**, so fixed-string memorization is structurally impossible.
 
-## Environments (10 live on Prime Intellect Hub)
+## Formally verified guarantees
 
-| # | Environment | Domain | Forward operator | Classical baseline |
+The split-conformal coverage guarantee behind our calibrated reward intervals is machine-verified in Lean 4 (sorry-free, standard axioms only). The Python implementation is property-tested against the formal specification.
+
+See [`formal/`](formal/) for the 8-module Lean 4 project (export from Aristotle, Harmonic AI) covering calibrated reward bounds, conformal coverage, adaptive difficulty stability, verifier invariance, model-routing optimality, the composed pipeline theorem, and the 7-condition self-improvement gate. The Python mirror lives in [`src/verifiable_labs_envs/formal_spec/`](src/verifiable_labs_envs/formal_spec/); property-based parity tests in [`tests/formal_spec/`](tests/formal_spec/) exercise the bounds, monotonicity, and gate predicates over `hypothesis` strategies.
+
+## Environments (25 live)
+
+| # | Environment | Domain | Forward operator / problem | Classical baseline / verifier |
 |---|---|---|---|---|
 | 1 | `sparse-fourier-recovery` | compressed sensing | subsampled orthonormal 1D DFT | OMP with LS-covariance σ̂ |
 | 2 | `sparse-fourier-recovery-multiturn` | compressed sensing | same, 3-turn dialogue | residual-feedback refinement |
@@ -164,10 +187,27 @@ Frontier reasoning models are trained with verifiable rewards (RLVR). Today's RL
 | 4 | `super-resolution-div2k-x4` | image | Gaussian blur + 4× decimation | bicubic with edge-weighted σ̂ |
 | 5 | `lodopab-ct-simplified` | medical imaging (CT) | 2D parallel-beam Radon | FBP with edge-weighted σ̂ (phantom default; real-patient LoDoPaB-CT via `use_real_data=True`) |
 | 6 | `lodopab-ct-simplified-multiturn` | medical imaging (CT) | same, 3-turn dialogue | FBP-residual feedback |
-| 7 | **`phase-retrieval`** (new sprint-giga) | crystallography / CDI | magnitude-only subsampled DFT | Gerchberg-Saxton (alternating projection) |
-| 8 | **`phase-retrieval-multiturn`** (new) | crystallography / CDI | same, 3-turn dialogue | magnitude-residual feedback |
-| 9 | **`mri-knee-reconstruction`** (new sprint-giga) | medical imaging (MRI) | 2D DFT + 4× Cartesian undersampling | zero-filled inverse FFT |
-|10 | **`mri-knee-reconstruction-multiturn`** (new) | medical imaging (MRI) | same, 3-turn dialogue | k-space residual feedback |
+| 7 | `phase-retrieval` | crystallography / CDI | magnitude-only subsampled DFT | Gerchberg-Saxton (alternating projection) |
+| 8 | `phase-retrieval-multiturn` | crystallography / CDI | same, 3-turn dialogue | magnitude-residual feedback |
+| 9 | `mri-knee-reconstruction` | medical imaging (MRI) | 2D DFT + 4× Cartesian undersampling | zero-filled inverse FFT |
+|10 | `mri-knee-reconstruction-multiturn` | medical imaging (MRI) | same, 3-turn dialogue | k-space residual feedback |
+|11 | **`math-algebra`** (Phase 21) | symbolic algebra | expand / factor / collect-like-terms problems | `simplify(answer − gold) == 0`, threaded timeout |
+|12 | **`math-algebra-multiturn`** (Phase 21) | symbolic algebra | same, 3-turn dialogue with verifier feedback | per-component feedback (format / parse / equivalence) |
+|13 | **`math-algebra-tools`** (Phase 21) | symbolic algebra | same, primitive-composition tool-use | `sympy_simplify` / `expand` / `solve` / `substitute` primitives |
+|14 | **`code-humaneval`** (Phase 24) | code execution | 12 procedural HumanEval-style templates (lists / strings / dicts / ints / trees / graphs) | sandboxed pytest pass-rate |
+|15 | **`code-humaneval-multiturn`** (Phase 24) | code execution | same, 3-turn dialogue with visible-test feedback | per-turn pass count, hidden tests held out (R10) |
+|16 | **`code-humaneval-tools`** (Phase 24) | code execution | same, primitive-composition tool-use | `read_file` / `write_file` / `run_test` primitives |
+|17 | **`code-mini-repo`** (Phase 24) | code execution (repo-scale) | synthetic 3-file repo (bug-fix / feature-add / refactor-preserve) | sandboxed pytest pass-rate over multi-file edits |
+|18 | **`tool-calling-single`** (Phase 25) | tool orchestration | 10 procedural tool-composition templates (arithmetic / search-and-email / file-concat / multi-search / outbox-audit) | D2-C composite: action validity + final workspace state |
+|19 | **`tool-calling-multiturn`** (Phase 25) | tool orchestration | same, multi-turn with verifier feedback + per-extra-turn penalty | same composite, capped 10% penalty |
+|20 | **`tool-calling-debug`** (Phase 25) | tool orchestration (trace-debug) | partial trajectory + workspace snapshot; model continues from there | base-template predicate over the rollout's terminal state |
+|21 | **`sql-single-turn`** (Phase 26) | text-to-SQL | 8 procedural schema templates (filter / aggregate / join / groupby / subquery / CTE / date arithmetic) | SQLite result-set equality (ordered if gold has ORDER BY) |
+|22 | **`sql-multiturn`** (Phase 26) | text-to-SQL | same templates, 3-turn dialogue with verifier feedback | parse status + row-count diagnostics, gold rows held out (R10) |
+|23 | **`long-context-needle`** (Phase 27) | long-context retrieval | 10 procedural topic templates × 4 needle positions (start/middle/end/random) over 4 K – 128 K token corpora | substring + case-insensitive match against the gold needle |
+|24 | **`long-context-synthesis`** (Phase 27) | long-context synthesis | same corpora with 3-5 needles per instance (D4-B), 3-turn dialogue with F1-bucketed feedback | SQuAD-style token-F1 against the gold concatenation |
+|25 | **`long-context-reasoning`** (Phase 27) | long-context reasoning | 3 multi-hop chain templates (2-hop / 3-hop / arithmetic-over-facts) with distractor needles (D4-C) | substring (string) or numeric tolerance ≤ 1e-6 (float) match |
+
+> **Phase 27 closes the env-catalogue track.** 25 envs across 7 template families (inverse-problem, symbolic-math, code-execution, tool-calling, sql-execution, long-context, plus the multi-domain compliance scaffolding). Subsequent phases prioritise customer-validated demand signal over net-new envs.
 
 ## Classical-baseline benchmark (5 seeds each, default hyperparameters)
 
@@ -327,12 +367,14 @@ Clean discrimination across model tiers and clean rank-ordering against the expe
 
 Reproduce with `python benchmarks/run_llm_benchmark.py --preset paid-full`. See [`results/llm_benchmark.md`](results/llm_benchmark.md) for the full analysis and [`results/llm_benchmark.csv`](results/llm_benchmark.csv) for per-call raw data.
 
-## Install
+## Install from source (developers)
+
+> Need the package only? See the [PyPI install at the top](#install) instead.
 
 ### Full monorepo (developers + research use)
 
 ```bash
-git clone https://github.com/stelioszach03/verifiable-labs-envs
+git clone https://github.com/verifiablelabs/verifiable-labs-envs
 cd verifiable-labs-envs
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"          # add ",api" to also install the FastAPI server
@@ -389,7 +431,7 @@ prime env install stelioszach/sparse-fourier-recovery
 ### Single environment via GitHub subdirectory
 
 ```bash
-pip install "git+https://github.com/stelioszach03/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-sparse-fourier"
+pip install "git+https://github.com/verifiablelabs/verifiable-labs-envs.git@main#subdirectory=packages/verifiable-labs-sparse-fourier"
 # or: verifiable-labs-sparse-fourier-multiturn, -tools, super-resolution,
 #     lodopab-ct, lodopab-ct-multiturn, envs-core
 ```
@@ -402,7 +444,9 @@ env = load_environment()
 out = env.run_baseline(seed=0)
 ```
 
-## Quickstart
+## Python API quickstart (local mode)
+
+> See also the [SDK quickstart](#sdk-quickstart) further up for the hosted-API client.
 
 ```python
 from verifiable_labs_envs import load_environment
@@ -422,6 +466,29 @@ Walkthrough across all three environments:
 ```bash
 python examples/quickstart.py
 ```
+
+## Quickstart: train with GRPO
+
+[`examples/quickstart_grpo.py`](examples/quickstart_grpo.py) is a
+minimal end-to-end loop that points TRL's `GRPOTrainer` at
+`sparse-fourier-recovery`. The reward function wraps the env's
+`score()`, so any RL stack that accepts a Python callable for rewards
+plugs in the same way.
+
+```bash
+pip install "trl>=0.12" "transformers>=4.45" accelerate
+python examples/quickstart_grpo.py --dry-run        # validate the loop
+python examples/quickstart_grpo.py --max-steps 10   # 10-step smoke
+python examples/quickstart_grpo.py --max-steps 500  # full run
+```
+
+Defaults fit a free Colab T4 (Qwen 0.5B). The measurable GRPO gain on
+this config is **format compliance** — mean reward climbs from ~0
+(parse failures) toward the ~0.35 zero-solution baseline as the model
+learns to emit valid `{"x_hat": [n floats]}` JSON. The ~0.93 OMP
+classical-baseline number elsewhere on this page is a specialised-
+solver ceiling, not a 0.5B target. See the file's top docstring for
+the temperature-≤-0.5 rationale on strict-JSON envs.
 
 ## Contamination resistance
 
@@ -448,10 +515,33 @@ cd leaderboard && pip install -r requirements.txt && python app.py
 
 HF Spaces deploy pending `HF_TOKEN` setup; see [`docs/LEADERBOARD.md`](docs/LEADERBOARD.md) for the exact deploy command.
 
+## Citation
+
+If you use Verifiable Labs in academic work, please cite:
+
+```bibtex
+@software{verifiable_labs_2026,
+  author       = {Zacharioudakis, Stelios},
+  title        = {Verifiable Labs: contamination-proof RL environments
+                  with conformal-calibrated rewards},
+  year         = {2026},
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.19786415},
+  url          = {https://doi.org/10.5281/zenodo.19786415}
+}
+```
+
+## Contact
+
+| | |
+|---|---|
+| Website | https://verifiable-labs.com |
+| General / press | hello@verifiable-labs.com |
+| Security disclosures | security@verifiable-labs.com |
+| Issues / contributions | [GitHub Issues](https://github.com/verifiablelabs/verifiable-labs-envs/issues) |
+
 ## Author
 
-Stelios Zacharioudakis — finishing BSc CS at the University of Athens (NKUA). Research on calibrated astronomical inverse imaging.
+Stelios Zacharioudakis — finishing BSc CS at the University of Athens (NKUA). Research on calibrated astronomical inverse imaging. Operating Verifiable Labs as a pre-incorporation working group; formal incorporation planned post-traction.
 
-## License
-
-Apache 2.0. See `LICENSE`.
+See the [License](#license) section near the top for the full Apache-2.0 + commercial-services breakdown.

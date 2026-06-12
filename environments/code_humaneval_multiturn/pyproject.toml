@@ -1,0 +1,28 @@
+[project]
+name = "code-humaneval-multiturn"
+tags = ["code", "humaneval", "multiturn", "rlvr"]
+description = "Multi-turn HumanEval — failed tests feed back as hints."
+version = "0.1.4"
+requires-python = ">=3.11"
+dependencies = [
+    "verifiers>=0.1.12",
+    "verifiable-labs-envs @ git+https://github.com/verifiablelabs/verifiable-labs-envs.git@main",
+]
+authors = [{ name = "Stelios Zacharioudakis" }]
+license = { text = "Apache-2.0" }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+[tool.verifiers.eval]
+module = "code_humaneval_multiturn"
+factory = "load_environment"
+
+[tool.hatch.build.targets.wheel]
+include = ["code_humaneval_multiturn.py"]
+
+[tool.hatch.metadata]
+# Allow git+https direct reference to verifiable-labs-envs above.
+allow-direct-references = true

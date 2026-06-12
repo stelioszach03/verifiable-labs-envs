@@ -5,8 +5,8 @@ type: software
 version: 0.1.0-alpha
 date-released: 2026-04-26
 license: Apache-2.0
-repository-code: "https://github.com/stelioszach03/verifiable-labs-envs"
-url: "https://github.com/stelioszach03/verifiable-labs-envs"
+repository-code: "https://github.com/verifiablelabs/verifiable-labs-envs"
+url: "https://github.com/verifiablelabs/verifiable-labs-envs"
 keywords:
   - reinforcement-learning
   - inverse-problems
@@ -23,7 +23,7 @@ preferred-citation:
   type: article
   title: "Conformal-Calibrated Rewards for Scientific RLVR: Procedural Regeneration Against Benchmark Contamination"
   year: 2026
-  url: "https://github.com/stelioszach03/verifiable-labs-envs/blob/main/paper/main.pdf"
+  url: "https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/paper/main.pdf"
   authors:
     - given-names: Stelios
       family-names: Zacharioudakis

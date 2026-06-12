@@ -80,7 +80,7 @@ with Client(base_url="https://api.verifiable-labs.com") as c:
 ## C. Local envs — for training loops + custom code
 
 ```bash
-git clone https://github.com/stelioszach03/verifiable-labs-envs.git
+git clone https://github.com/verifiablelabs/verifiable-labs-envs.git
 cd verifiable-labs-envs
 pip install -e ".[dev]"
 ```

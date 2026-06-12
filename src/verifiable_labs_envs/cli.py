@@ -207,6 +207,33 @@ def _summarise_error(exc: BaseException) -> str:
     return _redact_secrets(msg)[:200]
 
 
+def _call_agent(
+    agent: Any,
+    observation: dict[str, Any],
+    tools_schema: list[dict[str, Any]] | None,
+) -> Any:
+    """Invoke ``agent.solve`` with tools_schema if the agent accepts it.
+
+    Tool-calling envs ship an OpenAI-format function-calling schema
+    via :meth:`EnvAdapter.get_tools_schema`. The bundled
+    :class:`OpenAICompatibleAgent` consumes the kwarg directly;
+    legacy / third-party agents that don't accept ``tools_schema``
+    fall through to the kwarg-less path.
+    """
+    if tools_schema is None:
+        return agent.solve(observation)
+    try:
+        return agent.solve(observation, tools_schema=tools_schema)
+    except TypeError as exc:
+        # Older agents lack the ``tools_schema`` kwarg — call the
+        # legacy signature. Any TypeError NOT mentioning that kwarg
+        # is genuine and re-raises so the caller's retry loop sees
+        # it.
+        if "tools_schema" not in str(exc):
+            raise
+        return agent.solve(observation)
+
+
 # ── subcommand: envs ────────────────────────────────────────────
 
 
@@ -359,6 +386,16 @@ def cmd_run(args: argparse.Namespace) -> int:
         obs_hash = hash_payload(observation.get("inputs", {}))
         _inst_hash = instance_hash(args.env, _env_version, seed, env_kwargs)
 
+        # Tool-calling envs ship an OpenAI-format function-calling
+        # schema via ``EnvAdapter.get_tools_schema``. The
+        # ``OpenAICompatibleAgent`` accepts ``tools_schema`` as a
+        # kwarg and forwards it to the chat-completions endpoint;
+        # other agent shapes ignore it (best-effort kwarg).
+        try:
+            tools_schema = adapter.get_tools_schema(instance)
+        except Exception:  # noqa: BLE001 — adapter boundary
+            tools_schema = None
+
         # Retry loop wraps agent.solve only — timeouts/exceptions are
         # non-deterministic and worth retrying. parse_error / invalid_schema
         # come AFTER solve and are deterministic; they don't retry.
@@ -371,7 +408,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             retries_done = attempt
             try:
                 with _alarm_timeout(int(args.timeout_seconds)):
-                    prediction = agent.solve(observation)
+                    prediction = _call_agent(agent, observation, tools_schema)
                 break
             except _AgentTimeout as e:
                 last_exc = e

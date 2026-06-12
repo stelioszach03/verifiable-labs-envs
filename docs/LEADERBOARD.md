@@ -2,7 +2,7 @@
 
 Sprint 1 Phase 7 deliverable. The Gradio leaderboard is live:
 
-**https://huggingface.co/spaces/stelioszach03/scientific-rl-benchmark**
+**https://huggingface.co/spaces/verifiablelabs/scientific-rl-benchmark**
 
 Three tabs, all backed by the v2 benchmark CSV:
 
@@ -25,7 +25,7 @@ python - <<'PY'
 import os
 from huggingface_hub import HfApi, create_repo
 api = HfApi(token=os.environ['HF_TOKEN'])
-repo_id = "stelioszach03/scientific-rl-benchmark"
+repo_id = "verifiablelabs/scientific-rl-benchmark"
 create_repo(repo_id=repo_id, repo_type="space", space_sdk="gradio",
             token=os.environ['HF_TOKEN'], exist_ok=True, private=False)
 api.upload_folder(
@@ -54,7 +54,7 @@ The Space bundles `leaderboard/data/llm_benchmark_v2.csv` +
 1. Run `benchmarks/run_v2_benchmark.py` with the desired scope.
 2. `python analysis/plot_v2_heatmap.py` to regenerate the heatmap.
 3. `cp results/llm_benchmark_v2.csv leaderboard/data/` and repeat for the PNG.
-4. Re-upload: `huggingface-cli upload stelioszach03/scientific-rl-benchmark leaderboard --repo-type=space`.
+4. Re-upload: `huggingface-cli upload verifiablelabs/scientific-rl-benchmark leaderboard --repo-type=space`.
 
 ## Security note
 

@@ -1,14 +1,14 @@
 [build-system]
-requires = ["hatchling>=1.24"]
+requires = ["hatchling>=1.24,<1.27"]
 build-backend = "hatchling.build"
 
 [project]
 name = "verifiable-labs-envs"
-version = "0.1.0a1"
+version = "0.1.0a2"
 description = "Reinforcement-learning environments for scientific reasoning: physics-grounded inverse problems with uncertainty-calibrated rewards."
 readme = "README.md"
 requires-python = ">=3.11"
-license = { file = "LICENSE" }
+license = { text = "Apache-2.0" }
 authors = [{ name = "Stelios Zacharioudakis" }]
 keywords = ["reinforcement-learning", "inverse-problems", "rlvr", "evaluation", "scientific-ml", "conformal-prediction"]
 classifiers = [
@@ -31,6 +31,10 @@ dependencies = [
     "openai>=1.50",
     "python-dotenv>=1.0",
     "matplotlib>=3.9",
+    # Lazy-imported by long_context_primitives; lives in root deps so
+    # pytest collection of the long-context env tests stays clean
+    # without forcing every consumer to add a separate sub-package.
+    "tiktoken>=0.5",
 ]
 
 [project.optional-dependencies]
@@ -38,10 +42,19 @@ dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
     "pytest-asyncio>=0.23", # SDK has async tests in packages/verifiable-labs/tests
+    # Property-based testing for tests/formal_spec/ — mirrors of the
+    # Lean theorems in formal/ are stress-tested over random inputs.
+    "hypothesis>=6.100",
     "ruff>=0.5",
     "mypy>=1.10",
     "httpx>=0.27",         # FastAPI test client uses httpx under the hood
     "respx>=0.21",         # SDK test suite mocks httpx via respx
+    "sympy>=1.12",         # symbolic-math env family (Phase 21+)
+    # Pulled into dev so `pip install -e .[dev]` recovers the test
+    # baseline (tests/api + tests/training). Without these the test
+    # runner fails at conftest-load time, not in individual test bodies.
+    "fastapi>=0.115",      # tests/api uses FastAPI TestClient
+    "torch>=2.3",          # tests/training imports torch via examples/training/*.py
 ]
 baselines = [
     "torch>=2.3",
@@ -69,8 +82,8 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/stelioszach03/verifiable-labs-envs"
-Issues = "https://github.com/stelioszach03/verifiable-labs-envs/issues"
+Homepage = "https://github.com/verifiablelabs/verifiable-labs-envs"
+Issues = "https://github.com/verifiablelabs/verifiable-labs-envs/issues"
 
 [project.scripts]
 # Developer CLI — see src/verifiable_labs_envs/cli.py.
@@ -80,10 +93,55 @@ verifiable = "verifiable_labs_envs.cli:main"
 [tool.hatch.build.targets.wheel]
 packages = ["src/verifiable_labs_envs", "src/verifiable_labs_api"]
 
+# Sdist: tight inclusion list — ship only what `pip install` actually
+# needs (SDK source + license + readme + project metadata). The
+# repo also carries 1.3 GB of services/, multi-MB calibration_data,
+# pre-built fixtures and per-version snapshots; without an explicit
+# include list hatchling pulls all tracked files and the resulting
+# sdist exceeds PyPI's 100 MB per-file cap (we hit 223 MB on the
+# 0.1.0a2 first attempt). This block keeps the sdist functionally
+# equivalent to the wheel.
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/verifiable_labs_envs/**/*.py",
+    "src/verifiable_labs_envs/py.typed",
+    "src/verifiable_labs_api/**/*.py",
+    "src/verifiable_labs_api/py.typed",
+    "LICENSE",
+    "README.md",
+    "pyproject.toml",
+]
+exclude = [
+    "**/__pycache__",
+    "**/*.pyc",
+    "**/.DS_Store",
+    "**/calibration_data/**",
+    "**/v0.0.1/**",
+    "**/fixtures/**",
+    "**/runs_local/**",
+    "**/wandb/**",
+]
+
 [tool.pytest.ini_options]
-testpaths = ["tests", "packages/verifiable-labs/tests"]
-addopts = "-q --strict-markers"
+testpaths = [
+    "tests",
+    "packages/verifiable-labs/tests",
+    "packages/vlabs-calibrate/tests",
+    "tools/vlabs-audit/tests",
+    "tools/vlabs-prm-eval/tests",
+]
+# --import-mode=importlib: required so multiple `tests/__init__.py` packages
+# (one per packages/* sub-package) don't collide on pytest's prepend importer.
+# See https://docs.pytest.org/en/stable/explanation/pythonpath.html#import-modes
+addopts = "-q --strict-markers --import-mode=importlib"
 asyncio_mode = "auto"
+# services/api uses session-scoped DB + ASGI client fixtures; the
+# asyncio loop scope must match so function-scoped tests can await on
+# session-scoped engine/sessions without "got Future attached to a
+# different loop" errors. The other tests in the repo are predominantly
+# sync; a session loop is harmless for them.
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: SDK tests that spin up a real uvicorn instance",

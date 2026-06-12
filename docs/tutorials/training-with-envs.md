@@ -107,7 +107,7 @@ Three honest ways to make this a real RLVR loop:
 2. **DSPy `BootstrapFewShot`** — uses the same reward signal but
    compiles a multi-shot prompt program. Requires a LiteLLM shim to
    talk to OpenRouter; the
-   [Plan B note](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/notebooks/README.md#why-prompt-search-and-not-dspy)
+   [Plan B note](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/notebooks/README.md#why-prompt-search-and-not-dspy)
    explains why we skipped it for v0.1.
 3. **Real RL** — `env.run_rollout(solver, instance)` returns a per-
    step reward. Feed it into a PPO / GRPO loop with `transformers` +
@@ -118,5 +118,5 @@ Three honest ways to make this a real RLVR loop:
 
 - [Concepts → Conformal rewards](../concepts/conformal-rewards.md) —
   what the reward signal actually measures.
-- [`notebooks/README.md`](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/notebooks/README.md) —
+- [`notebooks/README.md`](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/notebooks/README.md) —
   the canonical reference for this experiment.

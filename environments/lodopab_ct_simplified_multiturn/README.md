@@ -2,7 +2,7 @@
 
 3-turn CT reconstruction with FBP-domain residual feedback.
 
-Verifiable Labs Scientific-RL environment. Published as a thin wrapper around the monorepo at https://github.com/stelioszach03/verifiable-labs-envs — the wrapper pulls the monorepo as a Git dependency so the full source of truth (rewards, forward operators, LLM adapter, conformal calibration) stays in one place.
+Verifiable Labs Scientific-RL environment. Published as a thin wrapper around the monorepo at https://github.com/verifiablelabs/verifiable-labs-envs — the wrapper pulls the monorepo as a Git dependency so the full source of truth (rewards, forward operators, LLM adapter, conformal calibration) stays in one place.
 
 ## Install
 

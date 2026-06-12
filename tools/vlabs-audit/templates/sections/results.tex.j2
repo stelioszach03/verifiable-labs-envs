@@ -1,0 +1,67 @@
+\section{Results}
+
+This section reports per-environment results followed by three aggregate
+visualisations spanning every environment.
+
+{% for env in envs %}
+\subsection{ {{- env.env_display_tex -}} }
+
+{{ env.description_tex }}
+
+\begin{tabular}{l r}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Episodes scheduled            & {{ env.n_episodes }} \\
+Successful episodes           & {{ env.n_success }} \\
+Failed episodes               & {{ env.n_failed }} \\
+Mean reward                   & {{ env.mean_reward_str }} \\
+95\% bootstrap CI             & {{ env.ci_str }} \\
+Parse-failure rate            & {{ env.parse_failure_pct_str }} \\
+Format-validity rate          & {{ env.format_valid_pct_str }} \\
+Held-out empirical coverage   & {{ env.coverage_holdout_str }} \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.5em}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{\detokenize{ {{- env.figure_filename -}} }}
+\caption{Per-episode reward distribution on \texttt{ {{- env.env_tex -}} }.
+The shaded band marks the 95\% bootstrap confidence interval on the mean;
+the dashed vertical line is the sample mean.}
+\end{figure}
+
+{% endfor %}
+
+\subsection{Coverage calibration across environments}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{\detokenize{coverage_calibration.pdf}}
+\caption{Empirical (held-out) coverage versus target $1 - \alpha = {{ target_coverage_str }}$.
+Bars at or above the dashed target line are calibrated; bars below indicate
+under-coverage.}
+\end{figure}
+
+\subsection{Quality breakdown}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{\detokenize{score_breakdown.pdf}}
+\caption{Stacked-bar decomposition of every scheduled episode by outcome
+class (format pass / format fail / parse error). Segments sum to one per
+environment.}
+\end{figure}
+
+\subsection{Cost analysis}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{\detokenize{cost_per_correct.pdf}}
+\caption{Estimated USD per successful episode, derived from per-trace
+\texttt{estimated\_cost\_usd} when reported by the SDK. When the
+underlying traces do not carry cost data the figure renders an
+informational placeholder rather than fabricated numbers.}
+\end{figure}

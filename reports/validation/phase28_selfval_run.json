@@ -1,0 +1,90 @@
+{
+  "alert_files": [
+    "/tmp/vlabs-emails/1778345679494-5d22f210.eml"
+  ],
+  "drained_via": "process_monitor_run() direct call",
+  "harness_fix_commit": "309fe80",
+  "monitor": {
+    "auth_token_fingerprint": "fadc7461",
+    "cadence": "daily",
+    "created_at": "2026-05-09T16:54:34.032083Z",
+    "monitor_id": "mon_094285b6ba7d4b3a8b30c4df9ca6a513",
+    "name": "self-val test",
+    "next_run_at": "2026-05-10T16:54:33.992400Z",
+    "projected_monthly_episodes": 90,
+    "status": "active",
+    "tier_limit_episodes": 300
+  },
+  "pdf_first16_hex": "255044462d312e340a25c4e5f2e5eba7",
+  "pdf_size_bytes": 1246,
+  "phase28_commit": "0ab121d",
+  "redis_path_taken": false,
+  "run": {
+    "cost_usd_estimate": 0.0008,
+    "error": null,
+    "finished_at": "2026-05-09T16:54:39.460042Z",
+    "monitor_id": "mon_094285b6ba7d4b3a8b30c4df9ca6a513",
+    "monitor_run_id": "mr_ae7ac4d7f90849e9a60dada55743a51f",
+    "pdf_sha256": "3488eb8e438ec6249b77c0e31aae048066d48f3d2e7925bd42c8097bb083b39e",
+    "pdf_url": "file:///tmp/r2-fake/vlabs-datasets/094285b6ba7d4b3a8b30c4df9ca6a513/ae7ac4d7f90849e9a60dada55743a51f/pdf.jsonl",
+    "regression_verdict": "warning",
+    "scheduled_at": "2026-05-09T16:54:34.057056Z",
+    "started_at": "2026-05-09T16:54:34.067279Z",
+    "status": "success",
+    "summary_stats": {
+      "cost_usd_estimate": 0.0008288000000000002,
+      "n_success": 3,
+      "n_total": 3,
+      "overall_coverage": 1.0,
+      "overall_mean_reward": 1.0,
+      "per_env": {
+        "math-algebra": {
+          "coverage": 1.0,
+          "coverage_flags": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "mean_reward": 1.0,
+          "n": 3,
+          "rewards": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "std_reward": 0.0
+        }
+      }
+    },
+    "trigger": "manual",
+    "verdict_payload": {
+      "bootstrap": {
+        "ci_high": 0.0,
+        "ci_low": 0.0,
+        "mean_delta": 0.0,
+        "p_value": 1.0,
+        "regressed": false
+      },
+      "conformal": {
+        "baseline": null,
+        "current": 1.0,
+        "delta_to_baseline": null,
+        "delta_to_target": 0.09999999999999998,
+        "verdict": "warning"
+      },
+      "per_env_breakdown": [
+        {
+          "baseline_mean": null,
+          "current_mean": 1.0,
+          "delta": null,
+          "env_id": "math-algebra",
+          "regressed": false
+        }
+      ],
+      "rng_seed": 1464050975,
+      "verdict": "warning"
+    }
+  },
+  "sandbox_fix_commit": "7fde3fe",
+  "self_val_timestamp": "2026-05-09T16:54:39Z"
+}

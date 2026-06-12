@@ -148,7 +148,7 @@ class AdaptiveDifficultyTracker:
     success_threshold: float = 0.5
 
     # State
-    l: int = 0  # noqa: E741
+    l: int = 0  # noqa: E741 — short field name matches the curriculum-learning paper notation
     h: int = 0
     a: int = 0  # successes at h since last check
     b: int = 0  # rollouts at h since last check

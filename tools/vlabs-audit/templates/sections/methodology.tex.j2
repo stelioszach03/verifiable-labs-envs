@@ -1,0 +1,59 @@
+\section{Methodology}
+
+\subsection{Conformal calibration in one paragraph}
+
+Each Verifiable Labs environment exposes a scoring function with an attached
+\emph{conformal} component: for every episode we compute a non-conformity
+score and turn the empirical quantile of those scores at level
+$1 - \alpha$ into a prediction interval that, under exchangeability, contains
+the held-out reference reward with probability at least $1 - \alpha$
+(see~\cite{leiconformal2018}). This audit reports the \emph{empirical}
+coverage achieved over a held-out fold of every audit run; deviations from
+$1 - \alpha = {{ target_coverage_str }}$ flag either undercoverage
+(miscalibration) or excessive interval width (over-conservative). The
+conformal layer is provided by the open-source
+\texttt{vlabs-calibrate~v{{ vlabs_calibrate_version_tex }}} package
+(pinned for reproducibility).
+
+\subsection{Audit configuration}
+
+\begin{tabular}{l l}
+\toprule
+\textbf{Setting} & \textbf{Value} \\
+\midrule
+Conformal $\alpha$       & {{ alpha_str }} \\
+Target coverage          & {{ target_coverage_str }} \\
+Episodes per environment & {{ n_episodes_per_env }} \\
+Initial seed             & {{ seed_start }} \\
+Held-out fold            & seed-sorted second half (50/50 split) \\
+\bottomrule
+\end{tabular}
+
+The held-out fold is the half of episodes with the larger seeds within each
+environment; coverage is averaged over those held-out traces. Mean reward
+is reported with a 95\% percentile-bootstrap confidence interval
+($n_{\text{resamples}} = 1000$, deterministic RNG seed for reproducibility).
+
+\subsection{Environments under audit}
+
+\begin{itemize}
+{% for env in envs -%}
+  \item \textbf{ {{- env.env_display_tex -}} } — {{ env.description_tex }}
+{% endfor -%}
+\end{itemize}
+
+\subsection{What this audit does \emph{not} measure}
+
+This is an offline, single-turn capability audit: the model receives a
+prompt, returns a structured prediction, and the environment scores it.
+The audit therefore says nothing about multi-turn tool use, planning,
+training-data leakage, or robustness to adversarial inputs. It also does
+not establish causal claims about how to \emph{improve} the model — only
+how it currently performs on this fixed evaluation regime.
+
+\begin{thebibliography}{1}
+\bibitem{leiconformal2018}
+Lei, J., G'Sell, M., Rinaldo, A., Tibshirani, R. J., \& Wasserman, L.
+\emph{Distribution-free predictive inference for regression.}
+Journal of the American Statistical Association, 113(523), 1094--1111, 2018.
+\end{thebibliography}

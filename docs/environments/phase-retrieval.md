@@ -66,7 +66,7 @@ ceiling of 0.78 — which makes it a useful "hard-mode" stress test.
 
 ## Source
 
-[`src/verifiable_labs_envs/envs/phase_retrieval.py`](https://github.com/stelioszach03/verifiable-labs-envs/blob/main/src/verifiable_labs_envs/envs/phase_retrieval.py).
+[`src/verifiable_labs_envs/envs/phase_retrieval.py`](https://github.com/verifiablelabs/verifiable-labs-envs/blob/main/src/verifiable_labs_envs/envs/phase_retrieval.py).
 
 ## See also
 

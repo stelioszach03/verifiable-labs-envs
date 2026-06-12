@@ -1,0 +1,43 @@
+[build-system]
+requires = ["hatchling>=1.24,<1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "verifiable-labs-tool-calling-multiturn"
+version = "0.1.2"
+description = "Multi-turn procedural tool-calling RL environment with verifier-feedback rollouts and per-extra-turn penalty"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Stelios Zacharioudakis" }]
+keywords = [
+    "reinforcement-learning",
+    "rlvr",
+    "evaluation",
+    "tool-calling",
+    "function-calling",
+    "multi-turn",
+    "verifiable-labs",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "verifiable-labs-envs-core>=0.1.1",
+    "numpy>=1.26",
+]
+
+[project.urls]
+Homepage = "https://github.com/verifiablelabs/verifiable-labs-envs"
+Issues = "https://github.com/verifiablelabs/verifiable-labs-envs/issues"
+
+[project.entry-points."verifiers.environments"]
+tool-calling-multiturn = "verifiable_labs_tool_calling_multiturn:load_environment"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/verifiable_labs_tool_calling_multiturn"]

@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling>=1.24,<1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "verifiable-labs-math-algebra"
+version = "0.1.2"
+description = "Single-turn algebraic-simplification RL environment with SymPy-verified rewards and conformal coverage"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Stelios Zacharioudakis" }]
+keywords = [
+    "reinforcement-learning",
+    "rlvr",
+    "evaluation",
+    "scientific-ml",
+    "symbolic-math",
+    "sympy",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+dependencies = [
+    "verifiable-labs-envs-core>=0.1.1",
+    "sympy>=1.12",
+]
+
+[project.urls]
+Homepage = "https://github.com/verifiablelabs/verifiable-labs-envs"
+Issues = "https://github.com/verifiablelabs/verifiable-labs-envs/issues"
+
+# Verifiers-compatible entry point so `prime env install verifiable-labs-math-algebra` /
+# the Prime Intellect Hub can discover load_environment() automatically.
+[project.entry-points."verifiers.environments"]
+math-algebra = "verifiable_labs_math_algebra:load_environment"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/verifiable_labs_math_algebra"]

@@ -2,7 +2,7 @@
 
 2D parallel-beam CT (phantom or real LoDoPaB slices via use_real_data).
 
-Verifiable Labs Scientific-RL environment. Published as a thin wrapper around the monorepo at https://github.com/stelioszach03/verifiable-labs-envs — the wrapper pulls the monorepo as a Git dependency so the full source of truth (rewards, forward operators, LLM adapter, conformal calibration) stays in one place.
+Verifiable Labs Scientific-RL environment. Published as a thin wrapper around the monorepo at https://github.com/verifiablelabs/verifiable-labs-envs — the wrapper pulls the monorepo as a Git dependency so the full source of truth (rewards, forward operators, LLM adapter, conformal calibration) stays in one place.
 
 ## Install
 

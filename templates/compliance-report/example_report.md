@@ -179,7 +179,7 @@ The following 5 environments contributed to this report:
 - `super-resolution-div2k-x4` (3 episodes)
 
 Each environment is documented under `docs/environments/<env_id>.md`
-in the [verifiable-labs-envs](https://github.com/stelioszach03/verifiable-labs-envs)
+in the [verifiable-labs-envs](https://github.com/verifiablelabs/verifiable-labs-envs)
 repository.
 
 ### 7.2 Source data

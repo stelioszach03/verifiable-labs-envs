@@ -1,0 +1,43 @@
+{
+  "envs": [
+    "code-humaneval",
+    "code-humaneval-multiturn",
+    "code-mini-repo"
+  ],
+  "harness_fix_commit": "309fe80",
+  "model": "anthropic/claude-haiku-4.5",
+  "n_per_env": 10,
+  "results": {
+    "code-humaneval": {
+      "cost_usd": 0.0102944,
+      "format_valid": "10/10",
+      "mean_reward": 1.0,
+      "n": 10,
+      "parse_valid": "10/10",
+      "pass_rate_component_mean": 1.0,
+      "std_reward": 0.0
+    },
+    "code-humaneval-multiturn": {
+      "cost_usd": 0.011082400000000001,
+      "format_valid": "10/10",
+      "mean_reward": 0.99,
+      "n": 10,
+      "parse_valid": "10/10",
+      "pass_rate_component_mean": 0.9857142857142858,
+      "std_reward": 0.029999999999999992
+    },
+    "code-mini-repo": {
+      "cost_usd": 0.0091024,
+      "format_valid": "10/10",
+      "mean_reward": 1.0,
+      "n": 10,
+      "parse_valid": "10/10",
+      "pass_rate_component_mean": 1.0,
+      "std_reward": 0.0
+    }
+  },
+  "sandbox_fix_commit": "7fde3fe",
+  "seed_start": 1000,
+  "timestamp_utc": "2026-05-09T16:27:44Z",
+  "total_cost_usd": 0.030479200000000005
+}
