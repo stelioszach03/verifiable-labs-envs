@@ -1,13 +1,22 @@
 # Verifiable Labs
 
-> **Open-core split in progress.** The SDK contracts (run modes, provider
-> interface, schemas, clean-gate CLI) now also live in
-> [vlabs-sdk](https://github.com/verifiablelabs/vlabs-sdk), and the Lean 4
-> formal track + property-test mirror in
-> [vlabs-formal](https://github.com/verifiablelabs/vlabs-formal); see
-> [vlabs-examples](https://github.com/verifiablelabs/vlabs-examples) for
-> runnable demos. This repository remains canonical for the 25
-> environments and the training stack until the split flips.
+> **This repository is now a compatibility / legacy workspace.** The main
+> public Verifiable Labs code has moved to
+> [vlabs-sdk](https://github.com/verifiablelabs/vlabs-sdk),
+> [vlabs-formal](https://github.com/verifiablelabs/vlabs-formal),
+> [vlabs-examples](https://github.com/verifiablelabs/vlabs-examples),
+> [vlabs-evidence](https://github.com/verifiablelabs/vlabs-evidence), and
+> [vlabs-docs](https://github.com/verifiablelabs/vlabs-docs). This repo is
+> kept temporarily for the original environments, training stack,
+> compatibility history, and transition validation. **Do not archive yet.**
+>
+> **Archive criteria** (all must hold before this repo may be archived):
+> 1. The split repos have completed two consecutive green refresh cycles.
+> 2. Package consumers have migrated to `vlabs-sdk`.
+> 3. The envs/training stack has either moved to its own repo or is no
+>    longer needed here.
+> 4. The eval-example CI has been replaced or moved.
+> 5. No active dependency still points to this repo.
 
 [![CI](https://github.com/verifiablelabs/verifiable-labs-envs/actions/workflows/ci.yml/badge.svg)](https://github.com/verifiablelabs/verifiable-labs-envs/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)

@@ -82,7 +82,7 @@ EOF
 | ✅ Is | A machine-verified mathematical specification of the public guarantees Verifiable Labs claims (calibrated-reward bounds, conformal coverage, gate monotonicity, etc.). |
 | ✅ Is | The source of truth that the Python module `src/verifiable_labs_envs/formal_spec/` mirrors and property-tests against. |
 | ❌ Isn't | A proof of correctness of the Python code or the hosted API. The implementation is property-tested for parity with this spec; the implementation itself is not formally verified. |
-| ❌ Isn't | A licence to write the phrases *"formally verified code"*, *"formally verified system"*, or *"formally verified API"* in any other documentation. Those claims are prohibited. The only approved wording is in the project `README.md`. |
+| ❌ Isn't | A licence to write the phrases *"formally verified code"*, *"formally verified system"*, or *"formally verified API"* in any other documentation. Never make those claims. The only approved wording is in the project `README.md`. |
 
 ## Contamination-resistant clean-gate track
 
