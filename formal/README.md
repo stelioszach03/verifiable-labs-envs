@@ -83,3 +83,96 @@ EOF
 | ✅ Is | The source of truth that the Python module `src/verifiable_labs_envs/formal_spec/` mirrors and property-tests against. |
 | ❌ Isn't | A proof of correctness of the Python code or the hosted API. The implementation is property-tested for parity with this spec; the implementation itself is not formally verified. |
 | ❌ Isn't | A licence to write the phrases *"formally verified code"*, *"formally verified system"*, or *"formally verified API"* in any other documentation. Those claims are prohibited. The only approved wording is in the project `README.md`. |
+
+## Contamination-resistant clean-gate track
+
+A second machine-verified track (modules **A–G**) extends the stack with the
+mathematics behind Verifiable Labs's **contamination-resistant generated
+evaluations** and **clean generalization gate**. Authored and discharged by
+[Aristotle](https://aristotle.harmonic.fun); imported on **2026-06-12** with the
+package/directory renamed from `RequestProject` to `VerifiableLabsFormal` (the
+only mechanical edits were the six `import RequestProject.X` →
+`import VerifiableLabsFormal.X` lines inside `CleanPipeline.lean`). All seven
+files are **`sorry`-free** and depend only on the three standard axioms
+(`propext`, `Classical.choice`, `Quot.sound`).
+
+### Allowed public claim (the only approved wording for this track)
+
+> "Selected mathematical properties behind Verifiable Labs' contamination-resistant
+> promotion gate are machine-verified in Lean 4. The implementation is
+> property-tested against the formal specification."
+
+Equivalently, throughout the SDK: *machine-verified theorems in Lean 4;
+implementation property-tested against the formal specification.*
+
+### Forbidden claims (do NOT use)
+
+- "The Verifiable Labs platform is formally verified."
+- "Our code / API / system is formally verified."
+- "We prove that the model generalizes."
+- "We prove AGI safety."
+- "We eliminate contamination completely."
+
+### Scope and limitations
+
+These results are mathematical properties of the scoring/gating layer over
+abstract definitions (scores, risks, tolerances, timestamps). They are **not** a
+verification of any software, API, model, or platform, and do not assert that
+contamination is eliminated. The time/leakage results (module B) are
+**per-checkpoint conditional** statements: *given* the stated assumption about
+training-data membership, generated-after-freeze scenarios are clean for that
+checkpoint — they reduce, but do not eliminate, leakage.
+
+### Modules and namespaces
+
+| File | Namespace |
+|---|---|
+| `VerifiableLabsFormal/ContaminationSplits.lean` | `Verifiable.ContaminationSplits` |
+| `VerifiableLabsFormal/GeneratedAfterFreeze.lean` | `Verifiable.GeneratedAfterFreeze` |
+| `VerifiableLabsFormal/ContaminationRisk.lean` | `Verifiable.ContaminationRisk` |
+| `VerifiableLabsFormal/CleanVGS.lean` | `Verifiable.CleanVGS` |
+| `VerifiableLabsFormal/GeneralizationGap.lean` | `Verifiable.GeneralizationGap` |
+| `VerifiableLabsFormal/CleanPromotionGate.lean` | `Verifiable.CleanPromotionGate` |
+| `VerifiableLabsFormal/CleanPipeline.lean` | `Verifiable.CleanPipeline` |
+
+### Theorem table
+
+| Module | Theorem | Plain-English meaning |
+|---|---|---|
+| A. ContaminationSplits | `hidden_eval_not_trainable` | A hidden-eval scenario under a valid policy is never trainable. |
+| A. ContaminationSplits | `hidden_eval_not_public_release` | A hidden-eval scenario under a valid policy is never publicly released. |
+| A. ContaminationSplits | `public_release_not_hidden` | A publicly released scenario is never a hidden-eval scenario. |
+| A. ContaminationSplits | `split_disjoint_hidden_train` | A scenario cannot be both HiddenEval and Train. |
+| A. ContaminationSplits | `split_disjoint_public_hidden` | A scenario cannot be both PublicDemo and HiddenEval. |
+| B. GeneratedAfterFreeze | `generated_after_freeze_not_in_training` | A scenario generated after a checkpoint freeze (cutoff ≤ freeze) is not in that checkpoint's training data. |
+| B. GeneratedAfterFreeze | `post_freeze_hidden_eval_clean_for_model` | A generated-after-freeze hidden eval is clean for that checkpoint, reducing leakage risk. |
+| C. ContaminationRisk | `clean_score_bounds` | The contamination-adjusted score stays in [0,1]. |
+| C. ContaminationRisk | `clean_score_le_raw` | Adjustment never increases the score. |
+| C. ContaminationRisk | `clean_score_eq_raw_iff_zero_dcr_or_zero_raw` | No penalty exactly when no contamination risk or zero raw score. |
+| C. ContaminationRisk | `clean_score_monotone_raw` | Higher raw score ⇒ higher clean score (fixed risk). |
+| C. ContaminationRisk | `clean_score_antitone_dcr` | Higher contamination risk ⇒ lower clean score (fixed raw). |
+| C. ContaminationRisk | `clean_score_zero_at_full_contamination` | Full contamination zeroes the score. |
+| D. CleanVGS | `clean_vgs_le_raw_vgs` | Contamination-adjusted VGS never exceeds raw VGS. |
+| D. CleanVGS | `clean_vgs_monotone_raw` | Higher raw VGS ⇒ higher clean VGS (fixed risk/penalty). |
+| D. CleanVGS | `clean_vgs_antitone_dcr` | Higher contamination risk ⇒ lower clean VGS. |
+| D. CleanVGS | `clean_vgs_penalizes_full_contamination` | Full contamination drives clean VGS to `-beta`. |
+| E. GeneralizationGap | `positive_gap_implies_hidden_underperforms` | A positive public−hidden gap means hidden underperforms. |
+| E. GeneralizationGap | `large_gap_implies_hidden_underperforms` | A large gap (τ ≥ 0) means hidden underperforms. |
+| E. GeneralizationGap | `zero_gap_iff_equal` | Zero gap ⇔ equal public and hidden scores. |
+| E. GeneralizationGap | `gap_bounded` | On [0,1] inputs the gap lies in [−1,1]. |
+| E. GeneralizationGap | `reject_on_large_gap_sound` | Rejecting on a large gap is sound: rejected ⇒ hidden underperforms. |
+| F. CleanPromotionGate | `accepted_update_improves_clean_vgs` | Accepted update improves clean VGS by ≥ τ. |
+| F. CleanPromotionGate | `accepted_update_bounds_hack_risk` | Accepted update bounds the hack-risk increase. |
+| F. CleanPromotionGate | `accepted_update_bounds_dcr` | Accepted update bounds the contamination-risk increase. |
+| F. CleanPromotionGate | `accepted_update_no_regression` | Accepted update has no regression flag. |
+| F. CleanPromotionGate | `accepted_sequence_clean_vgs_monotone` | A sequence of accepted updates is nondecreasing in clean VGS. |
+| F. CleanPromotionGate | `accepted_sequence_clean_vgs_growth` | After n accepted updates, clean VGS ≥ initial + n·τ. |
+| G. CleanPipeline | `clean_pipeline_acceptance_sound` | Gate acceptance entails ALL contamination-adjusted guarantees simultaneously — not public-score improvement alone. |
+
+The Python mirror of this track lives in
+`src/verifiable_labs_envs/formal_spec/` (modules `contamination_risk`,
+`clean_vgs`, `generalization_gap`, `contamination_splits`,
+`generated_after_freeze`, `clean_promotion_gate`, `clean_pipeline`) and is
+property-tested against these theorems in `tests/formal_spec/`. The
+`vlabs-prm-eval clean-gate` CLI command consumes eval cards through the same
+predicate.

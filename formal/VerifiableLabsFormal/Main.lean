@@ -1,5 +1,14 @@
 import Mathlib
 
+-- Contamination-resistant clean-gate track (modules A–G).
+import VerifiableLabsFormal.ContaminationSplits
+import VerifiableLabsFormal.GeneratedAfterFreeze
+import VerifiableLabsFormal.ContaminationRisk
+import VerifiableLabsFormal.CleanVGS
+import VerifiableLabsFormal.GeneralizationGap
+import VerifiableLabsFormal.CleanPromotionGate
+import VerifiableLabsFormal.CleanPipeline
+
 open scoped BigOperators
 open scoped Real
 open scoped Nat
