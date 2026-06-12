@@ -22,11 +22,11 @@ FORMAL_CLAIM = (
 # Phrases that must never appear anywhere (asserted by the forbidden-claims
 # grep in T10). Exposed here so tests can import the canonical list.
 FORBIDDEN_CLAIMS = (
-    "formally verified system",
-    "formally verified api",
-    "formally verified product",
-    "formally verified code",
-    "formally verified service",
+    "formally verified system",  # never allowed
+    "formally verified api",  # never allowed
+    "formally verified product",  # never allowed
+    "formally verified code",  # never allowed
+    "formally verified service",  # never allowed
     "we prove the model generalizes",
     "we eliminate contamination",
     "guarantee general intelligence",

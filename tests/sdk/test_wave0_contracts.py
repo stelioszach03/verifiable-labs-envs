@@ -178,5 +178,5 @@ def test_assurance_card_locks_formal_claim() -> None:
             baseline_id=None,
             candidate_id=None,
             decision="ACCEPT",
-            formal_claim="formally verified API",
+            formal_claim="formally verified API",  # not a valid claim; must raise
         )
